@@ -149,23 +149,47 @@ Plan:          [1] Verify Runtime -> [2] Start DB -> [3] .env -> [4] Install -> 
 
 ### Installation
 
+#### Option 1: Global CLI Tool (Recommended for Users)
+Install RunRepo as a standalone global tool using `uv` to use the `runrepo` command anywhere on your machine:
+
 ```bash
 # Clone the repository
 git clone https://github.com/AmirHossein-84/RunRepo.git
 cd RunRepo
 
-# Sync virtual environment and all dependencies with uv
-uv sync --extra dev
+# Install globally as a CLI tool (editable development mode)
+uv tool install -e .
+
+# Now you can use `runrepo` from ANY directory or terminal:
+runrepo setup https://github.com/owner/project
 ```
+
+#### Option 2: Local Development Setup (For Contributors)
+Run directly within the virtual environment:
+
+```bash
+# Sync virtual environment and all dev dependencies with uv
+uv sync --extra dev
+
+# Run commands with `uv run`
+uv run runrepo setup .
+```
+
+> [!TIP]
+> **Isolated Cache Directory**: Remote repositories cloned from GitHub are **never** installed inside your RunRepo source directory. They are cleanly cached in your OS user data storage:
+> - **Windows**: `%LOCALAPPDATA%\runrepo\repositories\`
+> - **Linux / macOS**: `~/.local/share/runrepo/repositories/`
+>
+> You can inspect cached repositories anytime with `runrepo cache list` and clean them with `runrepo cache clean`.
 
 ### Quick Run
 
 ```bash
 # Analyze, plan, and setup a local project:
-uv run runrepo setup .
+runrepo setup .
 
-# Or analyze any remote GitHub repository:
-uv run runrepo setup https://github.com/facebook/react --dry-run
+# Or analyze any remote GitHub repository safely with dry-run:
+runrepo setup https://github.com/facebook/react --dry-run
 ```
 
 ---
@@ -368,14 +392,37 @@ uv run pytest --cov=runrepo --cov-report=term-missing
 
 ### نحوه نصب و راه‌اندازی
 
+#### روش اول: نصب سراسری ابزار (پیشنهادی برای کاربران)
+با نصب سراسری ابزار، می‌توانید دستور `runrepo` را در **هر دایرکتوری و هر ترمینالی** بر روی سیستم خود اجرا کنید:
+
 ```bash
 # کلون کردن مخزن پروژه
 git clone https://github.com/AmirHossein-84/RunRepo.git
 cd RunRepo
 
-# نصب وابستگی‌ها با ابزار فوق‌سریع uv
-uv sync --extra dev
+# نصب سراسری به عنوان ابزار خط فرمان با uv
+uv tool install -e .
+
+# اکنون می‌توانید از هر کجای سیستم از دستور runrepo استفاده کنید:
+runrepo setup https://github.com/owner/project
 ```
+
+#### روش دوم: اجرای توسعه محلی (برای توسعه‌دهندگان)
+اجرای مستقیم در محیط مجازی پروژه:
+
+```bash
+# نصب و همگام‌سازی تمام وابستگی‌ها
+uv sync --extra dev
+
+# اجرای دستورات با پیشوند uv run
+uv run runrepo setup .
+```
+
+> **نکته امنیتی و ایزولاسیون حافظه:** پروژه‌های کلون‌شده از گیت‌هاب **هرگز** در داخل پوشه خود RunRepo دانلود نمی‌شوند؛ بلکه در دایرکتوری امن کاربر ذخیره می‌گردند:
+> - **ویندوز:** `%LOCALAPPDATA%\runrepo\repositories\`
+> - **لینوکس و مک:** `~/.local/share/runrepo/repositories/`
+>
+> برای مشاهده و پاکسازی کش مخازن می‌توانید از `runrepo cache list` و `runrepo cache clean` استفاده کنید.
 
 ---
 
