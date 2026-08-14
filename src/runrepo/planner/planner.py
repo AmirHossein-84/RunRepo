@@ -187,20 +187,13 @@ class ExecutionPlanner:
         # 4. Infrastructure & Database Services
         # ---------------------------------------------------------
         service_step_ids: list[str] = []
-        needs_docker = (
-            project_info.docker.has_dockerfile
-            or bool(project_info.docker.compose_files)
-            or bool(project_info.databases)
-            or bool(project_info.services)
-        )
+        docker_check = env_checks_map.get("docker")
+        compose_check = env_checks_map.get("docker-compose")
+        docker_ok = docker_check is not None and docker_check.status == EnvironmentStatus.OK
+        compose_ok = compose_check is not None and compose_check.status == EnvironmentStatus.OK
 
-        if needs_docker and project_info.docker.compose_files:
-            docker_check = env_checks_map.get("docker")
-            compose_check = env_checks_map.get("docker-compose")
-
-            docker_ok = docker_check is not None and docker_check.status == EnvironmentStatus.OK
-            compose_ok = compose_check is not None and compose_check.status == EnvironmentStatus.OK
-
+        # 4a. Docker Compose (Preferred if present)
+        if project_info.docker.compose_files:
             step_id = "start-service:docker-compose"
             if not docker_ok or not compose_ok:
                 detail = docker_check.details if docker_check else "Docker CLI or daemon is unavailable"
@@ -237,6 +230,113 @@ class ExecutionPlanner:
                     )
                 )
             service_step_ids.append(step_id)
+
+        # 4b. Standalone Database / Cache Services (When no Compose file is present)
+        else:
+            db_names = {db.name.lower() for db in project_info.databases}
+            svc_names = {svc.name.lower() for svc in project_info.services}
+
+            # PostgreSQL
+            if "postgresql" in db_names or "postgres" in db_names:
+                step_id = "start-service:postgres"
+                if not docker_ok:
+                    blocking_reasons.append("PostgreSQL database is required by repository, but Docker is not running")
+                    steps.append(
+                        PlanStep(
+                            id=step_id,
+                            description="Start PostgreSQL Docker container",
+                            action_type=ActionType.START_SERVICE,
+                            command=["docker", "run", "-d", "--name", f"runrepo-{project_info.name.lower()}-postgres"],
+                            risk=RiskLevel.BLOCKED,
+                            is_blocked=True,
+                            reason="PostgreSQL required by schema/manifest, but Docker is unavailable",
+                        )
+                    )
+                else:
+                    from runrepo.services.ports import find_available_port
+                    pg_port = find_available_port(5432)
+                    sanitized_name = "".join(c if c.isalnum() or c == "_" else "_" for c in project_info.name).lower()
+                    db_name = f"{sanitized_name}_dev"
+                    container_name = f"runrepo-{sanitized_name}-postgres"
+
+                    steps.append(
+                        PlanStep(
+                            id=step_id,
+                            description=f"Start PostgreSQL database container (port {pg_port})",
+                            action_type=ActionType.START_SERVICE,
+                            command=[
+                                "docker", "run", "-d",
+                                "--name", container_name,
+                                "-p", f"{pg_port}:5432",
+                                "-e", f"POSTGRES_DB={db_name}",
+                                "-e", "POSTGRES_USER=postgres",
+                                "-e", "POSTGRES_PASSWORD=postgres",
+                                "postgres:16-alpine",
+                            ],
+                            depends_on=env_step_ids,
+                            risk=RiskLevel.REQUIRES_CONFIRMATION,
+                            reason="PostgreSQL required by repository schema/configuration",
+                            verification=StepVerification(
+                                strategy="port_reachable",
+                                target=str(pg_port),
+                                description=f"PostgreSQL port {pg_port} reachable",
+                            ),
+                            rollback=StepRollback(
+                                strategy="stop_container",
+                                description=f"docker rm -f {container_name}",
+                            ),
+                        )
+                    )
+                service_step_ids.append(step_id)
+
+            # Redis
+            if "redis" in db_names or "redis" in svc_names:
+                step_id = "start-service:redis"
+                if not docker_ok:
+                    blocking_reasons.append("Redis cache/queue is required by repository, but Docker is not running")
+                    steps.append(
+                        PlanStep(
+                            id=step_id,
+                            description="Start Redis Docker container",
+                            action_type=ActionType.START_SERVICE,
+                            command=["docker", "run", "-d", "--name", f"runrepo-{project_info.name.lower()}-redis"],
+                            risk=RiskLevel.BLOCKED,
+                            is_blocked=True,
+                            reason="Redis required by repository, but Docker is unavailable",
+                        )
+                    )
+                else:
+                    from runrepo.services.ports import find_available_port
+                    redis_port = find_available_port(6379)
+                    sanitized_name = "".join(c if c.isalnum() or c == "_" else "_" for c in project_info.name).lower()
+                    container_name = f"runrepo-{sanitized_name}-redis"
+
+                    steps.append(
+                        PlanStep(
+                            id=step_id,
+                            description=f"Start Redis cache container (port {redis_port})",
+                            action_type=ActionType.START_SERVICE,
+                            command=[
+                                "docker", "run", "-d",
+                                "--name", container_name,
+                                "-p", f"{redis_port}:6379",
+                                "redis:7-alpine",
+                            ],
+                            depends_on=env_step_ids,
+                            risk=RiskLevel.REQUIRES_CONFIRMATION,
+                            reason="Redis required by repository",
+                            verification=StepVerification(
+                                strategy="port_reachable",
+                                target=str(redis_port),
+                                description=f"Redis port {redis_port} reachable",
+                            ),
+                            rollback=StepRollback(
+                                strategy="stop_container",
+                                description=f"docker rm -f {container_name}",
+                            ),
+                        )
+                    )
+                service_step_ids.append(step_id)
 
         # ---------------------------------------------------------
         # 5. Scoped Dependencies, Migrations & Startup

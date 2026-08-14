@@ -14,10 +14,10 @@ from pathlib import Path
 class ProcessExecutionResult:
     """Outcome of a process execution."""
 
-    stdout: str
-    stderr: str
-    exit_code: int
-    duration_ms: float
+    stdout: str = ""
+    stderr: str = ""
+    exit_code: int = 0
+    duration_ms: float = 0.0
     pid: int | None = None
 
 
@@ -186,10 +186,16 @@ class MockProcessExecutor(ProcessExecutor):
 
     def __init__(
         self,
-        responses: dict[tuple[str, ...], ProcessExecutionResult] | None = None,
+        responses: dict | None = None,
+        custom_responses: dict | None = None,
         default_response: ProcessExecutionResult | None = None,
     ) -> None:
-        self.responses: dict[tuple[str, ...], ProcessExecutionResult] = responses or {}
+        raw_responses = responses or custom_responses or {}
+        self.responses: dict[tuple[str, ...], ProcessExecutionResult] = {}
+        for k, v in raw_responses.items():
+            key = tuple(k.split()) if isinstance(k, str) else tuple(k)
+            self.responses[key] = v
+
         self.default_response = default_response or ProcessExecutionResult(
             stdout="mock output",
             stderr="",
@@ -203,11 +209,11 @@ class MockProcessExecutor(ProcessExecutor):
 
     def register_response(
         self,
-        command: list[str] | tuple[str, ...],
+        command: list[str] | tuple[str, ...] | str,
         result: ProcessExecutionResult,
     ) -> None:
         """Register a specific mock result for an exact command prefix or tuple."""
-        key = tuple(command) if isinstance(command, list) else command
+        key = tuple(command.split()) if isinstance(command, str) else tuple(command)
         self.responses[key] = result
 
     def execute(

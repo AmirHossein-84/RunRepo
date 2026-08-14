@@ -469,4 +469,38 @@ def render_process_list(processes, console: Console) -> None:
     console.print()
 
 
+def render_infrastructure_list(resources, console: Console) -> None:
+    """Render a table of RunRepo-managed infrastructure resources."""
+    console.print()
+    console.rule("[bold cyan]RunRepo Managed Infrastructure Resources[/bold cyan]")
+    console.print()
+
+    if not resources:
+        console.print("[dim]No RunRepo-owned infrastructure resources found.[/dim]\n")
+        return
+
+    table = Table(expand=True, border_style="dim")
+    table.add_column("Type", style="bold cyan", width=12)
+    table.add_column("Resource Name / ID", style="bold white", width=30)
+    table.add_column("Service", style="bold magenta", width=16)
+    table.add_column("Ports", width=12)
+    table.add_column("Repository", style="dim", width=28)
+    table.add_column("Created At", style="dim")
+
+    for res in resources:
+        ports_str = ", ".join(str(p) for p in res.ports) if res.ports else "-"
+        table.add_row(
+            res.resource_type.value,
+            res.name or res.id,
+            res.service_type.value,
+            ports_str,
+            res.project_path,
+            res.created_at[:19] if len(res.created_at) >= 19 else res.created_at,
+        )
+
+    console.print(table)
+    console.print()
+
+
+
 

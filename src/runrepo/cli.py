@@ -349,6 +349,97 @@ def logs_command(
     console.print(logs)
 
 
+@app.command("infra")
+def infra_command(
+    path: Annotated[
+        Path | None,
+        typer.Argument(
+            help="Optional path to repository",
+        ),
+    ] = None,
+) -> None:
+    """List RunRepo-managed infrastructure resources (containers, volumes)."""
+    from runrepo.services import InfrastructureRegistry
+    from runrepo.ui import render_infrastructure_list
+
+    registry = InfrastructureRegistry()
+    target_path = Path(path).resolve() if path else None
+    resources = registry.list_resources(repo_path=target_path)
+    render_infrastructure_list(resources, console)
+
+
+@app.command("clean")
+def clean_command(
+    path: Annotated[
+        Path | None,
+        typer.Argument(
+            help="Optional path to repository to scope cleanup",
+        ),
+    ] = None,
+    all_resources: Annotated[
+        bool,
+        typer.Option(
+            "--all",
+            "-a",
+            help="Clean all RunRepo-managed infrastructure across all projects",
+        ),
+    ] = False,
+    yes: Annotated[
+        bool,
+        typer.Option(
+            "--yes",
+            "-y",
+            help="Confirm removal without prompting",
+        ),
+    ] = False,
+) -> None:
+    """Clean up and remove RunRepo-created Docker containers and volumes."""
+    from rich.prompt import Confirm
+    from runrepo.executor.process import SystemProcessExecutor
+    from runrepo.services import ComposeManager, DockerManager, InfrastructureRegistry
+    from runrepo.services.models import ResourceType, ServiceType
+    from runrepo.ui import render_infrastructure_list
+
+    registry = InfrastructureRegistry()
+    target_path = None if all_resources else (Path(path).resolve() if path else Path.cwd().resolve())
+
+    resources = registry.list_resources(repo_path=target_path)
+    if not resources:
+        console.print("\n[dim]No RunRepo-managed infrastructure resources found for cleanup.[/dim]\n")
+        return
+
+    render_infrastructure_list(resources, console)
+
+    if not yes:
+        confirmed = Confirm.ask(
+            f"[bold yellow]Remove {len(resources)} RunRepo-managed infrastructure resource(s)?[/bold yellow]",
+            default=False,
+        )
+        if not confirmed:
+            console.print("[dim]Cleanup cancelled.[/dim]\n")
+            return
+
+    executor = SystemProcessExecutor()
+    cleaned_count = 0
+
+    for res in resources:
+        if res.service_type == ServiceType.DOCKER_COMPOSE and res.project_path:
+            compose_file = ComposeManager.find_compose_file(Path(res.project_path))
+            if compose_file:
+                ComposeManager.down(Path(res.project_path), executor=executor)
+
+        if res.resource_type == ResourceType.CONTAINER:
+            DockerManager.remove_container(res.name or res.id, executor, force=True)
+            registry.unregister_resource(res.id)
+            cleaned_count += 1
+        elif res.resource_type == ResourceType.VOLUME:
+            DockerManager.remove_volume(res.name or res.id, executor)
+            registry.unregister_resource(res.id)
+            cleaned_count += 1
+
+    console.print(f"\n[bold green]Successfully cleaned {cleaned_count} resource(s).[/bold green]\n")
+
+
 if __name__ == "__main__":
     app()
 
