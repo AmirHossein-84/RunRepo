@@ -1,107 +1,151 @@
-# RunRepo
+<div align="center">
 
-> **"I give RunRepo a repository. RunRepo figures out what it needs and makes it runnable."**
+# ⚡ RunRepo
 
-RunRepo is a developer CLI tool that takes an arbitrary Git repository and makes it runnable locally with minimal manual setup.
+**Deterministic Repository Analyzer & Local Environment Orchestrator**
 
-RunRepo is **not an AI coding assistant**. Deterministic repository analysis, environment detection, planning, execution, and verification form the core product. AI is only used later for ambiguity resolution and failure diagnostics.
+*“I found an open-source GitHub project. I want to run it. Make the environment work.”*
+
+[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![Package Manager](https://img.shields.io/badge/managed%20by-uv-purple.svg?style=flat-square)](https://github.com/astral-sh/uv)
+[![Test Suite](https://img.shields.io/badge/tests-273%20passed-success.svg?style=flat-square&logo=pytest&logoColor=white)](https://github.com/AmirHossein-84/RunRepo)
+[![Platform](https://img.shields.io/badge/platform-Windows%2011%20%7C%20Linux%20%7C%20macOS-informational.svg?style=flat-square)](https://github.com/AmirHossein-84/RunRepo)
+[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
+
+[English](#-english-documentation) • [فارسی (Persian)](#-راهنمای-فارسی-persian-documentation)
 
 ---
 
-## Architecture
+</div>
 
-RunRepo separates analysis, planning, and execution into clean, independent stages:
+## 📑 Table of Contents
 
-```text
-Repository
-    ↓
-Analyzer (Milestone 1: Repository Facts)
-    ↓
-ProjectInfo / ProjectGraph
-    +
-Local Machine
-    ↓
-Environment Checker (Milestone 2: Host Facts)
-    ↓
-EnvironmentState
-    ↓
-Planner (Milestone 3: Decision & Execution Graph)
-    ↓
-ExecutionPlan
-    ↓
-Executor (Milestone 4: Controlled Execution & Process Tracking)
-    ↓
-ExecutionResult
-    ↓
-[Future: Verification → Diagnostics]
+- [Overview & Philosophy](#-overview--philosophy)
+- [System Architecture](#-system-architecture)
+- [Key Capabilities](#-key-capabilities)
+- [Getting Started & Installation](#-getting-started--installation)
+- [CLI Command Reference](#-cli-command-reference)
+- [Reproducibility (`runrepo.yaml` & `runrepo.lock`)](#-reproducibility-runrepoyaml--runrepolock)
+- [Safety & Sandboxing Model](#-safety--sandboxing-model)
+- [Diagnostics & Port Conflict Resolution](#-diagnostics--port-conflict-resolution)
+- [Optional Gemini AI Integration](#-optional-gemini-ai-integration)
+- [Testing & Quality Assurance](#-testing--quality-assurance)
+- [راهنمای فارسی (Persian Documentation)](#-راهنمای-فارسی-persian-documentation)
+
+---
+
+## 🌟 Overview & Philosophy
+
+Running an unfamiliar open-source repository typically means cloning the code, deciphering incomplete README instructions, troubleshooting mismatching runtime versions, starting databases, setting up environment variables, and diagnosing broken ports.
+
+**RunRepo transforms this tedious manual process into a single deterministic command:**
+
+```bash
+runrepo setup https://github.com/owner/project
 ```
 
-### Core Architectural Invariants
+```text
+RunRepo
+─────────────────────────────────────────────────────────────────────────────
+Repository:    github.com/owner/project
+Runtimes:      Node.js 22.14.0 (✓ Satisfied) | Python 3.12 (✓ Satisfied)
+Workspaces:    pnpm (apps/web, apps/api, packages/ui)
+Services:      PostgreSQL (Docker: 5432), Redis (Docker: 6379)
+Plan:          [1] Verify Runtime -> [2] Start DB -> [3] .env -> [4] Install -> [5] Start App
 
-1. **Strict Responsibility Separation**:
-   - **Repository Analyzer** answers: *"What does this repository require?"* (Read-only on repository filesystem).
-   - **Environment Checker** answers: *"What does this host machine currently provide?"* (Read-only on local system).
-   - **Execution Planner** answers: *"Given repository facts and host facts, what ordered actions are necessary?"* (Read-only decision graph).
-   - **Execution Engine** answers: *"How do we safely execute approved actions?"* (Controlled execution, process management, confirmation gates).
-2. **Deterministic First**: Programmatic detection via manifest files, lockfiles, and standard tool probes before any AI heuristics.
-3. **Safety & Confirmation Gates**: Commands marked `REQUIRES_CONFIRMATION` prompt the user unless `--yes` is supplied; `DANGEROUS` commands require explicit confirmation; `BLOCKED` commands never run.
-4. **Zero-Side-Effects Dry Run**: `--dry-run` simulates the entire pipeline without running processes or writing files.
-5. **Cross-Platform Resilience**: Designed specifically for Windows 11 as the primary target and Linux as secondary. Safe subprocess execution without `shell=True` and normalized process group management.
-6. **Isolated Process Lifecycle**: Background applications are managed via `ProcessManager` with logs written to user data storage (`platformdirs.user_data_dir("runrepo")`).
+[1/5] Checking Node.js 22 & Python 3.12 .................. ✓ OK
+[2/5] Starting managed PostgreSQL container .............. ✓ Ready (localhost:5432)
+[3/5] Generating .env from .env.example .................. ✓ Generated (safe defaults)
+[4/5] Installing dependencies with pnpm .................. ✓ Completed (4.2s)
+[5/5] Launching development server ....................... 🚀 http://localhost:3000
+```
 
----
+### Core Invariants
 
-## Features
-
-### Milestone 1: Repository Analyzer (`runrepo analyze`)
-
-Deterministic repository detectors discovering facts from codebase assets:
-
-* **Node.js**: Versions (`.nvmrc`, `.node-version`, `package.json` `engines.node`), package managers (`pnpm`, `npm`, `yarn`, `bun`), frameworks (Next.js, Remix, Nuxt, Astro, SvelteKit, Vite, React, Vue, Express, NestJS, Fastify, Hono), scripts, dependencies, workspaces (`pnpm-workspace.yaml`, `turbo.json`, `lerna.json`, `nx.json`).
-* **Python**: Versions (`.python-version`, `pyproject.toml` `requires-python`, `runtime.txt`, `Pipfile`), package managers (`uv`, `poetry`, `pipenv`, `pip`), frameworks (FastAPI, Django, Flask, Starlette, Litestar, Streamlit, Celery), entrypoints (`[project.scripts]`, `main.py`, `app.py`, `manage.py`, `cli.py`).
-* **Docker & Compose**: Dockerfiles and Docker Compose files (`compose.yaml`, `docker-compose.yml`), service definitions, ports, and environment variable keys.
-* **Databases & Services**: Prisma (`schema.prisma`), Alembic (`alembic.ini`), Drizzle (`drizzle.config`), PostgreSQL, Redis, MySQL, SQLite, MongoDB, RabbitMQ.
-* **Environment Variables**: `.env.example`, `.env.template`, `.env.sample` parsing with categorization (`database`, `secret`, `local_default`, `external_service`).
-
-### Milestone 2: Environment Checker (`runrepo doctor`)
-
-Safe, read-only host inspection evaluating whether the local environment satisfies project requirements:
-
-* **Git**: CLI presence and version.
-* **Node.js**: Discovered version and semantic version requirement evaluation (`>=22`, `^20`, `~18.2`, `18.x`).
-* **Python**: Discovered interpreter, version requirement evaluation (`>=3.11`, `<3.14`), and interpreter path resolution.
-* **Package Managers**: npm, pnpm, yarn, uv, and pip (bound directly to discovered Python interpreter).
-* **Docker & Docker Compose**: Two-tier inspection distinguishing missing CLI (`MISSING`), stopped/unreachable daemon (`BROKEN`), and operational state (`OK`). Supports modern `docker compose` plugin and legacy standalone `docker-compose`.
-* **Standardized Status Model**: `OK`, `MISSING`, `WRONG_VERSION`, `BROKEN`, `UNKNOWN`.
-
-### Milestone 3: Execution Planner (`runrepo plan`)
-
-Deterministic, explainable execution planning that builds a directed acyclic graph of ordered actions:
-
-* **Topological DAG Ordering**: Constructs a `PlanGraph` linking prerequisites via `depends_on` with cycle detection.
-* **Risk Classification**: Steps are classified as `SAFE`, `REQUIRES_CONFIRMATION`, `BLOCKED`, or `DANGEROUS`.
-* **Plan Status Model**: `READY`, `NEEDS_CONFIRMATION`, `NEEDS_INPUT`, `BLOCKED`.
-* **Action Types**: `VERIFY_RUNTIME`, `VERIFY_PACKAGE_MANAGER`, `CONFIGURE_ENV`, `START_SERVICE`, `INSTALL_DEPENDENCIES`, `GENERATE_CLIENT`, `RUN_DATABASE_MIGRATION`, `START_APPLICATION`, `VERIFY_APPLICATION`.
-* **Verification & Rollback Metadata**: Every step defines structured criteria for validating execution and rolling back changes.
-
-### Milestone 4: Execution Engine (`runrepo setup`)
-
-Controlled, safe execution engine and background process manager:
-
-* **Fail-Fast DAG Execution**: Steps execute in topological order; failures halt execution immediately and downstream steps are marked `SKIPPED`.
-* **Confirmation Handlers**: Interactive terminal prompts (`ConsoleConfirmationHandler`), automated CI/CD mode (`AutoConfirmationHandler` for `--yes`), and strict non-interactive checks (`NonInteractiveConfirmationHandler`).
-* **Dedicated Step Handlers**: Modular handlers for environment preparation, dependency installation, Docker Compose services, database migrations, and application startup.
-* **Background Process Lifecycle**: Long-running applications run as managed background processes with real-time log capturing and Windows-compatible termination (`taskkill` / process groups).
-* **Step Verification**: Automatically evaluates exit codes, file existence, TCP ports, and HTTP endpoints.
+1. **Deterministic First**: Programmatic detection via lockfiles, manifests, AST, and standard tools before any heuristics.
+2. **Strict Phase Separation**: Analyzer (read-only facts) → Environment Checker (read-only host facts) → Planner (action DAG) → Executor (controlled side-effects) → Verifier (outcome assertion) → Diagnostics (failure explanation).
+3. **Safe by Default**: Dangerous operations require interactive confirmation; destructive operations are blocked; dry-run mode (`--dry-run`) performs zero side-effects.
+4. **Reproducible**: Persistent lockfiles (`runrepo.lock`) guarantee bit-for-bit repeatability with zero secret leaks.
+5. **AI Only for Ambiguity**: Google Gemini is strictly optional for unstructured READMEs or obscure error triage.
 
 ---
 
-## Installation & Usage
+## 🏛 System Architecture
+
+```text
+                     Git Repository / Local Directory
+                                    │
+                                    ▼
+                         ┌────────────────────┐
+                         │Repository Analyzer │ (Inspects package manifests,
+                         │ (Read-Only Facts)  │  frameworks, docker, databases)
+                         └─────────┬──────────┘
+                                   │ ProjectInfo
+                                   ▼
+                         ┌────────────────────┐
+     Local Machine ─────►│Environment Checker │ (Inspects installed runtimes,
+                         │ (Read-Only Host)   │  tools, Docker daemon, ports)
+                         └─────────┬──────────┘
+                                   │ EnvironmentState
+                                   ▼
+                         ┌────────────────────┐
+     runrepo.yaml ──────►│ Execution Planner  │ (Constructs topological DAG,
+     (User Overrides)    │   (Plan Graph)     │  assigns risk classifications)
+                         └─────────┬──────────┘
+                                   │ ExecutionPlan
+                                   ▼
+                         ┌────────────────────┐
+     Confirmation ──────►│  Execution Engine  │ (Sandboxed runner, process tracking,
+     Gate (--yes)        │ (Controlled Run)   │  atomic resource allocation)
+                         └─────────┬──────────┘
+                                   │
+                                   ▼
+                         ┌────────────────────┐
+                         │Step & App Verifier │ (Probes TCP/HTTP endpoints,
+                         └─────────┬──────────┘  validates exit codes, disk state)
+                                   │
+                         ┌─────────┴──────────┐
+                         │                    │
+                     ✓ SUCCESS            ✗ FAILURE
+                         │                    │
+                         ▼                    ▼
+                 ┌───────────────┐   ┌─────────────────┐
+                 │ Process Logs  │   │   Diagnostics   │ (PID discovery,
+                 │ & Active URLs │   │  Engine & Rules │  port owner inspect)
+                 └───────────────┘   └────────┬────────┘
+                                              │ (If UNKNOWN)
+                                              ▼
+                                     ┌─────────────────┐
+                                     │Optional Gemini  │
+                                     │  AI Assistant   │
+                                     └─────────────────┘
+```
+
+---
+
+## ✨ Key Capabilities
+
+| Subsystem | Capabilities | Supported Technologies |
+| :--- | :--- | :--- |
+| **Language & Runtime Detectors** | Version requirements, entrypoints, script discovery, lockfile resolution | **Node.js, Python, Bun, Deno, Go, Rust (Cargo)** |
+| **Package Managers** | Dependency graphs, monorepo workspaces, package scripts | **npm, pnpm, yarn, bun, uv, poetry, pipenv, pip, conda, cargo** |
+| **Monorepo & Workspaces** | Workspace layout detection, subproject DAG resolution, targeted execution | **pnpm workspaces, Turborepo, Nx, Lerna, Yarn, UV workspaces** |
+| **Infrastructure Services** | Automated Docker container provisioning, healthchecks, atomic rollbacks | **PostgreSQL, Redis, MySQL, MongoDB, RabbitMQ, MinIO (S3)** |
+| **Environment Configuration** | Structured `.env` generation, secret categorization, placeholder warnings | **`.env.example`, `.env.template`, `.env.sample`, docker-compose envs** |
+| **Sandboxed Execution** | Working directory boundaries, sanitized pass-through environment allowlists | **`SandboxedProcessExecutor`, `SandboxPolicy`, strict timeouts** |
+| **Diagnostics & Observability** | Network socket probing, process ownership identification, PID triage | **Windows `netstat -ano`, Posix `lsof`, port conflict matching** |
+| **Reproducibility** | Declarative manifest overrides and deterministic sorted lockfiles | **`runrepo.yaml` (v1) and `runrepo.lock` (v1, zero secrets)** |
+| **AI Ambiguity Resolution** | Structured JSON schema validation, destructive command filtering | **Google Gemini 2.5 Flash / Pro (zero external SDKs, REST)** |
+
+---
+
+## 🚀 Getting Started & Installation
 
 ### Prerequisites
 
-- Python `>= 3.11`
-- `uv` (recommended)
+- **Python**: `>= 3.11`
+- **uv**: *(Recommended)* Modern fast Python package manager
+- **Docker**: *(Optional)* Required for auto-provisioning databases and services
 
 ### Installation
 
@@ -110,81 +154,268 @@ Controlled, safe execution engine and background process manager:
 git clone https://github.com/AmirHossein-84/RunRepo.git
 cd RunRepo
 
-# Sync virtual environment and dev dependencies with uv
+# Sync virtual environment and all dependencies with uv
 uv sync --extra dev
 ```
 
-### CLI Commands
-
-#### 1. Setup & Run Repository (`runrepo setup`)
+### Quick Run
 
 ```bash
-# Run end-to-end repository setup (analyze -> doctor -> plan -> execute)
+# Analyze, plan, and setup a local project:
 uv run runrepo setup .
 
-# Simulate execution without running processes or writing files
-uv run runrepo setup . --dry-run
-
-# Run with automatic confirmation for all safe and confirmation steps
-uv run runrepo setup . --yes
-
-# Output structured ExecutionResult in JSON format
-uv run runrepo setup . --dry-run --json
-```
-
-#### 2. Execution Plan (`runrepo plan`)
-
-```bash
-# Generate and display the ordered execution plan
-uv run runrepo plan .
-
-# Output structured ExecutionPlan in JSON format
-uv run runrepo plan . --json
-```
-
-#### 3. Environment Health Check (`runrepo doctor`)
-
-```bash
-# Check host environment against current repository requirements
-uv run runrepo doctor .
-
-# Run general host environment health check (all tools)
-uv run runrepo doctor
-```
-
-#### 4. Repository Analysis (`runrepo analyze`)
-
-```bash
-# Analyze repository facts
-uv run runrepo analyze .
-
-# Show granular detection evidence breakdown
-uv run runrepo analyze . --evidence
-```
-
-#### 5. Background Process Management (`runrepo status`, `stop`, `logs`)
-
-```bash
-# List all active background applications
-uv run runrepo status
-
-# View recent output logs of a running process
-uv run runrepo logs
-
-# Stop running background processes
-uv run runrepo stop
+# Or analyze any remote GitHub repository:
+uv run runrepo setup https://github.com/facebook/react --dry-run
 ```
 
 ---
 
-## Testing
+## 💻 CLI Command Reference
 
-The project includes an extensive, 100% deterministic test suite using mocked command execution and realistic fixtures:
+### Primary Commands
+
+| Command | Description | Example |
+| :--- | :--- | :--- |
+| `runrepo setup [path]` | Full end-to-end orchestration (analyze → check → plan → execute) | `runrepo setup . --yes` |
+| `runrepo plan [path]` | Generate and display the ordered execution DAG | `runrepo plan . --json` |
+| `runrepo analyze [path]`| Deep inspection of codebase facts, frameworks, and scripts | `runrepo analyze . --evidence` |
+| `runrepo doctor [path]` | Check host system against repository requirements | `runrepo doctor .` |
+| `runrepo tree [path]` | Display monorepo workspace hierarchy and runnable applications | `runrepo tree .` |
+| `runrepo clone <target>`| Safely acquire and cache a remote GitHub repository | `runrepo clone owner/repo` |
+
+### Service & Process Management
+
+| Command | Description | Example |
+| :--- | :--- | :--- |
+| `runrepo status` | List active background applications and listening ports | `runrepo status` |
+| `runrepo logs [pid]` | Stream or inspect real-time logs from background processes | `runrepo logs 18492` |
+| `runrepo stop [--all]` | Terminate managed background applications and service containers | `runrepo stop --all` |
+| `runrepo clean` | Safely remove RunRepo-owned containers, volumes, and temporary state | `runrepo clean --yes` |
+
+### Cache & Reproducibility
+
+| Command | Description | Example |
+| :--- | :--- | :--- |
+| `runrepo config [path]` | Inspect active `runrepo.yaml` configuration overrides | `runrepo config .` |
+| `runrepo lock [path]` | Generate or refresh a deterministic `runrepo.lock` file | `runrepo lock . --refresh` |
+| `runrepo cache [list]` | List cached repositories, sizes, and validation health | `runrepo cache list` |
+| `runrepo cache clean` | Safely purge stale cached repositories with confirmation | `runrepo cache clean --days 14` |
+
+---
+
+## 🔒 Reproducibility (`runrepo.yaml` & `runrepo.lock`)
+
+RunRepo offers full environment reproducibility across machines:
+
+### 1. User Manifest (`runrepo.yaml`)
+
+Define explicit overrides without bypassing safety constraints:
+
+```yaml
+version: 1
+name: my-fullstack-app
+
+runtimes:
+  node: ">=20.10.0"
+  python: ">=3.11"
+
+package_manager: pnpm
+
+docker: true
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    port: 5432
+    database_name: app_development
+  redis:
+    port: 6379
+
+startup:
+  command: "pnpm run dev"
+```
+
+### 2. Lockfile (`runrepo.lock`)
+
+Deterministic JSON lockfile generated via `runrepo lock`:
+
+```json
+{
+  "lock_version": 1,
+  "repository": {
+    "name": "my-fullstack-app",
+    "commit_hash": "a1b2c3d4",
+    "ref": "main"
+  },
+  "platform": {
+    "os": "windows",
+    "arch": "x86_64"
+  },
+  "resolved_runtimes": {
+    "node": "22.14.0",
+    "python": "3.12.2"
+  },
+  "resolved_package_manager": "pnpm",
+  "resolved_services": [
+    { "name": "postgres", "image": "postgres:16-alpine", "port": 5432 },
+    { "name": "redis", "image": "redis:7-alpine", "port": 6379 }
+  ],
+  "plan_steps": [
+    "verify-node",
+    "service-postgres",
+    "service-redis",
+    "configure-env",
+    "install-deps",
+    "start-app"
+  ]
+}
+```
+
+> [!NOTE]
+> **Strict Zero-Secret Policy**: `runrepo.lock` never stores sensitive secret values. Only variable names and categorization metadata are recorded.
+
+---
+
+## 🛡 Safety & Sandboxing Model
+
+Every execution step is classified into one of four safety tiers:
+
+| Risk Level | Behavior | Example Actions |
+| :--- | :--- | :--- |
+| `SAFE` | Executed automatically in standard and automated modes | Checking tool versions, reading manifests |
+| `REQUIRES_CONFIRMATION` | Prompts user interactively (or bypassed with `--yes`) | `pnpm install`, `docker compose up`, starting server |
+| `DANGEROUS` | Explicit interactive prompt required | Modifying critical host files, deleting state |
+| `BLOCKED` | **Execution strictly refused** | Running commands with missing runtimes or destructive commands |
+
+### Process Confinement (`SandboxedProcessExecutor`)
+
+- Restricts subprocess `cwd` strictly inside the repository boundary.
+- Strips unauthorized host environment variables, passing only sanitized variables (`PATH`, `TEMP`, `USERPROFILE`, etc.).
+- Enforces hard execution timeouts to prevent hanging background scripts.
+
+---
+
+## 🩺 Diagnostics & Port Conflict Resolution
+
+When a service or application fails, RunRepo's rule-based diagnostic engine identifies the root cause and inspects process ownership:
+
+```text
+[!] Diagnostic: Network Port Conflict (5432)
+Severity:     ERROR
+Explanation:  A service failed to bind to port 5432 because another active process is using it.
+              Occupied by PID 18492 (postgres.exe).
+
+Suggested Actions:
+  1. Terminate conflicting process (PID 18492) or configure another port in runrepo.yaml.
+  2. Stop RunRepo-managed background services:
+     $ runrepo stop --all
+```
+
+---
+
+## 🤖 Optional Gemini AI Integration
+
+When deterministic rules encounter unfamiliar setups or unknown errors, the optional AI layer (`src/runrepo/ai/`) resolves ambiguity:
+
+- **Strict Validation**: All AI responses must conform to strict Pydantic schemas (`AIActionSuggestion`).
+- **Destructive Command Guard**: Automatically filters out destructive patterns (`rm -rf`, `format`, `del /f`).
+- **Privacy First**: Secrets and `.env` files are scrubbed before prompt construction.
+- **Offline First**: Easily disabled globally via the `--no-ai` flag or `RUNREPO_NO_AI=1`.
+
+---
+
+## 🧪 Testing & Quality Assurance
+
+RunRepo maintains **100% deterministic testing** with zero live Docker, GitHub, or database requirements:
 
 ```bash
-# Run all tests (107 tests)
+# Run the complete test suite (273 tests)
 uv run pytest -v
 
-# Run tests with coverage report
+# Run with test coverage
 uv run pytest --cov=runrepo --cov-report=term-missing
 ```
+
+```text
+============================ 273 passed in 16.61s =============================
+```
+
+---
+
+<div dir="rtl">
+
+## 🇮🇷 راهنمای فارسی (Persian Documentation)
+
+### معرفی پروژه RunRepo
+
+ابزار **RunRepo** یک ارکستریتور و ابزار خط فرمان (CLI) مدرن و هوشمند است که یک مخزن گیت (Git Repository) دلخواه را تحلیل کرده و بدون نیاز به کانفیگ دستی و خسته‌کننده، آن را بر روی سیستم شما آماده اجرا می‌کند.
+
+> **هدف اصلی پروژه:** *"من یک پروژه متن‌باز پیدا کرده‌ام. می‌خواهم آن را اجرا کنم. محیط را به طور خودکار آماده کن."*
+
+---
+
+### ویژگی‌های کلیدی
+
+- ⚡ **تحلیل کاملاً قطعی (Deterministic-First):** شناسایی زبان‌ها، پکیج منیجرها و وابستگی‌ها بدون وابستگی به هوش مصنوعی.
+- 📦 **پشتیبانی از Monorepo:** مدیریت ساختارهای پیچیده مبتنی بر pnpm workspaces، Turborepo، Nx و Lerna.
+- 🐳 **سرویس‌های داکر خودکار:** راه‌اندازی، بررسی سلامت و بازگردانی خودکار پایگاه‌های داده (PostgreSQL, MySQL, MongoDB, Redis, RabbitMQ, MinIO).
+- 🔒 **سندباکس و امنیت بالا:** تفکیک متغیرهای محیطی حساس، محدود کردن دسترسی فرآیندها و مسدودسازی دستورات مخرب.
+- 📋 **تکرارپذیری با Lockfile:** ذخیره تصمیمات در `runrepo.lock` بدون نشت کلیدها و پسوردهای حساس.
+- 🩺 **سیستم عیب‌یابی پیشرفته:** تشخیص خطاهای پورت و شبکه همراه با استخراج PID و نام برنامه اشغال‌کننده پورت در ویندوز و لینوکس.
+- 🤖 **هوش مصنوعی اختیاری:** استفاده از مدل‌های Gemini برای تفسیر فایل‌های README مبهم و تحلیل ارورهای ناشناخته.
+
+---
+
+### نحوه نصب و راه‌اندازی
+
+```bash
+# کلون کردن مخزن پروژه
+git clone https://github.com/AmirHossein-84/RunRepo.git
+cd RunRepo
+
+# نصب وابستگی‌ها با ابزار فوق‌سریع uv
+uv sync --extra dev
+```
+
+---
+
+### دستورات پرکاربرد خط فرمان
+
+```bash
+# ۱. تحلیل و راه‌اندازی کامل پروژه در دایرکتوری جاری
+uv run runrepo setup .
+
+# ۲. اجرای آزمایشی (بدون هیچ‌گونه تغییر در سیستم)
+uv run runrepo setup . --dry-run
+
+# ۳. بررسی وضعیت پیش‌نیازهای سیستم
+uv run runrepo doctor .
+
+# ۴. نمایش درخت مونو‌ریپو و برنامه‌های قابل اجرا
+uv run runrepo tree .
+
+# ۵. تولید فایل تکرارپذیری runrepo.lock
+uv run runrepo lock .
+
+# ۶. مشاهده لاگ‌ها و متوقف‌سازی سرویس‌های در حال اجرا
+uv run runrepo status
+uv run runrepo stop --all
+```
+
+---
+
+### تست‌ها و اعتبارسنجی
+
+پروژه دارای **۲۷۳ تست جامع** واحد (Unit) و یکپارچه‌سازی (Integration) است:
+
+```bash
+uv run pytest -v
+```
+
+</div>
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
