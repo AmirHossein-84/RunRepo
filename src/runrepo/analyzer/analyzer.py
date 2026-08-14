@@ -293,12 +293,30 @@ class RepositoryAnalyzer:
         if FrameworkCategory.WEB_BACKEND in categories:
             return ProjectType.API_SERVICE
 
-        # Check script cues
+        # Check script cues for web applications
         script_names = {s.name.lower() for s in scripts}
-        if "dev" in script_names or "start" in script_names or "build" in script_names:
+        if "dev" in script_names or "start" in script_names:
             return ProjectType.WEB_APPLICATION
 
-        if entrypoints or any(s.name in ("cli", "run") for s in scripts):
+        # Check for explicit CLI tool declarations (project.scripts, poetry scripts, or entrypoints)
+        has_cli_script = any(
+            s.evidence and any(
+                "project.scripts" in (e.detail or "")
+                or "tool.poetry.scripts" in (e.detail or "")
+                or "bin" in e.source
+                for e in s.evidence
+            )
+            for s in scripts
+        ) or any(s.name in ("cli", "run", "main") for s in scripts)
+
+        if entrypoints or has_cli_script:
             return ProjectType.CLI_TOOL
+
+        if "build" in script_names:
+            return ProjectType.WEB_APPLICATION
+
+        # If runtimes exist but no web or CLI entrypoints
+        if runtimes:
+            return ProjectType.LIBRARY
 
         return ProjectType.UNKNOWN

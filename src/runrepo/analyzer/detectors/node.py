@@ -161,8 +161,15 @@ class NodeDetector(BaseDetector):
                     )
                 )
 
-        # Record Node.js runtime if detected
-        if all_package_jsons or has_node_version_files or has_js_ts_files:
+        # Record Node.js runtime if a manifest, version file, or JS/TS config exists
+        has_node_manifest_or_config = (
+            bool(all_package_jsons)
+            or has_node_version_files
+            or context.has_file("tsconfig.json")
+            or context.has_file("jsconfig.json")
+        )
+
+        if has_node_manifest_or_config:
             if not node_evidence and all_package_jsons:
                 node_evidence.append(
                     DetectionEvidence(
@@ -176,8 +183,8 @@ class NodeDetector(BaseDetector):
                 node_evidence.append(
                     DetectionEvidence(
                         source="codebase",
-                        detail="JavaScript/TypeScript source files present",
-                        confidence=Confidence.MEDIUM,
+                        detail="JavaScript/TypeScript configuration present",
+                        confidence=Confidence.HIGH if has_node_version_files else Confidence.MEDIUM,
                     )
                 )
 

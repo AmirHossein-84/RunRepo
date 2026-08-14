@@ -13,6 +13,8 @@ from runrepo.models import (
 )
 
 PRISMA_PROVIDER_REGEX = re.compile(r'provider\s*=\s*"([^"]+)"')
+SQLALCHEMY_URL_REGEX = re.compile(r'sqlalchemy\.url\s*=\s*([^\s]+)')
+DRIZZLE_DIALECT_REGEX = re.compile(r'dialect\s*:\s*["\']([^"\']+)["\']')
 
 
 class DatabaseDetector(BaseDetector):
@@ -33,7 +35,7 @@ class DatabaseDetector(BaseDetector):
         ]
         for pfile in prisma_files:
             text = context.read_text(pfile)
-            db_type = DatabaseType.POSTGRESQL  # Default Prisma assumption if not specified
+            db_type = DatabaseType.UNKNOWN
             matched_provider = None
             if text:
                 match = PRISMA_PROVIDER_REGEX.search(text)
@@ -51,8 +53,8 @@ class DatabaseDetector(BaseDetector):
             evidence = [
                 DetectionEvidence(
                     source="schema.prisma",
-                    detail=f"Prisma schema with provider '{matched_provider or 'default'}'",
-                    confidence=Confidence.HIGH,
+                    detail=f"Prisma schema with provider '{matched_provider or 'unspecified'}'",
+                    confidence=Confidence.HIGH if matched_provider else Confidence.MEDIUM,
                     path=pfile,
                 )
             ]
@@ -76,16 +78,48 @@ class DatabaseDetector(BaseDetector):
         ]
         if alembic_files:
             ini_file = next((f for f in alembic_files if f.endswith("alembic.ini")), alembic_files[0])
+            ini_text = context.read_text(ini_file) if ini_file.endswith("alembic.ini") else None
+            
+            db_type = DatabaseType.UNKNOWN
+            detail_msg = "Alembic database migration configuration found"
+            
+            if ini_text:
+                url_match = SQLALCHEMY_URL_REGEX.search(ini_text)
+                if url_match:
+                    raw_url = url_match.group(1).lower()
+                    if "postgres" in raw_url:
+                        db_type = DatabaseType.POSTGRESQL
+                        detail_msg = f"Alembic configured with PostgreSQL url: {url_match.group(1)}"
+                    elif "mysql" in raw_url:
+                        db_type = DatabaseType.MYSQL
+                        detail_msg = f"Alembic configured with MySQL url: {url_match.group(1)}"
+                    elif "sqlite" in raw_url:
+                        db_type = DatabaseType.SQLITE
+                        detail_msg = f"Alembic configured with SQLite url: {url_match.group(1)}"
+
+            # If no URL in alembic.ini, check for database driver dependencies
+            if db_type == DatabaseType.UNKNOWN:
+                all_text = " ".join(
+                    filter(None, [context.read_text("requirements.txt"), context.read_text("pyproject.toml")])
+                ).lower()
+                if any(p in all_text for p in ("psycopg", "asyncpg", "pg8000")):
+                    db_type = DatabaseType.POSTGRESQL
+                    detail_msg += " (PostgreSQL driver dependency detected)"
+                elif any(m in all_text for m in ("mysqlclient", "pymysql", "asyncmy")):
+                    db_type = DatabaseType.MYSQL
+                    detail_msg += " (MySQL driver dependency detected)"
+                elif "aiosqlite" in all_text:
+                    db_type = DatabaseType.SQLITE
+                    detail_msg += " (SQLite driver dependency detected)"
+
             evidence = [
                 DetectionEvidence(
                     source="alembic.ini" if ini_file.endswith("alembic.ini") else "alembic/",
-                    detail="Alembic database migration configuration found",
-                    confidence=Confidence.HIGH,
+                    detail=detail_msg,
+                    confidence=Confidence.HIGH if db_type != DatabaseType.UNKNOWN else Confidence.MEDIUM,
                     path=ini_file,
                 )
             ]
-            # Alembic is most commonly PostgreSQL in Python modern stacks, or generic SQL
-            db_type = DatabaseType.POSTGRESQL
             if db_type not in databases:
                 databases[db_type] = DatabaseRequirement(
                     name=db_type,
@@ -103,15 +137,46 @@ class DatabaseDetector(BaseDetector):
             f for f in context.get_all_files() if "drizzle.config" in f or f.startswith("drizzle/")
         ]
         if drizzle_files:
+            cfg_file = next((f for f in drizzle_files if "drizzle.config" in f), drizzle_files[0])
+            cfg_text = context.read_text(cfg_file) if "drizzle.config" in cfg_file else None
+            
+            db_type = DatabaseType.UNKNOWN
+            detail_msg = "Drizzle ORM configuration found"
+            
+            if cfg_text:
+                dialect_match = DRIZZLE_DIALECT_REGEX.search(cfg_text)
+                if dialect_match:
+                    dialect = dialect_match.group(1).lower()
+                    if dialect in ("postgresql", "pg"):
+                        db_type = DatabaseType.POSTGRESQL
+                        detail_msg = f"Drizzle configured with dialect '{dialect}'"
+                    elif dialect == "mysql":
+                        db_type = DatabaseType.MYSQL
+                        detail_msg = "Drizzle configured with dialect 'mysql'"
+                    elif dialect == "sqlite":
+                        db_type = DatabaseType.SQLITE
+                        detail_msg = "Drizzle configured with dialect 'sqlite'"
+
+            if db_type == DatabaseType.UNKNOWN:
+                pkg_text = (context.read_text("package.json") or "").lower()
+                if any(p in pkg_text for p in ("@vercel/postgres", "@neondatabase/serverless", "pg", "postgres")):
+                    db_type = DatabaseType.POSTGRESQL
+                    detail_msg += " (PostgreSQL driver dependency detected)"
+                elif "mysql2" in pkg_text:
+                    db_type = DatabaseType.MYSQL
+                    detail_msg += " (MySQL driver dependency detected)"
+                elif any(s in pkg_text for s in ("better-sqlite3", "@libsql/client")):
+                    db_type = DatabaseType.SQLITE
+                    detail_msg += " (SQLite driver dependency detected)"
+
             evidence = [
                 DetectionEvidence(
                     source="drizzle.config",
-                    detail="Drizzle ORM configuration found",
-                    confidence=Confidence.HIGH,
-                    path=drizzle_files[0],
+                    detail=detail_msg,
+                    confidence=Confidence.HIGH if db_type != DatabaseType.UNKNOWN else Confidence.MEDIUM,
+                    path=cfg_file,
                 )
             ]
-            db_type = DatabaseType.POSTGRESQL
             if db_type not in databases:
                 databases[db_type] = DatabaseRequirement(
                     name=db_type,
@@ -144,88 +209,77 @@ class DatabaseDetector(BaseDetector):
                         continue
 
                     img = str(sdef.get("image", "")).lower()
-                    s_lower = sname.lower()
+                    s_lower = str(sname).lower()
+                    raw_env = sdef.get("environment", {})
+                    env_keys = (
+                        [k.upper() for k in raw_env.keys()]
+                        if isinstance(raw_env, dict)
+                        else [str(e).split("=")[0].upper() for e in raw_env if isinstance(e, str)]
+                    )
 
-                    # PostgreSQL
-                    if "postgres" in img or "timescale" in img or s_lower in ("db", "postgres", "postgresql", "database"):
+                    # Match by Image first (highest accuracy)
+                    matched_db: DatabaseType | None = None
+                    if "postgres" in img or "timescale" in img:
+                        matched_db = DatabaseType.POSTGRESQL
+                    elif "mysql" in img or "mariadb" in img:
+                        matched_db = DatabaseType.MYSQL
+                    elif "mongo" in img:
+                        matched_db = DatabaseType.MONGODB
+                    elif "redis" in img or "valkey" in img or "dragonfly" in img or "keydb" in img:
+                        matched_db = DatabaseType.REDIS
+                    # Fallback to Service Name & Environment Keys
+                    elif "postgres" in s_lower:
+                        matched_db = DatabaseType.POSTGRESQL
+                    elif "mysql" in s_lower or "mariadb" in s_lower:
+                        matched_db = DatabaseType.MYSQL
+                    elif "mongo" in s_lower:
+                        matched_db = DatabaseType.MONGODB
+                    elif "redis" in s_lower or s_lower in ("cache", "queue"):
+                        matched_db = DatabaseType.REDIS
+                    elif s_lower in ("db", "database"):
+                        if any("POSTGRES" in k for k in env_keys):
+                            matched_db = DatabaseType.POSTGRESQL
+                        elif any("MYSQL" in k or "MARIADB" in k for k in env_keys):
+                            matched_db = DatabaseType.MYSQL
+                        elif any("MONGO" in k for k in env_keys):
+                            matched_db = DatabaseType.MONGODB
+                        else:
+                            matched_db = DatabaseType.UNKNOWN
+
+                    if matched_db is not None:
                         evidence = [
                             DetectionEvidence(
                                 source=cf,
                                 detail=f"Service '{sname}' with image '{sdef.get('image', sname)}'",
-                                confidence=Confidence.HIGH,
+                                confidence=Confidence.HIGH if img else Confidence.MEDIUM,
                                 path=cf,
                             )
                         ]
-                        if DatabaseType.POSTGRESQL not in databases:
-                            databases[DatabaseType.POSTGRESQL] = DatabaseRequirement(
-                                name=DatabaseType.POSTGRESQL,
+                        if matched_db not in databases:
+                            databases[matched_db] = DatabaseRequirement(
+                                name=matched_db,
                                 evidence=evidence,
                             )
                         else:
-                            databases[DatabaseType.POSTGRESQL].evidence.extend(evidence)
+                            databases[matched_db].evidence.extend(evidence)
 
-                    # Redis
-                    if "redis" in img or "valkey" in img or "dragonfly" in img or s_lower in ("redis", "cache", "queue"):
-                        evidence = [
-                            DetectionEvidence(
-                                source=cf,
-                                detail=f"Service '{sname}' with image '{sdef.get('image', sname)}'",
-                                confidence=Confidence.HIGH,
-                                path=cf,
-                            )
-                        ]
-                        if DatabaseType.REDIS not in databases:
-                            databases[DatabaseType.REDIS] = DatabaseRequirement(
-                                name=DatabaseType.REDIS,
-                                evidence=evidence,
-                            )
-                        else:
-                            databases[DatabaseType.REDIS].evidence.extend(evidence)
-
+                    # Redis as an auxiliary ServiceRequirement
+                    if matched_db == DatabaseType.REDIS or "redis" in s_lower:
                         if "redis" not in services:
                             services["redis"] = ServiceRequirement(
                                 name="redis",
                                 service_type="cache_or_queue",
                                 image=sdef.get("image"),
                                 port=6379,
-                                evidence=evidence,
+                                evidence=[
+                                    DetectionEvidence(
+                                        source=cf,
+                                        detail=f"Redis service '{sname}' in compose",
+                                        confidence=Confidence.HIGH,
+                                        path=cf,
+                                    )
+                                ],
                             )
-
-                    # MySQL
-                    if "mysql" in img or "mariadb" in img or s_lower in ("mysql", "mariadb"):
-                        evidence = [
-                            DetectionEvidence(
-                                source=cf,
-                                detail=f"Service '{sname}' with image '{sdef.get('image', sname)}'",
-                                confidence=Confidence.HIGH,
-                                path=cf,
-                            )
-                        ]
-                        if DatabaseType.MYSQL not in databases:
-                            databases[DatabaseType.MYSQL] = DatabaseRequirement(
-                                name=DatabaseType.MYSQL,
-                                evidence=evidence,
-                            )
-                        else:
-                            databases[DatabaseType.MYSQL].evidence.extend(evidence)
-
-                    # MongoDB
-                    if "mongo" in img or s_lower in ("mongo", "mongodb"):
-                        evidence = [
-                            DetectionEvidence(
-                                source=cf,
-                                detail=f"Service '{sname}' with image '{sdef.get('image', sname)}'",
-                                confidence=Confidence.HIGH,
-                                path=cf,
-                            )
-                        ]
-                        if DatabaseType.MONGODB not in databases:
-                            databases[DatabaseType.MONGODB] = DatabaseRequirement(
-                                name=DatabaseType.MONGODB,
-                                evidence=evidence,
-                            )
-                        else:
-                            databases[DatabaseType.MONGODB].evidence.extend(evidence)
 
                     # RabbitMQ
                     if "rabbitmq" in img or s_lower == "rabbitmq":

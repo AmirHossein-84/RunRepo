@@ -13,54 +13,76 @@ RunRepo is **not an AI coding assistant**. Deterministic repository analysis, en
 RunRepo separates analysis, planning, and execution into clean, independent stages:
 
 ```text
-CLI (`runrepo analyze`)
- ↓
-Repository Analyzer & ScanContext
- ↓
-Deterministic Domain Detectors (Node, Python, Docker, Database, Environment)
- ↓
-Structured Project Graph & Evidence Synthesis (`ProjectInfo`)
- ↓
-[Future Milestones: Environment Checker → Planner → Executor → Verification → Diagnostics]
+Repository
+    ↓
+Analyzer (Milestone 1: Repository Facts)
+    ↓
+ProjectInfo / ProjectGraph
+    +
+Local Machine
+    ↓
+Environment Checker (Milestone 2: Host Facts)
+    ↓
+EnvironmentState
+    ↓
+Planner (Milestone 3: Decision & Execution Graph)
+    ↓
+ExecutionPlan
+    ↓
+[Future: Executor → Verification → Diagnostics]
 ```
 
 ### Core Architectural Invariants
 
-1. **Deterministic First**: Programmatic detection via manifest files, lockfiles, and configuration before any AI heuristics.
-2. **Explainable Facts**: Every detected fact preserves its exact `DetectionEvidence` (source file, matched line/detail, confidence score, relative path).
-3. **Strict Read-Only Analysis**: The analyzer never executes setup actions, creates virtual environments, installs dependencies, or alters the repository.
-4. **Cross-Platform Resilience**: Designed specifically for Windows 11 as the primary target and Linux as secondary. Normalized path handling and terminal encoding safety.
-5. **Polyglot & Monorepo Support**: Captures subprojects (e.g. Node frontend + Python backend) with independent runtimes and framework metadata.
+1. **Strict Responsibility Separation**:
+   - **Repository Analyzer** answers: *"What does this repository require?"* (Read-only on repository filesystem).
+   - **Environment Checker** answers: *"What does this host machine currently provide?"* (Read-only on local system).
+   - **Execution Planner** answers: *"Given repository facts and host facts, what ordered actions are necessary?"* (Read-only decision graph).
+2. **Deterministic First**: Programmatic detection via manifest files, lockfiles, and standard tool probes before any AI heuristics.
+3. **Explainable Facts**: Every detected fact preserves its exact `DetectionEvidence` (source file, matched line/detail, confidence score, relative path).
+4. **Strict Read-Only Guarantee**: Analyzer, Environment Checker, and Planner **never** execute arbitrary scripts, install software, start services, or modify configuration.
+5. **Cross-Platform Resilience**: Designed specifically for Windows 11 as the primary target and Linux as secondary. Safe subprocess execution without `shell=True` and normalized path handling.
+6. **Per-Run Command Caching**: Inspection commands are cached per execution to prevent redundant process invocations.
 
 ---
 
-## Milestone 1 Features
+## Features
 
-### Detectors Implemented
+### Milestone 1: Repository Analyzer (`runrepo analyze`)
 
-* **Node.js**:
-  * Runtime versions (`.nvmrc`, `.node-version`, `package.json` `engines.node`)
-  * Package managers (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `bun.lock`, `package.json` `packageManager`)
-  * Frameworks (Next.js, Remix, Nuxt, Astro, SvelteKit, Vite, React, Vue, Svelte, Express, NestJS, Fastify, Hono, Koa)
-  * Scripts & dependencies (`package.json` `scripts`, `dependencies`, `devDependencies`)
-  * Monorepo workspaces (`pnpm-workspace.yaml`, `turbo.json`, `lerna.json`, `nx.json`, `workspaces`)
-* **Python**:
-  * Runtime versions (`.python-version`, `pyproject.toml` `requires-python`, `runtime.txt`, `Pipfile`)
-  * Package managers (`uv.lock` / `tool.uv`, `poetry.lock` / `tool.poetry`, `Pipfile.lock` / `Pipfile`, `requirements.txt`, `setup.py`)
-  * Frameworks (FastAPI, Django, Flask, Starlette, Litestar, Tornado, Sanic, Streamlit, Celery)
-  * Dependencies (`requirements.txt`, `pyproject.toml` dependencies and optional-dependencies)
-  * Entry points (`main.py`, `app.py`, `manage.py`, `wsgi.py`, `asgi.py`, `cli.py`, `[project.scripts]`)
-* **Docker & Compose**:
-  * Containerfiles (`Dockerfile`, `Dockerfile.*`, `docker/Dockerfile`)
-  * Compose files (`compose.yaml`, `compose.yml`, `docker-compose.yaml`, `docker-compose.yml`)
-  * Service definitions, image references, ports, and declared environment variable keys
-* **Databases & Services**:
-  * ORMs & Migrations (Prisma `schema.prisma`, Alembic `alembic.ini`, Drizzle `drizzle.config`)
-  * Services (PostgreSQL, Redis, MySQL, SQLite, MongoDB, RabbitMQ)
-* **Environment Variables**:
-  * Template parsing (`.env.example`, `.env.template`, `.env.sample`, `.env.local.example`)
-  * Categorization (`database`, `secret`, `local_default`, `external_service`, `general`)
-  * Required vs optional detection
+Deterministic repository detectors discovering facts from codebase assets:
+
+* **Node.js**: Versions (`.nvmrc`, `.node-version`, `package.json` `engines.node`), package managers (`pnpm`, `npm`, `yarn`, `bun`), frameworks (Next.js, Remix, Nuxt, Astro, SvelteKit, Vite, React, Vue, Express, NestJS, Fastify, Hono), scripts, dependencies, workspaces (`pnpm-workspace.yaml`, `turbo.json`, `lerna.json`, `nx.json`).
+* **Python**: Versions (`.python-version`, `pyproject.toml` `requires-python`, `runtime.txt`, `Pipfile`), package managers (`uv`, `poetry`, `pipenv`, `pip`), frameworks (FastAPI, Django, Flask, Starlette, Litestar, Streamlit, Celery), entrypoints (`[project.scripts]`, `main.py`, `app.py`, `manage.py`, `cli.py`).
+* **Docker & Compose**: Dockerfiles and Docker Compose files (`compose.yaml`, `docker-compose.yml`), service definitions, ports, and environment variable keys.
+* **Databases & Services**: Prisma (`schema.prisma`), Alembic (`alembic.ini`), Drizzle (`drizzle.config`), PostgreSQL, Redis, MySQL, SQLite, MongoDB, RabbitMQ.
+* **Environment Variables**: `.env.example`, `.env.template`, `.env.sample` parsing with categorization (`database`, `secret`, `local_default`, `external_service`).
+
+### Milestone 2: Environment Checker (`runrepo doctor`)
+
+Safe, read-only host inspection evaluating whether the local environment satisfies project requirements:
+
+* **Git**: CLI presence and version.
+* **Node.js**: Discovered version and semantic version requirement evaluation (`>=22`, `^20`, `~18.2`, `18.x`).
+* **Python**: Discovered interpreter, version requirement evaluation (`>=3.11`, `<3.14`), and interpreter path resolution.
+* **Package Managers**: npm, pnpm, yarn, uv, and pip (bound directly to discovered Python interpreter).
+* **Docker & Docker Compose**: Two-tier inspection distinguishing missing CLI (`MISSING`), stopped/unreachable daemon (`BROKEN`), and operational state (`OK`). Supports modern `docker compose` plugin and legacy standalone `docker-compose`.
+* **Standardized Status Model**: `OK`, `MISSING`, `WRONG_VERSION`, `BROKEN`, `UNKNOWN`.
+
+### Milestone 3: Execution Planner (`runrepo plan`)
+
+Deterministic, explainable execution planning that builds a directed acyclic graph of ordered actions:
+
+* **Topological DAG Ordering**: Constructs a `PlanGraph` linking prerequisites via `depends_on` with cycle detection.
+* **Risk Classification**: Steps are classified as `SAFE`, `REQUIRES_CONFIRMATION`, `BLOCKED`, or `DANGEROUS`.
+* **Plan Status Model**:
+  - `READY`: All prerequisites satisfied and safe to run.
+  - `NEEDS_CONFIRMATION`: Steps require user approval (e.g. package installation, service startup).
+  - `NEEDS_INPUT`: Requires missing credentials/secrets (`OPENAI_API_KEY`) or startup command disambiguation.
+  - `BLOCKED`: Required runtime or dependency is missing/incompatible with no safe automated strategy.
+* **Action Types**: `VERIFY_RUNTIME`, `VERIFY_PACKAGE_MANAGER`, `CONFIGURE_ENV`, `START_SERVICE`, `INSTALL_DEPENDENCIES`, `GENERATE_CLIENT`, `RUN_DATABASE_MIGRATION`, `START_APPLICATION`, `VERIFY_APPLICATION`.
+* **Verification & Rollback Metadata**: Every step defines structured criteria for validating execution and rolling back changes.
+* **Polyglot & Subproject Scoping**: Separate scopes for frontend and backend subprojects with accurate working directories (`cwd`).
 
 ---
 
@@ -78,11 +100,13 @@ Structured Project Graph & Evidence Synthesis (`ProjectInfo`)
 git clone https://github.com/AmirHossein-84/RunRepo.git
 cd RunRepo
 
-# Sync virtual environment and dependencies with uv
+# Sync virtual environment and dev dependencies with uv
 uv sync --extra dev
 ```
 
 ### CLI Commands
+
+#### Repository Analysis (`runrepo analyze`)
 
 ```bash
 # Analyze a repository directory
@@ -94,15 +118,41 @@ uv run runrepo analyze /path/to/project
 # Output structured domain model in JSON format
 uv run runrepo analyze . --json
 
-# Show full evidence breakdown and confidence scores
+# Show granular detection evidence breakdown
 uv run runrepo analyze . --evidence
+```
+
+#### Environment Check (`runrepo doctor`)
+
+```bash
+# Check host environment against current repository requirements
+uv run runrepo doctor .
+
+# Run general host environment health check (all tools)
+uv run runrepo doctor
+
+# Output structured EnvironmentState in JSON format
+uv run runrepo doctor . --json
+```
+
+#### Execution Plan (`runrepo plan`)
+
+```bash
+# Generate and display the ordered execution plan
+uv run runrepo plan .
+
+# Output structured ExecutionPlan in JSON format
+uv run runrepo plan . --json
+
+# Plan with explicit dry-run flag
+uv run runrepo plan . --dry-run
 ```
 
 ---
 
 ## Domain Model Overview
 
-The core domain model is `ProjectInfo`, which contains:
+### `ProjectInfo` (Repository Facts)
 
 | Field | Type | Description |
 |---|---|---|
@@ -121,18 +171,39 @@ The core domain model is `ProjectInfo`, which contains:
 | `services` | `list[ServiceRequirement]` | Auxiliary services (e.g. Redis cache/queue, RabbitMQ) |
 | `docker` | `DockerInfo` | Dockerfiles and Docker Compose service configurations |
 | `subprojects` | `list[SubprojectInfo]` | Isolated subprojects in monorepo/polyglot setups |
-| `entrypoints` | `list[str]` | Discovered executable entrypoints |
-| `warnings` | `list[AnalysisWarning]` | Non-fatal parser warnings (e.g. malformed configs) |
-| `evidence` | `list[DetectionEvidence]` | Provenance details for detected facts |
+
+### `EnvironmentState` (Host Facts & Evaluation)
+
+| Field | Type | Description |
+|---|---|---|
+| `platform` | `str` | Host OS description (e.g. `"Windows 11"`) |
+| `architecture` | `str` | CPU architecture (e.g. `"x86_64"`) |
+| `is_satisfied` | `bool` | True if all required capabilities are satisfied (`OK`) |
+| `missing_checks` | `list[str]` | Required tools that are completely missing |
+| `wrong_version_checks` | `list[str]` | Required tools with incompatible versions |
+| `broken_checks` | `list[str]` | Required tools installed but non-operational |
+| `unknown_checks` | `list[str]` | Capabilities whose status could not be evaluated |
+| `checks` | `list[EnvironmentCheck]` | Granular per-tool inspection and diagnostic status |
+
+### `ExecutionPlan` (Decision & Execution Graph)
+
+| Field | Type | Description |
+|---|---|---|
+| `repository_path` | `str` | Target repository path |
+| `status` | `PlanStatus` | `READY`, `NEEDS_CONFIRMATION`, `NEEDS_INPUT`, `BLOCKED` |
+| `steps` | `list[PlanStep]` | Topologically ordered execution steps |
+| `warnings` | `list[str]` | Warnings and notes for the user |
+| `blocking_reasons` | `list[str]` | Explanations for why execution is blocked |
+| `input_reasons` | `list[str]` | Required user credentials or command choices |
 
 ---
 
 ## Testing
 
-The project includes an extensive test suite covering unit tests, domain models, individual detectors, and end-to-end integration tests across 12 realistic fixtures:
+The project includes an extensive, 100% deterministic test suite using mocked command execution and realistic fixtures:
 
 ```bash
-# Run all tests
+# Run all tests (78 tests)
 uv run pytest -v
 
 # Run tests with coverage report

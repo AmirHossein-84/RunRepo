@@ -199,3 +199,154 @@ def render_project_analysis(project: ProjectInfo, console: Console, show_evidenc
 
         console.print(tree)
         console.print()
+
+
+def render_environment_state(env_state, console: Console) -> None:
+    """Render a clean, readable Rich presentation of EnvironmentState."""
+    console.print()
+    console.rule("[bold cyan]RunRepo Environment Check (Doctor)[/bold cyan]")
+    console.print()
+
+    # 1. Platform Summary Panel
+    platform_table = Table.grid(padding=(0, 2))
+    platform_table.add_column("Key", style="bold")
+    platform_table.add_column("Value")
+
+    platform_table.add_row("Platform:", f"[white]{env_state.platform}[/white]")
+    platform_table.add_row("Architecture:", f"[white]{env_state.architecture}[/white]")
+
+    if env_state.is_satisfied:
+        satisfaction_text = "[bold green]+ All required environment capabilities are satisfied[/bold green]"
+    else:
+        issues = []
+        if env_state.missing_checks:
+            issues.append(f"Missing: {', '.join(env_state.missing_checks)}")
+        if env_state.wrong_version_checks:
+            issues.append(f"Wrong Version: {', '.join(env_state.wrong_version_checks)}")
+        if env_state.broken_checks:
+            issues.append(f"Broken: {', '.join(env_state.broken_checks)}")
+        satisfaction_text = f"[bold red]- Missing or incompatible requirements: {'; '.join(issues)}[/bold red]"
+
+    platform_table.add_row("Readiness:", satisfaction_text)
+    console.print(Panel(platform_table, title="[bold]Host System Overview[/bold]", border_style="cyan"))
+    console.print()
+
+    # 2. Environment Checks Table
+    table = Table(title="Environment Capabilities & Status", expand=True, border_style="dim")
+    table.add_column("Capability", style="bold cyan", width=16)
+    table.add_column("Required", width=12)
+    table.add_column("Required Ver", style="magenta", width=15)
+    table.add_column("Installed Ver", style="white", width=15)
+    table.add_column("Status", width=18)
+    table.add_column("Diagnostic Details", style="dim")
+
+    for chk in env_state.checks:
+        req_str = "[bold yellow]required[/bold yellow]" if chk.required else "[dim]optional[/dim]"
+        req_ver_str = chk.required_version or "-"
+        inst_ver_str = chk.installed_version or "-"
+
+        status_str = chk.status.value
+        if chk.status.value == "OK":
+            status_str = "[bold green]+ OK[/bold green]"
+        elif chk.status.value == "MISSING":
+            status_str = "[bold red]- MISSING[/bold red]" if chk.required else "[dim]MISSING[/dim]"
+        elif chk.status.value == "WRONG_VERSION":
+            status_str = "[bold yellow]! WRONG_VERSION[/bold yellow]"
+        elif chk.status.value == "BROKEN":
+            status_str = "[bold red]X BROKEN[/bold red]"
+        elif chk.status.value == "UNKNOWN":
+            status_str = "[dim]? UNKNOWN[/dim]"
+
+        details_str = chk.details or (chk.executable_path if chk.executable_path else "-")
+        table.add_row(chk.name, req_str, req_ver_str, inst_ver_str, status_str, details_str)
+
+    console.print(table)
+    console.print()
+
+
+def render_execution_plan(plan, console: Console) -> None:
+    """Render a clean, readable Rich presentation of an ExecutionPlan."""
+    console.print()
+    console.rule("[bold cyan]RunRepo Execution Plan[/bold cyan]")
+    console.print()
+
+    # 1. Overview Panel
+    overview_table = Table.grid(padding=(0, 2))
+    overview_table.add_column("Key", style="bold")
+    overview_table.add_column("Value")
+
+    overview_table.add_row("Repository:", f"[white]{plan.repository_path}[/white]")
+    overview_table.add_row("Project Name:", f"[bold white]{plan.project_info.name}[/bold white]")
+    overview_table.add_row("Project Type:", f"[green]{plan.project_info.project_type.value}[/green]")
+
+    status_badge = plan.status.value
+    if plan.status.value == "READY":
+        status_badge = "[bold green]READY[/bold green]"
+    elif plan.status.value == "NEEDS_CONFIRMATION":
+        status_badge = "[bold yellow]NEEDS_CONFIRMATION[/bold yellow]"
+    elif plan.status.value == "NEEDS_INPUT":
+        status_badge = "[bold cyan]NEEDS_INPUT[/bold cyan]"
+    elif plan.status.value == "BLOCKED":
+        status_badge = "[bold red]BLOCKED[/bold red]"
+
+    overview_table.add_row("Plan Status:", status_badge)
+    console.print(Panel(overview_table, title="[bold]Plan Overview[/bold]", border_style="cyan"))
+    console.print()
+
+    # 2. Blocking / Input Alerts
+    if plan.blocking_reasons:
+        b_text = "\n".join(f"[bold red]- {r}[/bold red]" for r in plan.blocking_reasons)
+        console.print(Panel(b_text, title="[bold red]Blocking Reasons (Action Required)[/bold red]", border_style="red"))
+        console.print()
+
+    if plan.input_reasons:
+        i_text = "\n".join(f"[bold cyan]? {r}[/bold cyan]" for r in plan.input_reasons)
+        console.print(Panel(i_text, title="[bold cyan]Required User Inputs / Disambiguation[/bold cyan]", border_style="cyan"))
+        console.print()
+
+    # 3. Ordered Steps Table
+    table = Table(title="Planned Execution Steps (Topologically Ordered)", expand=True, border_style="dim")
+    table.add_column("#", style="bold white", width=4)
+    table.add_column("Step ID", style="bold cyan", width=26)
+    table.add_column("Action / Command", style="white", width=30)
+    table.add_column("Prerequisites", style="dim", width=22)
+    table.add_column("Risk", width=22)
+    table.add_column("Justification", style="dim")
+
+    for i, step in enumerate(plan.steps, start=1):
+        if step.command:
+            cmd_display = " ".join(step.command)
+            if step.cwd:
+                cmd_display += f" [dim](in {step.cwd})[/dim]"
+        elif step.is_satisfied:
+            cmd_display = "[bold green]+ Already satisfied[/bold green]"
+        elif step.is_blocked:
+            cmd_display = "[bold red]- Blocked[/bold red]"
+        else:
+            cmd_display = f"[cyan]{step.action_type.value}[/cyan]"
+
+        deps_str = ", ".join(step.depends_on) if step.depends_on else "-"
+
+        risk_str = step.risk.value
+        if step.risk.value == "SAFE":
+            risk_str = "[bold green]SAFE[/bold green]"
+        elif step.risk.value == "REQUIRES_CONFIRMATION":
+            risk_str = "[bold yellow]REQUIRES_CONFIRMATION[/bold yellow]"
+        elif step.risk.value == "BLOCKED":
+            risk_str = "[bold red]BLOCKED[/bold red]"
+        elif step.risk.value == "DANGEROUS":
+            risk_str = "[bold red]DANGEROUS[/bold red]"
+
+        table.add_row(
+            str(i),
+            step.id,
+            cmd_display,
+            deps_str,
+            risk_str,
+            step.reason,
+        )
+
+    console.print(table)
+    console.print()
+
+
