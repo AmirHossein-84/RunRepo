@@ -7,7 +7,7 @@ RunRepo is a developer CLI tool that takes an arbitrary Git repository and makes
 RunRepo is **not an AI coding assistant**. Deterministic repository analysis, environment detection, planning, execution, and verification form the core product. AI is only used later for ambiguity resolution and failure diagnostics.
 
 ---
-
+test
 ## Architecture
 
 RunRepo separates analysis, planning, and execution into clean, independent stages:
