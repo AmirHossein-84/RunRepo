@@ -9,6 +9,7 @@ from runrepo.verification.models import VerificationResult, VerificationStatus, 
 from runrepo.verification.verifiers import (
     BaseVerifier,
     DependencyVerifier,
+    EnvVerifier,
     ExitCodeVerifier,
     FileVerifier,
     HttpVerifier,
@@ -23,6 +24,7 @@ class VerificationEngine:
     def __init__(self, verifiers: list[BaseVerifier] | None = None) -> None:
         self.verifiers = verifiers or [
             DependencyVerifier(),
+            EnvVerifier(),
             ServiceVerifier(),
             ProcessVerifier(),
             HttpVerifier(),

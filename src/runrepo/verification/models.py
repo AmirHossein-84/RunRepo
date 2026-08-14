@@ -23,6 +23,7 @@ class VerificationType(StrEnum):
     PORT_CHECK = "PORT_CHECK"
     HTTP_CHECK = "HTTP_CHECK"
     FILE_CHECK = "FILE_CHECK"
+    ENVIRONMENT_CHECK = "ENVIRONMENT_CHECK"
     EXIT_CODE_CHECK = "EXIT_CODE_CHECK"
 
 
@@ -45,3 +46,8 @@ class VerificationResult(BaseModel):
         default_factory=dict,
         description="Low-level debug data (HTTP status, error codes, exit codes)",
     )
+
+    @property
+    def passed(self) -> bool:
+        """Helper returning boolean success status."""
+        return self.status == VerificationStatus.PASSED
