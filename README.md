@@ -144,27 +144,58 @@ Plan:          [1] Verify Runtime -> [2] Start DB -> [3] .env -> [4] Install -> 
 ### Prerequisites
 
 - **Python**: `>= 3.11`
-- **uv**: *(Recommended)* Modern fast Python package manager
+- **uv**: *(Recommended)* Modern ultra-fast Python package manager
 - **Docker**: *(Optional)* Required for auto-provisioning databases and services
 
-### Installation
+---
 
-#### Option 1: Global CLI Tool (Recommended for Users)
-Install RunRepo as a standalone global tool using `uv` to use the `runrepo` command anywhere on your machine:
+### Quick 1-Line Automated Installation
 
+**Linux / WSL 2 / macOS:**
 ```bash
-# Clone the repository
-git clone https://github.com/AmirHossein-84/RunRepo.git
-cd RunRepo
-
-# Install globally as a CLI tool (editable development mode)
-uv tool install -e .
-
-# Now you can use `runrepo` from ANY directory or terminal:
-runrepo setup https://github.com/owner/project
+git clone https://github.com/AmirHossein-84/RunRepo.git && cd RunRepo && chmod +x install.sh && ./install.sh
 ```
 
-#### Option 2: Local Development Setup (For Contributors)
+**Windows (PowerShell):**
+```powershell
+git clone https://github.com/AmirHossein-84/RunRepo.git; cd RunRepo; .\install.ps1
+```
+*(The automated installer checks for `uv`, automatically installs it if missing, and provisions `runrepo` globally.)*
+
+---
+
+### Manual Installation
+
+#### 🐧 Linux & WSL 2 (Step-by-Step)
+```bash
+# 1. Install uv in your Linux/WSL terminal (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.local/bin/env
+
+# 2. Clone and install RunRepo globally as an editable CLI tool
+git clone https://github.com/AmirHossein-84/RunRepo.git
+cd RunRepo
+uv tool install -e .
+
+# 3. Verify installation
+runrepo doctor
+```
+
+#### 🪟 Windows (Step-by-Step)
+```powershell
+# 1. Install uv (if not already installed)
+irm https://astral.sh/uv/install.ps1 | iex
+
+# 2. Clone and install RunRepo globally
+git clone https://github.com/AmirHossein-84/RunRepo.git
+cd RunRepo
+uv tool install -e .
+
+# 3. Verify installation
+runrepo doctor
+```
+
+#### 🛠️ Local Development Mode (For Contributors)
 Run directly within the virtual environment:
 
 ```bash
@@ -178,7 +209,7 @@ uv run runrepo setup .
 > [!TIP]
 > **Isolated Cache Directory**: Remote repositories cloned from GitHub are **never** installed inside your RunRepo source directory. They are cleanly cached in your OS user data storage:
 > - **Windows**: `%LOCALAPPDATA%\runrepo\repositories\`
-> - **Linux / macOS**: `~/.local/share/runrepo/repositories/`
+> - **Linux / macOS / WSL 2**: `~/.local/share/runrepo/repositories/`
 >
 > You can inspect cached repositories anytime with `runrepo cache list` and clean them with `runrepo cache clean`.
 
@@ -392,22 +423,51 @@ uv run pytest --cov=runrepo --cov-report=term-missing
 
 ### نحوه نصب و راه‌اندازی
 
-#### روش اول: نصب سراسری ابزار (پیشنهادی برای کاربران)
-با نصب سراسری ابزار، می‌توانید دستور `runrepo` را در **هر دایرکتوری و هر ترمینالی** بر روی سیستم خود اجرا کنید:
+#### ⚡ روش نصب خودکار و تک‌خطی (پیشنهادی)
 
+**لینوکس، مک و WSL 2:**
 ```bash
-# کلون کردن مخزن پروژه
-git clone https://github.com/AmirHossein-84/RunRepo.git
-cd RunRepo
-
-# نصب سراسری به عنوان ابزار خط فرمان با uv
-uv tool install -e .
-
-# اکنون می‌توانید از هر کجای سیستم از دستور runrepo استفاده کنید:
-runrepo setup https://github.com/owner/project
+git clone https://github.com/AmirHossein-84/RunRepo.git && cd RunRepo && chmod +x install.sh && ./install.sh
 ```
 
-#### روش دوم: اجرای توسعه محلی (برای توسعه‌دهندگان)
+**ویندوز (PowerShell):**
+```powershell
+git clone https://github.com/AmirHossein-84/RunRepo.git; cd RunRepo; .\install.ps1
+```
+*(اسکریپت نصب خودکار، وجود `uv` را بررسی کرده و در صورت نیاز آن را نصب و سپس `runrepo` را به صورت سراسری مستقر می‌کند.)*
+
+---
+
+#### 🐧 نصب دستی در لینوکس و WSL 2 (گام‌به‌گام)
+```bash
+# ۱. نصب uv در ترمینال لینوکس یا WSL
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.local/bin/env
+
+# ۲. کلون و نصب سراسری RunRepo
+git clone https://github.com/AmirHossein-84/RunRepo.git
+cd RunRepo
+uv tool install -e .
+
+# ۳. بررسی وضعیت نصب
+runrepo doctor
+```
+
+#### 🪟 نصب دستی در ویندوز (گام‌به‌گام)
+```powershell
+# ۱. نصب uv
+irm https://astral.sh/uv/install.ps1 | iex
+
+# ۲. کلون و نصب سراسری RunRepo
+git clone https://github.com/AmirHossein-84/RunRepo.git
+cd RunRepo
+uv tool install -e .
+
+# ۳. بررسی وضعیت نصب
+runrepo doctor
+```
+
+#### 🛠️ روش توسعه محلی (برای توسعه‌دهندگان)
 اجرای مستقیم در محیط مجازی پروژه:
 
 ```bash
@@ -420,7 +480,7 @@ uv run runrepo setup .
 
 > **نکته امنیتی و ایزولاسیون حافظه:** پروژه‌های کلون‌شده از گیت‌هاب **هرگز** در داخل پوشه خود RunRepo دانلود نمی‌شوند؛ بلکه در دایرکتوری امن کاربر ذخیره می‌گردند:
 > - **ویندوز:** `%LOCALAPPDATA%\runrepo\repositories\`
-> - **لینوکس و مک:** `~/.local/share/runrepo/repositories/`
+> - **لینوکس، مک و WSL 2:** `~/.local/share/runrepo/repositories/`
 >
 > برای مشاهده و پاکسازی کش مخازن می‌توانید از `runrepo cache list` و `runrepo cache clean` استفاده کنید.
 

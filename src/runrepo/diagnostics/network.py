@@ -77,7 +77,7 @@ class PortDiagnostics:
 
     @classmethod
     def _get_port_owner_posix(cls, port: int) -> PortOwnerInfo | None:
-        """Inspect Linux/macOS port owner via ss or lsof."""
+        """Inspect Linux/macOS port owner via lsof or ss."""
         try:
             cmd = ["lsof", "-i", f":{port}", "-sTCP:LISTEN", "-t"]
             res = subprocess.run(cmd, capture_output=True, text=True, timeout=2.0)
@@ -90,6 +90,28 @@ class PortDiagnostics:
                     protocol="TCP",
                     state="LISTENING",
                 )
+        except Exception:
+            pass
+
+        # Fallback to ss on Linux (standard on modern Linux & WSL)
+        try:
+            cmd = ["ss", "-tulpn"]
+            res = subprocess.run(cmd, capture_output=True, text=True, timeout=2.0)
+            if res.returncode == 0 and res.stdout:
+                for line in res.stdout.splitlines():
+                    if f":{port}" in line:
+                        match = re.search(r"pid=(\d+)", line)
+                        pname_match = re.search(r'users:\(\("([^"]+)"', line)
+                        pid = int(match.group(1)) if match else None
+                        pname = pname_match.group(1) if pname_match else (f"pid_{pid}" if pid else None)
+                        if pid:
+                            return PortOwnerInfo(
+                                port=port,
+                                pid=pid,
+                                process_name=pname,
+                                protocol="TCP",
+                                state="LISTENING",
+                            )
         except Exception:
             pass
         return None
