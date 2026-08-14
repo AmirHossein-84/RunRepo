@@ -2,6 +2,7 @@
 
 from datetime import datetime, timezone
 from enum import StrEnum
+from typing import Any
 from pydantic import BaseModel, Field
 
 
@@ -36,6 +37,7 @@ class StepExecutionResult(BaseModel):
     error: str | None = Field(default=None, description="Error message or exception description")
     verification_passed: bool = Field(default=True, description="Whether post-execution verification succeeded")
     verification_details: str | None = Field(default=None, description="Verification diagnostic message")
+    verification: Any | None = Field(default=None, description="Structured VerificationResult record")
     rollback_available: bool = Field(default=False, description="Whether a rollback strategy is defined")
 
 

@@ -17,8 +17,8 @@ from runrepo.executor.handlers import (
 from runrepo.executor.models import ExecutionResult, ExecutionStatus, StepExecutionResult
 from runrepo.executor.process import ProcessExecutor, SystemProcessExecutor
 from runrepo.executor.process_manager import ProcessManager
-from runrepo.executor.verification import StepVerifier
 from runrepo.planner.models import ExecutionPlan, PlanStatus
+from runrepo.verification import VerificationEngine, VerificationStatus
 
 
 class ExecutionEngine:
@@ -29,12 +29,14 @@ class ExecutionEngine:
         executor: ProcessExecutor | None = None,
         confirmation: ConfirmationHandler | None = None,
         process_manager: ProcessManager | None = None,
+        verification_engine: VerificationEngine | None = None,
         handlers: list[BaseStepHandler] | None = None,
         console: Console | None = None,
     ) -> None:
         self.executor = executor or SystemProcessExecutor()
         self.confirmation = confirmation or ConsoleConfirmationHandler(console=console)
         self.process_manager = process_manager or ProcessManager()
+        self.verification_engine = verification_engine or VerificationEngine()
         self.console = console or Console()
         self.handlers = handlers or [
             VerifyStepHandler(),
@@ -149,16 +151,23 @@ class ExecutionEngine:
                 dry_run=dry_run,
             )
 
-            # Verification hook (if not already verified or if post-verification needed)
-            from runrepo.executor.process import MockProcessExecutor
-            if step_result.status == ExecutionStatus.SUCCESS and not dry_run and not isinstance(self.executor, MockProcessExecutor):
-                passed, vmsg = StepVerifier.verify(step, step_result, repo_path)
-                step_result.verification_passed = passed
-                step_result.verification_details = vmsg
-                if not passed:
+            # Verification hook via VerificationEngine
+            if step_result.status == ExecutionStatus.SUCCESS:
+                v_res = self.verification_engine.verify_step(
+                    step=step,
+                    step_result=step_result,
+                    repo_path=repo_path,
+                    executor=self.executor,
+                    process_manager=self.process_manager,
+                    dry_run=dry_run,
+                )
+                step_result.verification = v_res
+                step_result.verification_passed = (v_res.status == VerificationStatus.PASSED)
+                step_result.verification_details = v_res.message
+                if v_res.status == VerificationStatus.FAILED:
                     step_result.status = ExecutionStatus.FAILED
                     if not step_result.stderr:
-                        step_result.stderr = f"Post-execution verification failed: {vmsg}"
+                        step_result.stderr = f"Verification failed: {v_res.message}"
 
             step_results.append(step_result)
 
