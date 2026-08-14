@@ -102,6 +102,22 @@ class DiagnosticsEngine:
                         break
 
                 if matched_diag:
+                    # If deterministic rule fell back to UNKNOWN, try AI diagnosis if available
+                    if matched_diag.category.value == "UNKNOWN":
+                        try:
+                            from runrepo.ai import AIDiagnosticsAssistant
+                            ai_diag_assistant = AIDiagnosticsAssistant()
+                            if ai_diag_assistant.client.is_available():
+                                ai_diag = ai_diag_assistant.diagnose_failure(
+                                    step=step,
+                                    step_result=step_res,
+                                    environment_state=plan.environment_state if plan else None,
+                                )
+                                if ai_diag is not None:
+                                    matched_diag = ai_diag
+                        except Exception:
+                            pass
+
                     diagnostics.append(matched_diag)
 
         return diagnostics

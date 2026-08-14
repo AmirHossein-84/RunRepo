@@ -37,7 +37,7 @@ class RepositoryAnalyzer:
     def __init__(self, detectors: Sequence[BaseDetector] | None = None) -> None:
         self.detectors = list(detectors) if detectors is not None else list(DEFAULT_DETECTORS)
 
-    def analyze(self, repo_path: Path | str) -> ProjectInfo:
+    def analyze(self, repo_path: Path | str, enable_ai: bool = True) -> ProjectInfo:
         """Deterministically analyze a local repository and return structured ProjectInfo."""
         path_obj = Path(repo_path).resolve()
         context = ScanContext(path_obj)
@@ -54,7 +54,19 @@ class RepositoryAnalyzer:
                     code="DETECTOR_EXECUTION_ERROR",
                 )
 
-        return self._synthesize_project_info(path_obj, context, results)
+        project_info = self._synthesize_project_info(path_obj, context, results)
+
+        # Ambiguity resolution via optional Gemini AI if ambiguous
+        if enable_ai and (project_info.project_type == ProjectType.UNKNOWN or not project_info.scripts):
+            try:
+                from runrepo.ai import AIRepositoryAnalyzer
+                ai_analyzer = AIRepositoryAnalyzer()
+                if ai_analyzer.client.is_available():
+                    project_info = ai_analyzer.analyze_ambiguity(path_obj, project_info)
+            except Exception:
+                pass
+
+        return project_info
 
     def _synthesize_project_info(
         self,

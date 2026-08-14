@@ -126,12 +126,22 @@ def analyze_command(
             help="Show granular detection evidence, confidence scores, and source paths",
         ),
     ] = False,
+    no_ai: Annotated[
+        bool,
+        typer.Option(
+            "--no-ai",
+            help="Disable AI-assisted ambiguity resolution and diagnostics",
+        ),
+    ] = False,
 ) -> None:
     """Analyze a repository and produce a structured, explainable ProjectInfo."""
+    if no_ai:
+        os.environ["RUNREPO_NO_AI"] = "1"
+
     target_path = resolve_target_path(path)
 
     analyzer = RepositoryAnalyzer()
-    project_info = analyzer.analyze(target_path)
+    project_info = analyzer.analyze(target_path, enable_ai=not no_ai)
 
     if json_output:
         # Constraint 6: Serialize the actual structured domain model
@@ -206,8 +216,18 @@ def plan_command(
             help="Explicit alias: compute and display the plan without executing it",
         ),
     ] = False,
+    no_ai: Annotated[
+        bool,
+        typer.Option(
+            "--no-ai",
+            help="Disable AI-assisted ambiguity resolution and diagnostics",
+        ),
+    ] = False,
 ) -> None:
     """Generate an ordered, explainable execution plan for a repository."""
+    if no_ai:
+        os.environ["RUNREPO_NO_AI"] = "1"
+
     from runrepo.environment import EnvironmentChecker
     from runrepo.planner import ExecutionPlanner
     from runrepo.ui import render_execution_plan
@@ -216,7 +236,7 @@ def plan_command(
 
     # 1. Repository Facts
     analyzer = RepositoryAnalyzer()
-    project_info = analyzer.analyze(target_path)
+    project_info = analyzer.analyze(target_path, enable_ai=not no_ai)
 
     # 2. Host Facts
     checker = EnvironmentChecker()
@@ -262,6 +282,13 @@ def setup_command(
             help="Run without interactive prompts (fails on unapproved confirmation)",
         ),
     ] = False,
+    no_ai: Annotated[
+        bool,
+        typer.Option(
+            "--no-ai",
+            help="Disable AI-assisted ambiguity resolution and diagnostics",
+        ),
+    ] = False,
     json_output: Annotated[
         bool,
         typer.Option(
@@ -272,6 +299,9 @@ def setup_command(
     ] = False,
 ) -> None:
     """Analyze, check environment, plan, and safely execute setup for a repository."""
+    if no_ai:
+        os.environ["RUNREPO_NO_AI"] = "1"
+
     from runrepo.environment import EnvironmentChecker
     from runrepo.executor import (
         AutoConfirmationHandler,
@@ -286,7 +316,7 @@ def setup_command(
 
     # 1. Repository Facts
     analyzer = RepositoryAnalyzer()
-    project_info = analyzer.analyze(target_path)
+    project_info = analyzer.analyze(target_path, enable_ai=not no_ai)
 
     # 2. Host Facts
     checker = EnvironmentChecker()
