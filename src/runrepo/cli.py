@@ -179,7 +179,178 @@ def plan_command(
         render_execution_plan(execution_plan, console=console)
 
 
+@app.command(name="setup")
+def setup_command(
+    path: Annotated[
+        Path,
+        typer.Argument(
+            help="Path to the local repository directory to setup and run",
+        ),
+    ] = Path("."),
+    dry_run: Annotated[
+        bool,
+        typer.Option(
+            "--dry-run",
+            help="Simulate execution without modifying files or running processes",
+        ),
+    ] = False,
+    yes: Annotated[
+        bool,
+        typer.Option(
+            "--yes",
+            "-y",
+            help="Automatically approve actions requiring confirmation",
+        ),
+    ] = False,
+    non_interactive: Annotated[
+        bool,
+        typer.Option(
+            "--non-interactive",
+            help="Run without interactive prompts (fails on unapproved confirmation)",
+        ),
+    ] = False,
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Output raw structured ExecutionResult JSON (Pydantic serialized)",
+        ),
+    ] = False,
+) -> None:
+    """Analyze, check environment, plan, and safely execute setup for a repository."""
+    from runrepo.environment import EnvironmentChecker
+    from runrepo.executor import (
+        AutoConfirmationHandler,
+        ConsoleConfirmationHandler,
+        ExecutionEngine,
+        NonInteractiveConfirmationHandler,
+    )
+    from runrepo.planner import ExecutionPlanner
+    from runrepo.ui import render_execution_plan, render_execution_result
+
+    target_path = Path(path).resolve()
+    if not target_path.exists():
+        console.print(f"[bold red]Error:[/bold red] Directory '{target_path}' does not exist.")
+        raise typer.Exit(code=1)
+    if not target_path.is_dir():
+        console.print(f"[bold red]Error:[/bold red] Path '{target_path}' is not a directory.")
+        raise typer.Exit(code=1)
+
+    # 1. Repository Facts
+    analyzer = RepositoryAnalyzer()
+    project_info = analyzer.analyze(target_path)
+
+    # 2. Host Facts
+    checker = EnvironmentChecker()
+    env_state = checker.check_environment(project_info)
+
+    # 3. Decision Plan
+    planner = ExecutionPlanner()
+    plan = planner.plan(project_info, env_state)
+
+    if not json_output:
+        render_execution_plan(plan, console=console)
+
+    # 4. Confirmation Strategy
+    if dry_run or yes:
+        confirmation = AutoConfirmationHandler()
+    elif non_interactive:
+        confirmation = NonInteractiveConfirmationHandler()
+    else:
+        confirmation = ConsoleConfirmationHandler(console=console)
+
+    # 5. Execution Engine
+    engine = ExecutionEngine(confirmation=confirmation, console=console)
+    result = engine.execute(plan, dry_run=dry_run)
+
+    if json_output:
+        typer.echo(result.model_dump_json(indent=2))
+    else:
+        render_execution_result(result, console=console)
+
+    if result.status.value in ("FAILED", "BLOCKED", "CANCELLED"):
+        raise typer.Exit(code=1)
+
+
+@app.command(name="status")
+def status_command() -> None:
+    """List all tracked background application processes."""
+    from runrepo.executor import ProcessManager
+    from runrepo.ui import render_process_list
+
+    pm = ProcessManager()
+    processes = pm.list_processes()
+    render_process_list(processes, console=console)
+
+
+@app.command(name="stop")
+def stop_command(
+    path: Annotated[
+        Path | None,
+        typer.Argument(
+            help="Optional path to repository whose processes should be stopped",
+        ),
+    ] = None,
+    name: Annotated[
+        str | None,
+        typer.Option(
+            "--name",
+            "-n",
+            help="Optional specific process name to stop",
+        ),
+    ] = None,
+) -> None:
+    """Stop running background processes."""
+    from runrepo.executor import ProcessManager
+
+    pm = ProcessManager()
+    target_path = Path(path).resolve() if path else None
+    stopped = pm.stop_process(repo_path=target_path, name=name)
+
+    if stopped:
+        for p in stopped:
+            console.print(f"[bold green]+ Stopped process:[/bold green] {p.name} (PID: {p.pid})")
+    else:
+        console.print("[dim]No matching running processes found to stop.[/dim]")
+
+
+@app.command(name="logs")
+def logs_command(
+    path: Annotated[
+        Path | None,
+        typer.Argument(
+            help="Optional path to repository",
+        ),
+    ] = None,
+    name: Annotated[
+        str | None,
+        typer.Option(
+            "--name",
+            "-n",
+            help="Optional process name",
+        ),
+    ] = None,
+    tail: Annotated[
+        int,
+        typer.Option(
+            "--tail",
+            "-t",
+            help="Number of lines from end of log file to display",
+        ),
+    ] = 50,
+) -> None:
+    """Fetch recent output logs of a running or completed process."""
+    from runrepo.executor import ProcessManager
+
+    pm = ProcessManager()
+    target_path = Path(path).resolve() if path else None
+    logs = pm.get_process_logs(repo_path=target_path, name=name, tail=tail)
+    console.print(logs)
+
+
 if __name__ == "__main__":
     app()
+
 
 

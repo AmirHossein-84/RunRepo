@@ -13,6 +13,7 @@ dependencies = [
     "rich>=13.7.0",
     "pydantic>=2.7.0",
     "pyyaml>=6.0.1",
+    "platformdirs>=4.0.0",
 ]
 
 [project.optional-dependencies]

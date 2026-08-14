@@ -350,3 +350,123 @@ def render_execution_plan(plan, console: Console) -> None:
     console.print()
 
 
+def render_execution_result(result, console: Console) -> None:
+    """Render a clean, readable Rich presentation of an ExecutionResult."""
+    console.print()
+    console.rule("[bold cyan]RunRepo Execution Result[/bold cyan]")
+    console.print()
+
+    # 1. Overview Panel
+    overview_table = Table.grid(padding=(0, 2))
+    overview_table.add_column("Key", style="bold")
+    overview_table.add_column("Value")
+
+    overview_table.add_row("Repository:", f"[white]{result.repository_path}[/white]")
+
+    status_str = result.status.value
+    if result.status.value == "SUCCESS":
+        status_str = "[bold green]SUCCESS[/bold green]"
+    elif result.status.value == "FAILED":
+        status_str = "[bold red]FAILED[/bold red]"
+    elif result.status.value == "CANCELLED":
+        status_str = "[bold yellow]CANCELLED[/bold yellow]"
+    elif result.status.value == "BLOCKED":
+        status_str = "[bold red]BLOCKED[/bold red]"
+    elif result.status.value == "SKIPPED":
+        status_str = "[dim]SKIPPED[/dim]"
+
+    overview_table.add_row("Outcome:", status_str)
+    overview_table.add_row("Summary:", f"[white]{result.summary}[/white]")
+
+    total_duration = sum(s.duration_ms for s in result.steps)
+    overview_table.add_row("Total Time:", f"[cyan]{total_duration:.1f} ms[/cyan]")
+
+    console.print(Panel(overview_table, title="[bold]Run Summary[/bold]", border_style="cyan"))
+    console.print()
+
+    # 2. Step Outcomes Table
+    table = Table(title="Executed Steps", expand=True, border_style="dim")
+    table.add_column("#", style="bold white", width=4)
+    table.add_column("Step ID", style="bold cyan", width=26)
+    table.add_column("Command / Action", style="white", width=30)
+    table.add_column("Duration", style="cyan", width=12)
+    table.add_column("Status", width=16)
+    table.add_column("Details / Output", style="dim")
+
+    for i, step_res in enumerate(result.steps, start=1):
+        cmd_display = " ".join(step_res.command) if step_res.command else "-"
+        if step_res.cwd:
+            cmd_display += f" [dim]({step_res.cwd})[/dim]"
+
+        dur_str = f"{step_res.duration_ms:.1f}ms" if step_res.duration_ms > 0 else "-"
+
+        st_str = step_res.status.value
+        if step_res.status.value == "SUCCESS":
+            st_str = "[bold green]+ SUCCESS[/bold green]"
+        elif step_res.status.value == "FAILED":
+            st_str = "[bold red]X FAILED[/bold red]"
+        elif step_res.status.value == "SKIPPED":
+            st_str = "[dim]- SKIPPED[/dim]"
+        elif step_res.status.value == "CANCELLED":
+            st_str = "[bold yellow]! CANCELLED[/bold yellow]"
+
+        detail_msg = ""
+        if step_res.error:
+            detail_msg = f"[red]{step_res.error}[/red]"
+        elif step_res.stderr:
+            first_err_line = step_res.stderr.strip().splitlines()[-1] if step_res.stderr.strip() else ""
+            detail_msg = f"[red]{first_err_line}[/red]"
+        elif step_res.stdout:
+            first_out_line = step_res.stdout.strip().splitlines()[0] if step_res.stdout.strip() else ""
+            detail_msg = first_out_line
+        elif step_res.verification_details:
+            detail_msg = step_res.verification_details
+
+        table.add_row(
+            str(i),
+            step_res.step_id,
+            cmd_display,
+            dur_str,
+            st_str,
+            detail_msg,
+        )
+
+    console.print(table)
+    console.print()
+
+
+def render_process_list(processes, console: Console) -> None:
+    """Render a table of managed background application processes."""
+    console.print()
+    console.rule("[bold cyan]RunRepo Managed Background Processes[/bold cyan]")
+    console.print()
+
+    if not processes:
+        console.print("[dim]No active or tracked processes found.[/dim]\n")
+        return
+
+    table = Table(expand=True, border_style="dim")
+    table.add_column("Name", style="bold cyan", width=22)
+    table.add_column("PID", style="bold magenta", width=10)
+    table.add_column("Status", width=14)
+    table.add_column("Command", style="white", width=28)
+    table.add_column("Repository", style="dim", width=28)
+    table.add_column("Log Location", style="dim")
+
+    for proc in processes:
+        st_str = "[bold green]RUNNING[/bold green]" if proc.is_running else "[dim]STOPPED[/dim]"
+        cmd_str = " ".join(proc.command)
+        table.add_row(
+            proc.name,
+            str(proc.pid),
+            st_str,
+            cmd_str,
+            proc.repo_path,
+            proc.log_file,
+        )
+
+    console.print(table)
+    console.print()
+
+
+

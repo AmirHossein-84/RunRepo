@@ -29,7 +29,11 @@ Planner (Milestone 3: Decision & Execution Graph)
     ↓
 ExecutionPlan
     ↓
-[Future: Executor → Verification → Diagnostics]
+Executor (Milestone 4: Controlled Execution & Process Tracking)
+    ↓
+ExecutionResult
+    ↓
+[Future: Verification → Diagnostics]
 ```
 
 ### Core Architectural Invariants
@@ -38,11 +42,12 @@ ExecutionPlan
    - **Repository Analyzer** answers: *"What does this repository require?"* (Read-only on repository filesystem).
    - **Environment Checker** answers: *"What does this host machine currently provide?"* (Read-only on local system).
    - **Execution Planner** answers: *"Given repository facts and host facts, what ordered actions are necessary?"* (Read-only decision graph).
+   - **Execution Engine** answers: *"How do we safely execute approved actions?"* (Controlled execution, process management, confirmation gates).
 2. **Deterministic First**: Programmatic detection via manifest files, lockfiles, and standard tool probes before any AI heuristics.
-3. **Explainable Facts**: Every detected fact preserves its exact `DetectionEvidence` (source file, matched line/detail, confidence score, relative path).
-4. **Strict Read-Only Guarantee**: Analyzer, Environment Checker, and Planner **never** execute arbitrary scripts, install software, start services, or modify configuration.
-5. **Cross-Platform Resilience**: Designed specifically for Windows 11 as the primary target and Linux as secondary. Safe subprocess execution without `shell=True` and normalized path handling.
-6. **Per-Run Command Caching**: Inspection commands are cached per execution to prevent redundant process invocations.
+3. **Safety & Confirmation Gates**: Commands marked `REQUIRES_CONFIRMATION` prompt the user unless `--yes` is supplied; `DANGEROUS` commands require explicit confirmation; `BLOCKED` commands never run.
+4. **Zero-Side-Effects Dry Run**: `--dry-run` simulates the entire pipeline without running processes or writing files.
+5. **Cross-Platform Resilience**: Designed specifically for Windows 11 as the primary target and Linux as secondary. Safe subprocess execution without `shell=True` and normalized process group management.
+6. **Isolated Process Lifecycle**: Background applications are managed via `ProcessManager` with logs written to user data storage (`platformdirs.user_data_dir("runrepo")`).
 
 ---
 
@@ -75,14 +80,19 @@ Deterministic, explainable execution planning that builds a directed acyclic gra
 
 * **Topological DAG Ordering**: Constructs a `PlanGraph` linking prerequisites via `depends_on` with cycle detection.
 * **Risk Classification**: Steps are classified as `SAFE`, `REQUIRES_CONFIRMATION`, `BLOCKED`, or `DANGEROUS`.
-* **Plan Status Model**:
-  - `READY`: All prerequisites satisfied and safe to run.
-  - `NEEDS_CONFIRMATION`: Steps require user approval (e.g. package installation, service startup).
-  - `NEEDS_INPUT`: Requires missing credentials/secrets (`OPENAI_API_KEY`) or startup command disambiguation.
-  - `BLOCKED`: Required runtime or dependency is missing/incompatible with no safe automated strategy.
+* **Plan Status Model**: `READY`, `NEEDS_CONFIRMATION`, `NEEDS_INPUT`, `BLOCKED`.
 * **Action Types**: `VERIFY_RUNTIME`, `VERIFY_PACKAGE_MANAGER`, `CONFIGURE_ENV`, `START_SERVICE`, `INSTALL_DEPENDENCIES`, `GENERATE_CLIENT`, `RUN_DATABASE_MIGRATION`, `START_APPLICATION`, `VERIFY_APPLICATION`.
 * **Verification & Rollback Metadata**: Every step defines structured criteria for validating execution and rolling back changes.
-* **Polyglot & Subproject Scoping**: Separate scopes for frontend and backend subprojects with accurate working directories (`cwd`).
+
+### Milestone 4: Execution Engine (`runrepo setup`)
+
+Controlled, safe execution engine and background process manager:
+
+* **Fail-Fast DAG Execution**: Steps execute in topological order; failures halt execution immediately and downstream steps are marked `SKIPPED`.
+* **Confirmation Handlers**: Interactive terminal prompts (`ConsoleConfirmationHandler`), automated CI/CD mode (`AutoConfirmationHandler` for `--yes`), and strict non-interactive checks (`NonInteractiveConfirmationHandler`).
+* **Dedicated Step Handlers**: Modular handlers for environment preparation, dependency installation, Docker Compose services, database migrations, and application startup.
+* **Background Process Lifecycle**: Long-running applications run as managed background processes with real-time log capturing and Windows-compatible termination (`taskkill` / process groups).
+* **Step Verification**: Automatically evaluates exit codes, file existence, TCP ports, and HTTP endpoints.
 
 ---
 
@@ -106,36 +116,23 @@ uv sync --extra dev
 
 ### CLI Commands
 
-#### Repository Analysis (`runrepo analyze`)
+#### 1. Setup & Run Repository (`runrepo setup`)
 
 ```bash
-# Analyze a repository directory
-uv run runrepo analyze .
+# Run end-to-end repository setup (analyze -> doctor -> plan -> execute)
+uv run runrepo setup .
 
-# Analyze an external project path
-uv run runrepo analyze /path/to/project
+# Simulate execution without running processes or writing files
+uv run runrepo setup . --dry-run
 
-# Output structured domain model in JSON format
-uv run runrepo analyze . --json
+# Run with automatic confirmation for all safe and confirmation steps
+uv run runrepo setup . --yes
 
-# Show granular detection evidence breakdown
-uv run runrepo analyze . --evidence
+# Output structured ExecutionResult in JSON format
+uv run runrepo setup . --dry-run --json
 ```
 
-#### Environment Check (`runrepo doctor`)
-
-```bash
-# Check host environment against current repository requirements
-uv run runrepo doctor .
-
-# Run general host environment health check (all tools)
-uv run runrepo doctor
-
-# Output structured EnvironmentState in JSON format
-uv run runrepo doctor . --json
-```
-
-#### Execution Plan (`runrepo plan`)
+#### 2. Execution Plan (`runrepo plan`)
 
 ```bash
 # Generate and display the ordered execution plan
@@ -143,58 +140,40 @@ uv run runrepo plan .
 
 # Output structured ExecutionPlan in JSON format
 uv run runrepo plan . --json
-
-# Plan with explicit dry-run flag
-uv run runrepo plan . --dry-run
 ```
 
----
+#### 3. Environment Health Check (`runrepo doctor`)
 
-## Domain Model Overview
+```bash
+# Check host environment against current repository requirements
+uv run runrepo doctor .
 
-### `ProjectInfo` (Repository Facts)
+# Run general host environment health check (all tools)
+uv run runrepo doctor
+```
 
-| Field | Type | Description |
-|---|---|---|
-| `path` | `str` | Absolute path to analyzed repository |
-| `name` | `str` | Inferred repository or package name |
-| `project_type` | `ProjectType` | `web_application`, `api_service`, `cli_tool`, `polyglot_fullstack`, `library`, `unknown` |
-| `is_monorepo` | `bool` | Whether repository contains multiple subprojects or workspace packages |
-| `languages` | `list[str]` | Detected programming languages (e.g. `["JavaScript", "TypeScript"]`) |
-| `runtimes` | `list[RuntimeInfo]` | Runtimes with version constraints and provenance evidence |
-| `package_managers` | `list[PackageManagerInfo]` | Detected package managers with lockfile references |
-| `frameworks` | `list[FrameworkInfo]` | Detected web/backend frameworks and categories |
-| `scripts` | `list[ProjectScript]` | Runnable tasks and script commands |
-| `dependencies` | `list[DependencyInfo]` | Direct and development dependencies |
-| `environment_variables` | `list[EnvironmentVariable]` | Detected required and optional environment variables |
-| `databases` | `list[DatabaseRequirement]` | Databases inferred from ORMs, Compose, and env vars |
-| `services` | `list[ServiceRequirement]` | Auxiliary services (e.g. Redis cache/queue, RabbitMQ) |
-| `docker` | `DockerInfo` | Dockerfiles and Docker Compose service configurations |
-| `subprojects` | `list[SubprojectInfo]` | Isolated subprojects in monorepo/polyglot setups |
+#### 4. Repository Analysis (`runrepo analyze`)
 
-### `EnvironmentState` (Host Facts & Evaluation)
+```bash
+# Analyze repository facts
+uv run runrepo analyze .
 
-| Field | Type | Description |
-|---|---|---|
-| `platform` | `str` | Host OS description (e.g. `"Windows 11"`) |
-| `architecture` | `str` | CPU architecture (e.g. `"x86_64"`) |
-| `is_satisfied` | `bool` | True if all required capabilities are satisfied (`OK`) |
-| `missing_checks` | `list[str]` | Required tools that are completely missing |
-| `wrong_version_checks` | `list[str]` | Required tools with incompatible versions |
-| `broken_checks` | `list[str]` | Required tools installed but non-operational |
-| `unknown_checks` | `list[str]` | Capabilities whose status could not be evaluated |
-| `checks` | `list[EnvironmentCheck]` | Granular per-tool inspection and diagnostic status |
+# Show granular detection evidence breakdown
+uv run runrepo analyze . --evidence
+```
 
-### `ExecutionPlan` (Decision & Execution Graph)
+#### 5. Background Process Management (`runrepo status`, `stop`, `logs`)
 
-| Field | Type | Description |
-|---|---|---|
-| `repository_path` | `str` | Target repository path |
-| `status` | `PlanStatus` | `READY`, `NEEDS_CONFIRMATION`, `NEEDS_INPUT`, `BLOCKED` |
-| `steps` | `list[PlanStep]` | Topologically ordered execution steps |
-| `warnings` | `list[str]` | Warnings and notes for the user |
-| `blocking_reasons` | `list[str]` | Explanations for why execution is blocked |
-| `input_reasons` | `list[str]` | Required user credentials or command choices |
+```bash
+# List all active background applications
+uv run runrepo status
+
+# View recent output logs of a running process
+uv run runrepo logs
+
+# Stop running background processes
+uv run runrepo stop
+```
 
 ---
 
@@ -203,7 +182,7 @@ uv run runrepo plan . --dry-run
 The project includes an extensive, 100% deterministic test suite using mocked command execution and realistic fixtures:
 
 ```bash
-# Run all tests (78 tests)
+# Run all tests (107 tests)
 uv run pytest -v
 
 # Run tests with coverage report
