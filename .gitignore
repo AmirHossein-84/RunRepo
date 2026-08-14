@@ -1,2 +1,6 @@
-# Private AI/project planning
-RunRepo-—-Full-Project-Plan.md
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
