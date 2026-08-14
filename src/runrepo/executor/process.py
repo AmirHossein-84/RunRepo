@@ -189,6 +189,8 @@ class MockProcessExecutor(ProcessExecutor):
         responses: dict | None = None,
         custom_responses: dict | None = None,
         default_response: ProcessExecutionResult | None = None,
+        default_result: ProcessExecutionResult | None = None,
+        side_effect: Any | None = None,
     ) -> None:
         raw_responses = responses or custom_responses or {}
         self.responses: dict[tuple[str, ...], ProcessExecutionResult] = {}
@@ -196,13 +198,14 @@ class MockProcessExecutor(ProcessExecutor):
             key = tuple(k.split()) if isinstance(k, str) else tuple(k)
             self.responses[key] = v
 
-        self.default_response = default_response or ProcessExecutionResult(
+        self.default_response = default_response or default_result or ProcessExecutionResult(
             stdout="mock output",
             stderr="",
             exit_code=0,
             duration_ms=10.0,
             pid=12345,
         )
+        self.side_effect = side_effect
         self.executed_commands: list[tuple[list[str], Path | None]] = []
         self.background_commands: list[tuple[list[str], Path | None, Path | None]] = []
         self._next_pid = 20000
@@ -224,6 +227,13 @@ class MockProcessExecutor(ProcessExecutor):
         env: dict[str, str] | None = None,
     ) -> ProcessExecutionResult:
         self.executed_commands.append((list(command), cwd))
+
+        if self.side_effect is not None:
+            if callable(self.side_effect):
+                res = self.side_effect(command, cwd=cwd, env=env, timeout=timeout_s)
+                if res is not None:
+                    return res
+
         key = tuple(command)
         if key in self.responses:
             return self.responses[key]

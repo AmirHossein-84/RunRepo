@@ -36,14 +36,80 @@ def main() -> None:
     pass
 
 
+def resolve_target_path(
+    target_input: str | Path | None,
+    refresh: bool = False,
+) -> Path:
+    """Resolve a local path or remote GitHub reference to a local filesystem directory."""
+    if target_input is None:
+        return Path(".").resolve()
+
+    from runrepo.repository import RepositoryManager, RepositorySource
+
+    manager = RepositoryManager()
+    result = manager.resolve(str(target_input), refresh=refresh)
+    if not result.success:
+        console.print(f"[bold red]Error:[/bold red] {result.error_message or 'Failed to acquire repository.'}")
+        raise typer.Exit(code=1)
+
+    if result.target.source != RepositorySource.LOCAL:
+        if result.target.status.value == "CACHED":
+            console.print(f"[dim cyan]Using cached repository:[/] [bold]{result.local_path}[/]")
+        elif result.target.status.value == "CLONED":
+            console.print(f"[dim green]Cloned repository to:[/] [bold]{result.local_path}[/]")
+
+    return result.local_path.resolve()  # type: ignore
+
+
+@app.command(name="clone")
+def clone_command(
+    target: Annotated[
+        str,
+        typer.Argument(
+            help="GitHub URL (https://github.com/owner/repo) or shorthand (owner/repo) to clone and cache",
+        ),
+    ],
+    refresh: Annotated[
+        bool,
+        typer.Option(
+            "--refresh",
+            "-r",
+            help="Force re-clone even if repository is already cached locally",
+        ),
+    ] = False,
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Output raw structured RepositoryResult JSON (Pydantic serialized)",
+        ),
+    ] = False,
+) -> None:
+    """Safely clone and cache a remote GitHub repository."""
+    from runrepo.repository import RepositoryManager
+
+    manager = RepositoryManager()
+    result = manager.resolve(target, refresh=refresh)
+
+    if json_output:
+        typer.echo(result.model_dump_json(indent=2))
+    else:
+        if result.success:
+            console.print(f"[bold green]Successfully acquired repository:[/] {result.local_path}")
+        else:
+            console.print(f"[bold red]Error:[/bold red] {result.error_message}")
+            raise typer.Exit(code=1)
+
+
 @app.command(name="analyze")
 def analyze_command(
     path: Annotated[
-        Path,
+        str,
         typer.Argument(
-            help="Path to the local repository directory to analyze",
+            help="Path or GitHub URL/shorthand of repository to analyze",
         ),
-    ] = Path("."),
+    ] = ".",
     json_output: Annotated[
         bool,
         typer.Option(
@@ -61,15 +127,8 @@ def analyze_command(
         ),
     ] = False,
 ) -> None:
-    """Analyze a local repository and produce a structured, explainable ProjectInfo."""
-    target_path = Path(path).resolve()
-    if not target_path.exists():
-        console.print(f"[bold red]Error:[/bold red] Directory '{target_path}' does not exist.")
-        raise typer.Exit(code=1)
-
-    if not target_path.is_dir():
-        console.print(f"[bold red]Error:[/bold red] Path '{target_path}' is not a directory.")
-        raise typer.Exit(code=1)
+    """Analyze a repository and produce a structured, explainable ProjectInfo."""
+    target_path = resolve_target_path(path)
 
     analyzer = RepositoryAnalyzer()
     project_info = analyzer.analyze(target_path)
@@ -84,9 +143,9 @@ def analyze_command(
 @app.command(name="doctor")
 def doctor_command(
     path: Annotated[
-        Path | None,
+        str | None,
         typer.Argument(
-            help="Optional path to local repository directory to evaluate requirements for",
+            help="Optional path or GitHub URL/shorthand to evaluate requirements for",
         ),
     ] = None,
     json_output: Annotated[
@@ -104,14 +163,7 @@ def doctor_command(
 
     project_info = None
     if path is not None:
-        target_path = Path(path).resolve()
-        if not target_path.exists():
-            console.print(f"[bold red]Error:[/bold red] Directory '{target_path}' does not exist.")
-            raise typer.Exit(code=1)
-        if not target_path.is_dir():
-            console.print(f"[bold red]Error:[/bold red] Path '{target_path}' is not a directory.")
-            raise typer.Exit(code=1)
-
+        target_path = resolve_target_path(path)
         analyzer = RepositoryAnalyzer()
         project_info = analyzer.analyze(target_path)
 
@@ -122,16 +174,23 @@ def doctor_command(
         typer.echo(env_state.model_dump_json(indent=2))
     else:
         render_environment_state(env_state, console=console)
+        if not env_state.is_satisfied:
+            from runrepo.diagnostics import DiagnosticsEngine, render_diagnostics_report
+
+            diag_engine = DiagnosticsEngine()
+            diagnostics = diag_engine.diagnose_environment(env_state, project_info)
+            if diagnostics:
+                render_diagnostics_report(diagnostics, console)
 
 
 @app.command(name="plan")
 def plan_command(
     path: Annotated[
-        Path,
+        str,
         typer.Argument(
-            help="Path to the local repository directory to plan execution for",
+            help="Path or GitHub URL/shorthand of repository to plan execution for",
         ),
-    ] = Path("."),
+    ] = ".",
     json_output: Annotated[
         bool,
         typer.Option(
@@ -153,13 +212,7 @@ def plan_command(
     from runrepo.planner import ExecutionPlanner
     from runrepo.ui import render_execution_plan
 
-    target_path = Path(path).resolve()
-    if not target_path.exists():
-        console.print(f"[bold red]Error:[/bold red] Directory '{target_path}' does not exist.")
-        raise typer.Exit(code=1)
-    if not target_path.is_dir():
-        console.print(f"[bold red]Error:[/bold red] Path '{target_path}' is not a directory.")
-        raise typer.Exit(code=1)
+    target_path = resolve_target_path(path)
 
     # 1. Repository Facts
     analyzer = RepositoryAnalyzer()
@@ -182,11 +235,11 @@ def plan_command(
 @app.command(name="setup")
 def setup_command(
     path: Annotated[
-        Path,
+        str,
         typer.Argument(
-            help="Path to the local repository directory to setup and run",
+            help="Path or GitHub URL/shorthand of repository to setup and run",
         ),
-    ] = Path("."),
+    ] = ".",
     dry_run: Annotated[
         bool,
         typer.Option(
@@ -229,13 +282,7 @@ def setup_command(
     from runrepo.planner import ExecutionPlanner
     from runrepo.ui import render_execution_plan, render_execution_result
 
-    target_path = Path(path).resolve()
-    if not target_path.exists():
-        console.print(f"[bold red]Error:[/bold red] Directory '{target_path}' does not exist.")
-        raise typer.Exit(code=1)
-    if not target_path.is_dir():
-        console.print(f"[bold red]Error:[/bold red] Path '{target_path}' is not a directory.")
-        raise typer.Exit(code=1)
+    target_path = resolve_target_path(path)
 
     # 1. Repository Facts
     analyzer = RepositoryAnalyzer()
@@ -268,6 +315,15 @@ def setup_command(
         typer.echo(result.model_dump_json(indent=2))
     else:
         render_execution_result(result, console=console)
+        if result.status.value in ("FAILED", "BLOCKED"):
+            from runrepo.diagnostics import DiagnosticsEngine, render_diagnostics_report
+
+            diag_engine = DiagnosticsEngine()
+            diagnostics = diag_engine.diagnose_execution(result, plan=plan)
+            if not diagnostics and env_state:
+                diagnostics = diag_engine.diagnose_environment(env_state, project_info)
+            if diagnostics:
+                render_diagnostics_report(diagnostics, console)
 
     if result.status.value in ("FAILED", "BLOCKED", "CANCELLED"):
         raise typer.Exit(code=1)
