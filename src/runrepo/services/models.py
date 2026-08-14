@@ -12,6 +12,10 @@ class ServiceType(StrEnum):
     DOCKER_COMPOSE = "DOCKER_COMPOSE"
     POSTGRES = "POSTGRES"
     REDIS = "REDIS"
+    MYSQL = "MYSQL"
+    MONGODB = "MONGODB"
+    RABBITMQ = "RABBITMQ"
+    MINIO = "MINIO"
     CUSTOM = "CUSTOM"
 
 
@@ -85,4 +89,52 @@ class RedisConfig(BaseModel):
     image: str = Field(default="redis:7-alpine", description="Docker image for Redis")
     container_name: str = Field(description="Unique container name (e.g. runrepo-webapp-redis)")
     host_port: int = Field(default=6379, description="Host port mapped to Redis")
+    volume_name: str | None = Field(default=None, description="Persistent volume name if enabled")
+
+
+class MySQLConfig(BaseModel):
+    """Configuration for auto-provisioning a MySQL database container."""
+
+    image: str = Field(default="mysql:8.0", description="Docker image for MySQL")
+    container_name: str = Field(description="Unique container name (e.g. runrepo-webapp-mysql)")
+    host_port: int = Field(default=3306, description="Host port mapped to MySQL")
+    database_name: str = Field(description="Default database name to initialize")
+    username: str = Field(default="root", description="Database root username")
+    password: str = Field(default="root", description="Database root password")
+    volume_name: str | None = Field(default=None, description="Persistent volume name if enabled")
+
+
+class MongoDBConfig(BaseModel):
+    """Configuration for auto-provisioning a MongoDB database container."""
+
+    image: str = Field(default="mongo:7.0", description="Docker image for MongoDB")
+    container_name: str = Field(description="Unique container name (e.g. runrepo-webapp-mongo)")
+    host_port: int = Field(default=27017, description="Host port mapped to MongoDB")
+    database_name: str = Field(default="test", description="Default database name")
+    username: str | None = Field(default=None, description="Root username if auth enabled")
+    password: str | None = Field(default=None, description="Root password if auth enabled")
+    volume_name: str | None = Field(default=None, description="Persistent volume name if enabled")
+
+
+class RabbitMQConfig(BaseModel):
+    """Configuration for auto-provisioning a RabbitMQ message broker container."""
+
+    image: str = Field(default="rabbitmq:3-management", description="Docker image for RabbitMQ")
+    container_name: str = Field(description="Unique container name (e.g. runrepo-webapp-rabbitmq)")
+    host_port: int = Field(default=5672, description="AMQP host port")
+    mgmt_port: int = Field(default=15672, description="Management UI host port")
+    username: str = Field(default="guest", description="Default user")
+    password: str = Field(default="guest", description="Default password")
+    volume_name: str | None = Field(default=None, description="Persistent volume name if enabled")
+
+
+class MinioConfig(BaseModel):
+    """Configuration for auto-provisioning a MinIO S3 object storage container."""
+
+    image: str = Field(default="minio/minio:latest", description="Docker image for MinIO")
+    container_name: str = Field(description="Unique container name (e.g. runrepo-webapp-minio)")
+    host_port: int = Field(default=9000, description="MinIO API host port")
+    console_port: int = Field(default=9001, description="MinIO Console UI host port")
+    root_user: str = Field(default="minioadmin", description="Root access key")
+    root_password: str = Field(default="minioadmin", description="Root secret key")
     volume_name: str | None = Field(default=None, description="Persistent volume name if enabled")

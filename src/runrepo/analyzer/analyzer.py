@@ -56,6 +56,18 @@ class RepositoryAnalyzer:
 
         project_info = self._synthesize_project_info(path_obj, context, results)
 
+        # Monorepo Workspace Detection & Resolution
+        try:
+            from runrepo.monorepo import MonorepoDetector, MonorepoResolver
+            monorepo_info = MonorepoDetector().detect(path_obj)
+            if monorepo_info.is_monorepo:
+                project_info.is_monorepo = True
+                if not project_info.subprojects:
+                    root_pm = project_info.package_managers[0].name if project_info.package_managers else None
+                    project_info.subprojects = MonorepoResolver.resolve_subprojects(monorepo_info, root_pm=root_pm)
+        except Exception:
+            pass
+
         # Ambiguity resolution via optional Gemini AI if ambiguous
         if enable_ai and (project_info.project_type == ProjectType.UNKNOWN or not project_info.scripts):
             try:

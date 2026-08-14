@@ -19,7 +19,7 @@ from runrepo.planner.models import (
 class ExecutionPlanner:
     """Deterministic, explainable execution planner with strict non-execution boundary."""
 
-    def plan(self, project_info: ProjectInfo, env_state: EnvironmentState) -> ExecutionPlan:
+    def plan(self, project_info: ProjectInfo, env_state: EnvironmentState, config: Any | None = None) -> ExecutionPlan:
         """Construct an ordered ExecutionPlan from repository and environment facts."""
         steps: list[PlanStep] = []
         warnings: list[str] = list(project_info.warnings) if hasattr(project_info, "warnings") and isinstance(project_info.warnings, list) else []
@@ -497,7 +497,14 @@ class ExecutionPlanner:
                 elif project_info.entrypoints:
                     ep = project_info.entrypoints[0]
                     start_cmd_tokens = ["python", ep]
-                    candidate_list.append(f"python {ep}")
+            # Check for config startup command override
+            if config and hasattr(config, "startup") and config.startup and config.startup.command:
+                override_cmd = config.startup.command
+                if isinstance(override_cmd, str):
+                    start_cmd_tokens = override_cmd.split()
+                else:
+                    start_cmd_tokens = list(override_cmd)
+                candidate_list = [" ".join(start_cmd_tokens)]
 
             if len(candidate_list) > 1:
                 warnings.append(

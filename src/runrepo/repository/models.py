@@ -51,3 +51,29 @@ class RepositoryResult(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc).isoformat(),
         description="ISO 8601 creation timestamp",
     )
+
+
+class CachedRepository(BaseModel):
+    """Metadata for a cached remote repository directory."""
+
+    name: str = Field(description="Cache directory slug identifier")
+    owner: str | None = Field(default=None, description="Repository owner")
+    repo: str | None = Field(default=None, description="Repository name")
+    path: Path = Field(description="Filesystem path to cached repository")
+    size_bytes: int = Field(default=0, description="Total size in bytes on disk")
+    last_used_at: str | None = Field(default=None, description="ISO timestamp of last access")
+    is_valid: bool = Field(default=True, description="Whether .git structure is valid")
+    commit_hash: str | None = Field(default=None, description="Current commit hash")
+    ref: str | None = Field(default=None, description="Current branch/tag ref")
+
+
+class CacheMetadata(BaseModel):
+    """Aggregated metadata for the RunRepo repository cache."""
+
+    total_repositories: int = Field(default=0, description="Number of cached repositories")
+    total_size_bytes: int = Field(default=0, description="Total size of all cached repositories in bytes")
+    cache_dir: str = Field(description="Root cache directory path")
+    repositories: list[CachedRepository] = Field(
+        default_factory=list,
+        description="List of all cached repositories",
+    )

@@ -102,6 +102,276 @@ def clone_command(
             raise typer.Exit(code=1)
 
 
+cache_app = typer.Typer(
+    name="cache",
+    help="Manage cached remote GitHub repositories.",
+    no_args_is_help=False,
+)
+app.add_typer(cache_app, name="cache")
+
+
+@cache_app.command(name="list")
+def cache_list_command(
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Output raw structured CacheMetadata JSON (Pydantic serialized)",
+        ),
+    ] = False,
+) -> None:
+    """List cached repositories, disk usage, and health status."""
+    from runrepo.repository import RepositoryManager
+
+    mgr = RepositoryManager()
+    meta = mgr.list_cached()
+
+    if json_output:
+        typer.echo(meta.model_dump_json(indent=2))
+    else:
+        if not meta.repositories:
+            console.print(f"[dim]No cached repositories found in {meta.cache_dir}[/dim]")
+            return
+
+        from rich.table import Table
+
+        table = Table(title="RunRepo Repository Cache")
+        table.add_column("Repository", style="bold cyan")
+        table.add_column("Size", justify="right")
+        table.add_column("Status", justify="center")
+        table.add_column("Last Used", style="dim")
+
+        for repo in meta.repositories:
+            size_mb = repo.size_bytes / (1024 * 1024)
+            status_str = "[green]VALID[/green]" if repo.is_valid else "[red]CORRUPT[/red]"
+            table.add_row(
+                repo.name,
+                f"{size_mb:.1f} MB",
+                status_str,
+                repo.last_used_at or "Unknown",
+            )
+
+        console.print(table)
+        total_mb = meta.total_size_bytes / (1024 * 1024)
+        console.print(f"\n[bold]Total:[/bold] {meta.total_repositories} repositories ({total_mb:.1f} MB)")
+
+
+@cache_app.callback(invoke_without_command=True)
+def cache_default_command(
+    ctx: typer.Context,
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Output raw structured CacheMetadata JSON (Pydantic serialized)",
+        ),
+    ] = False,
+) -> None:
+    """List cached repositories, disk usage, and health status."""
+    if ctx.invoked_subcommand is not None:
+        return
+    cache_list_command(json_output=json_output)
+
+
+@cache_app.command(name="clean")
+def cache_clean_command(
+    target: Annotated[
+        str | None,
+        typer.Argument(
+            help="Specific repository name or slug to remove from cache (e.g. owner/repo)",
+        ),
+    ] = None,
+    days: Annotated[
+        int | None,
+        typer.Option(
+            "--days",
+            help="Only remove cached repositories older than specified days",
+        ),
+    ] = None,
+    yes: Annotated[
+        bool,
+        typer.Option(
+            "--yes",
+            "-y",
+            help="Automatically approve cache cleanup without interactive prompt",
+        ),
+    ] = False,
+) -> None:
+    """Safely purge cached repositories from disk."""
+    from runrepo.repository import RepositoryManager
+
+    mgr = RepositoryManager()
+    meta = mgr.list_cached()
+
+    if not meta.repositories:
+        console.print("[dim]Cache is already empty.[/dim]")
+        return
+
+    if not yes:
+        confirm = typer.confirm(
+            f"Are you sure you want to clean cached repositories in {mgr.cache_dir}?"
+        )
+        if not confirm:
+            console.print("[yellow]Cache cleanup canceled.[/yellow]")
+            return
+
+    removed = mgr.clean_cache(target=target, older_than_days=days)
+    if removed:
+        console.print(f"[bold green]Successfully cleaned {len(removed)} cached repositories:[/bold green]")
+        for name in removed:
+            console.print(f"  [green]•[/green] {name}")
+    else:
+        console.print("[dim]No matching cached repositories were found to clean.[/dim]")
+
+
+@app.command(name="tree")
+def tree_command(
+    path: Annotated[
+        str,
+        typer.Argument(
+            help="Path or GitHub URL/shorthand of repository to inspect tree for",
+        ),
+    ] = ".",
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Output raw structured MonorepoInfo JSON (Pydantic serialized)",
+        ),
+    ] = False,
+) -> None:
+    """Display repository directory and monorepo workspace structure."""
+    from runrepo.monorepo import MonorepoDetector
+
+    target_path = resolve_target_path(path)
+    detector = MonorepoDetector()
+    monorepo_info = detector.detect(target_path)
+
+    if json_output:
+        typer.echo(monorepo_info.model_dump_json(indent=2))
+    else:
+        from rich.tree import Tree
+
+        root_tree = Tree(f"[bold cyan]{target_path.name}[/bold cyan] ({monorepo_info.workspace_type.value})")
+
+        if monorepo_info.packages:
+            for pkg in monorepo_info.packages:
+                badge = "[green][app][/green]" if pkg.is_application else "[dim][pkg][/dim]"
+                node = root_tree.add(f"{badge} [bold]{pkg.name}[/bold] ([dim]{pkg.path}[/dim])")
+                if pkg.scripts:
+                    scripts_node = node.add("[dim]scripts[/dim]")
+                    for s_name, cmd in pkg.scripts.items():
+                        scripts_node.add(f"[cyan]{s_name}[/cyan]: {cmd}")
+        else:
+            root_tree.add("[dim]Single-package repository layout[/dim]")
+
+        console.print(root_tree)
+
+
+@app.command(name="config")
+def config_command(
+    path: Annotated[
+        str,
+        typer.Argument(
+            help="Path or GitHub URL/shorthand of repository to inspect config for",
+        ),
+    ] = ".",
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Output raw structured RunRepoConfig JSON (Pydantic serialized)",
+        ),
+    ] = False,
+) -> None:
+    """Display user configuration from runrepo.yaml and effective settings."""
+    from runrepo.reproducibility import ReproducibilityManager
+
+    target_path = resolve_target_path(path)
+    repro_mgr = ReproducibilityManager(target_path)
+    config = repro_mgr.load_config()
+
+    if json_output:
+        if config:
+            typer.echo(config.model_dump_json(indent=2))
+        else:
+            typer.echo("{}")
+    else:
+        if config:
+            console.print(f"[bold green]Loaded Configuration:[/] {target_path / 'runrepo.yaml'}")
+            console.print(f"  • Runtimes: {config.runtimes or 'None'}")
+            console.print(f"  • Package Manager: {config.package_manager or 'Detected'}")
+            console.print(f"  • Docker: {config.docker}")
+            console.print(f"  • Services: {list(config.services.keys()) or 'None'}")
+            if config.startup.command:
+                console.print(f"  • Startup Override: {config.startup.command}")
+        else:
+            console.print(f"[dim]No runrepo.yaml found in {target_path}. Using detected defaults.[/dim]")
+
+
+@app.command(name="lock")
+def lock_command(
+    path: Annotated[
+        str,
+        typer.Argument(
+            help="Path or GitHub URL/shorthand of repository to lock",
+        ),
+    ] = ".",
+    refresh: Annotated[
+        bool,
+        typer.Option(
+            "--refresh",
+            "-r",
+            help="Force refresh and rewrite runrepo.lock even if one already exists",
+        ),
+    ] = False,
+    dry_run: Annotated[
+        bool,
+        typer.Option(
+            "--dry-run",
+            help="Simulate lockfile generation without writing to disk",
+        ),
+    ] = False,
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Output raw structured RunRepoLock JSON (Pydantic serialized)",
+        ),
+    ] = False,
+) -> None:
+    """Generate or refresh a deterministic, secret-free runrepo.lock file."""
+    from runrepo.environment import EnvironmentChecker
+    from runrepo.planner import ExecutionPlanner
+    from runrepo.reproducibility import LockfileManager, ReproducibilityManager
+
+    target_path = resolve_target_path(path)
+    repro_mgr = ReproducibilityManager(target_path)
+    config = repro_mgr.load_config()
+
+    analyzer = RepositoryAnalyzer()
+    project_info = analyzer.analyze(target_path)
+
+    checker = EnvironmentChecker()
+    env_state = checker.check_environment(project_info)
+
+    planner = ExecutionPlanner()
+    plan = planner.plan(project_info, env_state, config=config)
+
+    lock = repro_mgr.generate_lockfile(project_info, env_state, plan)
+    if json_output:
+        typer.echo(LockfileManager.format_json(lock))
+    elif dry_run:
+        console.print("[yellow]Dry-run: generated lockfile in memory[/yellow]")
+    else:
+        console.print(f"[bold green]Successfully generated lockfile:[/] {target_path / 'runrepo.lock'}")
+
+
 @app.command(name="analyze")
 def analyze_command(
     path: Annotated[
@@ -234,6 +504,10 @@ def plan_command(
 
     target_path = resolve_target_path(path)
 
+    from runrepo.reproducibility import ReproducibilityManager
+    repro_mgr = ReproducibilityManager(target_path)
+    config = repro_mgr.load_config()
+
     # 1. Repository Facts
     analyzer = RepositoryAnalyzer()
     project_info = analyzer.analyze(target_path, enable_ai=not no_ai)
@@ -244,12 +518,21 @@ def plan_command(
 
     # 3. Decision Plan
     planner = ExecutionPlanner()
-    execution_plan = planner.plan(project_info, env_state)
+    execution_plan = planner.plan(project_info, env_state, config=config)
+
+    # 4. Check Drift Against runrepo.lock
+    diff = repro_mgr.check_drift(project_info, env_state, execution_plan)
+    if diff and diff.has_changes:
+        execution_plan.warnings.extend(diff.warnings)
 
     if json_output:
         typer.echo(execution_plan.model_dump_json(indent=2))
     else:
         render_execution_plan(execution_plan, console=console)
+        if diff and diff.has_changes:
+            console.print("[bold yellow]Environment Drift from runrepo.lock:[/bold yellow]")
+            for w in diff.warnings:
+                console.print(f"  [yellow]•[/yellow] {w}")
 
 
 @app.command(name="setup")
@@ -310,9 +593,12 @@ def setup_command(
         NonInteractiveConfirmationHandler,
     )
     from runrepo.planner import ExecutionPlanner
+    from runrepo.reproducibility import ReproducibilityManager
     from runrepo.ui import render_execution_plan, render_execution_result
 
     target_path = resolve_target_path(path)
+    repro_mgr = ReproducibilityManager(target_path)
+    config = repro_mgr.load_config()
 
     # 1. Repository Facts
     analyzer = RepositoryAnalyzer()
@@ -324,10 +610,19 @@ def setup_command(
 
     # 3. Decision Plan
     planner = ExecutionPlanner()
-    plan = planner.plan(project_info, env_state)
+    plan = planner.plan(project_info, env_state, config=config)
+
+    # 4. Check Drift Against runrepo.lock
+    diff = repro_mgr.check_drift(project_info, env_state, plan)
+    if diff and diff.has_changes:
+        plan.warnings.extend(diff.warnings)
 
     if not json_output:
         render_execution_plan(plan, console=console)
+        if diff and diff.has_changes:
+            console.print("[bold yellow]Environment Drift from runrepo.lock:[/bold yellow]")
+            for w in diff.warnings:
+                console.print(f"  [yellow]•[/yellow] {w}")
 
     # 4. Confirmation Strategy
     if dry_run or yes:

@@ -120,12 +120,25 @@ class PortConflictRule(DiagnosticRule):
             port_match = re.search(r":(\d{4,5})", combined_error) or re.search(r"port (\d{4,5})", combined_error, re.IGNORECASE)
             port_str = port_match.group(1) if port_match else "the configured port"
 
+            owner_desc = ""
+            if port_match:
+                try:
+                    from runrepo.diagnostics.network import PortDiagnostics
+                    owner_info = PortDiagnostics.get_port_owner(int(port_match.group(1)))
+                    if owner_info and owner_info.pid:
+                        owner_desc = f" Occupied by PID {owner_info.pid}"
+                        if owner_info.process_name:
+                            owner_desc += f" ({owner_info.process_name})"
+                        owner_desc += "."
+                except Exception:
+                    pass
+
             return Diagnostic(
                 id=f"diag:port_conflict:{step_id}",
                 severity=DiagnosticSeverity.ERROR,
                 category=DiagnosticCategory.NETWORK,
                 title=f"Network Port Conflict ({port_str})",
-                explanation=f"A service failed to bind to {port_str} because another active process or container is already using it.",
+                explanation=f"A service failed to bind to {port_str} because another active process or container is already using it.{owner_desc}",
                 affected_step_id=step_id,
                 stdout_excerpt=stdout_excerpt,
                 stderr_excerpt=stderr_excerpt,
