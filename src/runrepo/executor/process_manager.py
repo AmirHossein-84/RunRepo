@@ -36,11 +36,22 @@ def is_pid_alive(pid: int) -> bool:
         return False
     if sys.platform == "win32":
         try:
-            # os.kill(pid, 0) works on Windows in modern Python for process existence check
-            os.kill(pid, 0)
-            return True
-        except (OSError, SystemError, PermissionError):
-            # Try tasklist as fallback
+            import ctypes
+            from ctypes import wintypes
+
+            STILL_ACTIVE = 259
+            PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+            kernel32 = ctypes.windll.kernel32
+            handle = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+            if not handle:
+                return False
+            exit_code = wintypes.DWORD()
+            success = kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code))
+            kernel32.CloseHandle(handle)
+            if success:
+                return exit_code.value == STILL_ACTIVE
+            return False
+        except Exception:
             try:
                 out = subprocess.check_output(
                     ["tasklist", "/FI", f"PID eq {pid}", "/NH"],
@@ -48,7 +59,7 @@ def is_pid_alive(pid: int) -> bool:
                     text=True,
                     timeout=2.0,
                 )
-                return str(pid) in out
+                return str(pid) in out and "No tasks" not in out
             except Exception:
                 return False
     else:
@@ -191,11 +202,13 @@ class ProcessManager:
         """List tracked processes and refresh active states."""
         processes = self._load_registry()
         normalized_repo = str(repo_path.resolve()) if repo_path else None
+        for proc in processes:
+            proc.is_running = is_pid_alive(proc.pid)
+        self._save_registry(processes)
         filtered = [
             p for p in processes
             if normalized_repo is None or p.repo_path == normalized_repo
         ]
-        self._save_registry(processes)
         return filtered
 
     def get_process_logs(

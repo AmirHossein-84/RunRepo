@@ -239,6 +239,8 @@ class ExecutionPlanner:
             # PostgreSQL
             if "postgresql" in db_names or "postgres" in db_names:
                 step_id = "start-service:postgres"
+                sanitized_name = "".join(c if c.isalnum() or c == "_" else "_" for c in project_info.name).strip("_").lower() or "app"
+                container_name = f"runrepo-{sanitized_name}-postgres"
                 if not docker_ok:
                     blocking_reasons.append("PostgreSQL database is required by repository, but Docker is not running")
                     steps.append(
@@ -246,7 +248,7 @@ class ExecutionPlanner:
                             id=step_id,
                             description="Start PostgreSQL Docker container",
                             action_type=ActionType.START_SERVICE,
-                            command=["docker", "run", "-d", "--name", f"runrepo-{project_info.name.lower()}-postgres"],
+                            command=["docker", "run", "-d", "--name", container_name],
                             risk=RiskLevel.BLOCKED,
                             is_blocked=True,
                             reason="PostgreSQL required by schema/manifest, but Docker is unavailable",
@@ -255,9 +257,7 @@ class ExecutionPlanner:
                 else:
                     from runrepo.services.ports import find_available_port
                     pg_port = find_available_port(5432)
-                    sanitized_name = "".join(c if c.isalnum() or c == "_" else "_" for c in project_info.name).lower()
                     db_name = f"{sanitized_name}_dev"
-                    container_name = f"runrepo-{sanitized_name}-postgres"
 
                     steps.append(
                         PlanStep(
@@ -292,6 +292,8 @@ class ExecutionPlanner:
             # Redis
             if "redis" in db_names or "redis" in svc_names:
                 step_id = "start-service:redis"
+                sanitized_name = "".join(c if c.isalnum() or c == "_" else "_" for c in project_info.name).strip("_").lower() or "app"
+                container_name = f"runrepo-{sanitized_name}-redis"
                 if not docker_ok:
                     blocking_reasons.append("Redis cache/queue is required by repository, but Docker is not running")
                     steps.append(
@@ -299,7 +301,7 @@ class ExecutionPlanner:
                             id=step_id,
                             description="Start Redis Docker container",
                             action_type=ActionType.START_SERVICE,
-                            command=["docker", "run", "-d", "--name", f"runrepo-{project_info.name.lower()}-redis"],
+                            command=["docker", "run", "-d", "--name", container_name],
                             risk=RiskLevel.BLOCKED,
                             is_blocked=True,
                             reason="Redis required by repository, but Docker is unavailable",
@@ -341,6 +343,49 @@ class ExecutionPlanner:
         # ---------------------------------------------------------
         # 5. Scoped Dependencies, Migrations & Startup
         # ---------------------------------------------------------
+        root_deps_step_id: str | None = None
+        if project_info.subprojects and project_info.package_managers:
+            root_pm = project_info.package_managers[0].name.lower()
+            root_install_cmd: list[str] | None = None
+            if root_pm == "pnpm":
+                root_install_cmd = ["pnpm", "install"]
+            elif root_pm == "yarn":
+                root_install_cmd = ["yarn", "install"]
+            elif root_pm == "npm":
+                root_install_cmd = ["npm", "install"]
+            elif root_pm == "uv":
+                root_install_cmd = ["uv", "sync"]
+            elif root_pm == "poetry":
+                root_install_cmd = ["poetry", "install"]
+            elif root_pm == "pip":
+                root_install_cmd = ["pip", "install", "-r", "requirements.txt"]
+
+            if root_install_cmd:
+                root_deps_step_id = "install-deps"
+                root_prereqs = []
+                if root_pm in pm_step_ids:
+                    root_prereqs.append(pm_step_ids[root_pm])
+                for rt in project_info.runtimes:
+                    if rt.name.lower() in runtime_step_ids and runtime_step_ids[rt.name.lower()] not in root_prereqs:
+                        root_prereqs.append(runtime_step_ids[rt.name.lower()])
+
+                steps.append(
+                    PlanStep(
+                        id=root_deps_step_id,
+                        description="Install root project dependencies",
+                        action_type=ActionType.INSTALL_DEPENDENCIES,
+                        command=root_install_cmd,
+                        cwd=None,
+                        depends_on=root_prereqs,
+                        risk=RiskLevel.REQUIRES_CONFIRMATION,
+                        reason=f"Install workspace dependencies using {root_pm}",
+                        verification=StepVerification(
+                            strategy="exit_code",
+                            description=f"{' '.join(root_install_cmd)} returns 0",
+                        ),
+                    )
+                )
+
         scopes: list[tuple[str, str | None, list, list, list, list]] = []
         if project_info.subprojects:
             for sp in project_info.subprojects:
@@ -407,6 +452,7 @@ class ExecutionPlanner:
             prisma_step_id = None
             if has_prisma and any(rt.name == "node" for rt in sc_rts):
                 prisma_step_id = f"generate-client:prisma{scope_prefix}"
+                prereq_deps = [deps_step_id] if install_cmd else ([root_deps_step_id] if root_deps_step_id else [])
                 steps.append(
                     PlanStep(
                         id=prisma_step_id,
@@ -414,7 +460,7 @@ class ExecutionPlanner:
                         action_type=ActionType.GENERATE_CLIENT,
                         command=["npx", "prisma", "generate"],
                         cwd=scope_path,
-                        depends_on=[deps_step_id] if install_cmd else [],
+                        depends_on=prereq_deps,
                         risk=RiskLevel.REQUIRES_CONFIRMATION,
                         reason="Prisma schema requires client artifact generation",
                         verification=StepVerification(
@@ -429,7 +475,8 @@ class ExecutionPlanner:
             migration_step_id = None
             if has_alembic and any(rt.name == "python" for rt in sc_rts):
                 migration_step_id = f"run-migration:alembic{scope_prefix}"
-                mig_prereqs = ([deps_step_id] if install_cmd else []) + service_step_ids
+                prereq_deps = [deps_step_id] if install_cmd else ([root_deps_step_id] if root_deps_step_id else [])
+                mig_prereqs = prereq_deps + service_step_ids
                 steps.append(
                     PlanStep(
                         id=migration_step_id,
@@ -455,7 +502,6 @@ class ExecutionPlanner:
             # Node.js startup resolution
             if any(rt.name == "node" for rt in sc_rts):
                 pm_bin = install_pm_name or "npm"
-                # Check candidate scripts
                 for cand in ("dev", "start", "serve"):
                     if cand in script_names:
                         candidate_list.append(f"{pm_bin} run {cand}" if pm_bin != "npm" or cand != "start" else "npm start")
@@ -497,6 +543,7 @@ class ExecutionPlanner:
                 elif project_info.entrypoints:
                     ep = project_info.entrypoints[0]
                     start_cmd_tokens = ["python", ep]
+
             # Check for config startup command override
             if config and hasattr(config, "startup") and config.startup and config.startup.command:
                 override_cmd = config.startup.command
@@ -515,11 +562,27 @@ class ExecutionPlanner:
                 )
 
             start_step_id = f"start-app{scope_prefix}"
-            app_prereqs = ([deps_step_id] if install_cmd else []) + service_step_ids
+            prereq_deps = [deps_step_id] if install_cmd else ([root_deps_step_id] if root_deps_step_id else [])
+            app_prereqs = prereq_deps + service_step_ids
             if prisma_step_id:
                 app_prereqs.append(prisma_step_id)
             if migration_step_id:
                 app_prereqs.append(migration_step_id)
+
+            # Determine appropriate target URL based on framework / runtime
+            fw_names_lower = [fw.name.lower() for fw in sc_fws]
+            if "flask" in fw_names_lower:
+                target_url = "http://127.0.0.1:5000"
+            elif "fastapi" in fw_names_lower or "django" in fw_names_lower:
+                target_url = "http://127.0.0.1:8000"
+            elif "vite" in fw_names_lower:
+                target_url = "http://127.0.0.1:5173"
+            elif any(rt.name == "go" for rt in sc_rts):
+                target_url = "http://127.0.0.1:8080"
+            elif any(rt.name == "node" for rt in sc_rts):
+                target_url = "http://127.0.0.1:3000"
+            else:
+                target_url = "http://127.0.0.1:8000"
 
             if start_cmd_tokens:
                 steps.append(
@@ -535,7 +598,7 @@ class ExecutionPlanner:
                         candidate_commands=candidate_list,
                         verification=StepVerification(
                             strategy="http_health_check",
-                            target="http://localhost:3000" if any(rt.name == "node" for rt in sc_rts) else "http://localhost:8000",
+                            target=target_url,
                             description="Application HTTP port becomes responsive",
                         ),
                         rollback=StepRollback(
@@ -557,6 +620,7 @@ class ExecutionPlanner:
                         reason="Confirm application is running and accessible",
                         verification=StepVerification(
                             strategy="http_health_check",
+                            target=target_url,
                             description="HTTP health endpoint returns HTTP 200 OK",
                         ),
                     )
