@@ -38,9 +38,9 @@ class ExecutionPlanner:
 
         for rt in all_runtimes:
             rt_name = rt.name.lower()
-            step_id = f"verify-runtime:{rt_name}"
-            if step_id in runtime_step_ids:
+            if rt_name in runtime_step_ids:
                 continue
+            step_id = f"verify-runtime:{rt_name}"
 
             check = env_checks_map.get(rt_name)
             is_satisfied = check is not None and check.status == EnvironmentStatus.OK
@@ -87,9 +87,9 @@ class ExecutionPlanner:
 
         for pm in all_pms:
             pm_name = pm.name.lower()
-            step_id = f"verify-pm:{pm_name}"
-            if step_id in pm_step_ids:
+            if pm_name in pm_step_ids:
                 continue
+            step_id = f"verify-pm:{pm_name}"
 
             check = env_checks_map.get(pm_name)
             is_satisfied = check is not None and check.status == EnvironmentStatus.OK
