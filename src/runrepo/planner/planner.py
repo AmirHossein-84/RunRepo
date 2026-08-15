@@ -361,7 +361,28 @@ class ExecutionPlanner:
             elif root_pm == "pip":
                 pip_check = env_checks_map.get("pip")
                 use_uv_pip = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK")
-                root_install_cmd = ["uv", "pip", "install", "--system", "--break-system-packages", "-r", "requirements.txt"] if use_uv_pip else ["pip", "install", "-r", "requirements.txt"]
+                if use_uv_pip:
+                    root_venv_step_id = "create-venv"
+                    steps.append(
+                        PlanStep(
+                            id=root_venv_step_id,
+                            description="Create root virtual environment",
+                            action_type=ActionType.INSTALL_DEPENDENCIES,
+                            command=["uv", "venv"],
+                            cwd=None,
+                            depends_on=list(root_prereqs),
+                            risk=RiskLevel.SAFE,
+                            reason="Create isolated Python virtual environment",
+                            verification=StepVerification(
+                                strategy="exit_code",
+                                description="uv venv returns 0",
+                            ),
+                        )
+                    )
+                    root_prereqs.append(root_venv_step_id)
+                    root_install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
+                else:
+                    root_install_cmd = ["pip", "install", "-r", "requirements.txt"]
 
             if root_install_cmd:
                 root_deps_step_id = "install-deps"
@@ -420,9 +441,29 @@ class ExecutionPlanner:
                 elif primary_pm == "pip":
                     pip_check = env_checks_map.get("pip")
                     use_uv_pip = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK")
-                    install_cmd = ["uv", "pip", "install", "--system", "--break-system-packages", "-r", "requirements.txt"] if use_uv_pip else ["pip", "install", "-r", "requirements.txt"]
                     if use_uv_pip:
+                        venv_step_id = f"create-venv{scope_prefix}"
+                        steps.append(
+                            PlanStep(
+                                id=venv_step_id,
+                                description=f"Create virtual environment for {scope_name}" if scope_name != "root" else "Create virtual environment",
+                                action_type=ActionType.INSTALL_DEPENDENCIES,
+                                command=["uv", "venv"],
+                                cwd=scope_path,
+                                depends_on=list(deps_prereqs),
+                                risk=RiskLevel.SAFE,
+                                reason="Create isolated Python virtual environment",
+                                verification=StepVerification(
+                                    strategy="exit_code",
+                                    description="uv venv returns 0",
+                                ),
+                            )
+                        )
+                        deps_prereqs.append(venv_step_id)
+                        install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
                         install_pm_name = "uv pip"
+                    else:
+                        install_cmd = ["pip", "install", "-r", "requirements.txt"]
 
                 if primary_pm in pm_step_ids:
                     deps_prereqs.append(pm_step_ids[primary_pm])
@@ -550,6 +591,11 @@ class ExecutionPlanner:
                 elif project_info.entrypoints:
                     ep = project_info.entrypoints[0]
                     start_cmd_tokens = ["python", ep]
+
+                pip_check = env_checks_map.get("pip")
+                use_uv_wrapper = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK") or any(pm.name.lower() == "uv" for pm in sc_pms)
+                if start_cmd_tokens and use_uv_wrapper and start_cmd_tokens[0] != "uv":
+                    start_cmd_tokens = ["uv", "run"] + start_cmd_tokens
 
             # Check for config startup command override
             if config and hasattr(config, "startup") and config.startup and config.startup.command:
