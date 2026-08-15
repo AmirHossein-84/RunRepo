@@ -80,6 +80,11 @@ class SystemProcessExecutor(ProcessExecutor):
         if which_path:
             resolved_cmd[0] = which_path
 
+        if sys.platform == "win32" and resolved_cmd:
+            exe_lower = resolved_cmd[0].lower()
+            if exe_lower.endswith((".cmd", ".bat")):
+                resolved_cmd = ["cmd.exe", "/c"] + resolved_cmd
+
         try:
             process = subprocess.Popen(
                 resolved_cmd,
@@ -150,6 +155,11 @@ class SystemProcessExecutor(ProcessExecutor):
         which_path = shutil.which(resolved_cmd[0])
         if which_path:
             resolved_cmd[0] = which_path
+
+        if sys.platform == "win32" and resolved_cmd:
+            exe_lower = resolved_cmd[0].lower()
+            if exe_lower.endswith((".cmd", ".bat")):
+                resolved_cmd = ["cmd.exe", "/c"] + resolved_cmd
 
         out_dest = subprocess.DEVNULL
         if log_file:

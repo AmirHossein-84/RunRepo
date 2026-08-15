@@ -29,9 +29,17 @@ class HttpVerifier(BaseVerifier):
         self.max_timeout_s = max_timeout_s
 
     def can_verify(self, step: PlanStep) -> bool:
-        if step.action_type == ActionType.VERIFY_APPLICATION:
-            return True
         if step.verification and step.verification.strategy in ("http_health_check", "port_reachable"):
+            return True
+        if step.action_type == ActionType.VERIFY_APPLICATION:
+            if step.verification and step.verification.strategy in (
+                "process_liveness",
+                "process",
+                "process_running",
+                "file_exists",
+                "exit_code",
+            ):
+                return False
             return True
         return False
 

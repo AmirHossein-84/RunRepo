@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import time
 
 
@@ -81,7 +82,10 @@ class SystemCommandRunner(CommandRunner):
             )
 
         # Build command with resolved binary path
-        resolved_cmd = [exe_path] + cmd[1:]
+        if sys.platform == "win32" and exe_path.lower().endswith((".cmd", ".bat")):
+            resolved_cmd = ["cmd.exe", "/c", exe_path] + cmd[1:]
+        else:
+            resolved_cmd = [exe_path] + cmd[1:]
         start_time = time.perf_counter()
 
         try:

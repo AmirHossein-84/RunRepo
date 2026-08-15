@@ -14,7 +14,13 @@ class ProcessVerifier(BaseVerifier):
     """Verifies that background application processes spawned by RunRepo remain actively running."""
 
     def can_verify(self, step: PlanStep) -> bool:
-        return step.action_type == ActionType.START_APPLICATION
+        if step.verification and step.verification.strategy in ("process_liveness", "process", "process_running"):
+            return True
+        if step.action_type in (ActionType.START_APPLICATION, ActionType.VERIFY_APPLICATION):
+            if step.verification and step.verification.strategy in ("http_health_check", "port_reachable"):
+                return False
+            return True
+        return False
 
     def verify(
         self,

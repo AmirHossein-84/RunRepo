@@ -54,7 +54,7 @@ class NodeDetector(BaseDetector):
         has_node_version_files = (
             context.has_file(".nvmrc")
             or context.has_file(".node-version")
-            or context.has_file(".nvmrc")
+            or context.has_file(".tool-versions")
         )
         has_js_ts_files = any(
             f.endswith((".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs"))

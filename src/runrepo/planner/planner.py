@@ -5,7 +5,7 @@ from typing import Any
 
 from runrepo.environment.models import EnvironmentCheck, EnvironmentState, EnvironmentStatus
 from runrepo.environment.venv import VirtualEnvStatus, inspect_virtual_env
-from runrepo.models import ProjectInfo, SubprojectInfo
+from runrepo.models import FrameworkCategory, ProjectInfo, ProjectType, SubprojectInfo
 from runrepo.planner.graph import PlanGraph
 from runrepo.planner.models import (
     ActionType,
@@ -409,9 +409,19 @@ class ExecutionPlanner:
                             )
                         )
                         root_prereqs.append(root_replace_step_id)
-                    root_install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
+                    if (base_dir / "requirements.txt").exists():
+                        root_install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
+                    elif (base_dir / "pyproject.toml").exists() or (base_dir / "setup.py").exists():
+                        root_install_cmd = ["uv", "pip", "install", "-e", "."]
+                    else:
+                        root_install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
                 else:
-                    root_install_cmd = ["pip", "install", "-r", "requirements.txt"]
+                    if (base_dir / "requirements.txt").exists():
+                        root_install_cmd = ["pip", "install", "-r", "requirements.txt"]
+                    elif (base_dir / "pyproject.toml").exists() or (base_dir / "setup.py").exists():
+                        root_install_cmd = ["pip", "install", "-e", "."]
+                    else:
+                        root_install_cmd = ["pip", "install", "-r", "requirements.txt"]
 
             if root_install_cmd:
                 root_deps_step_id = "install-deps"
@@ -468,10 +478,10 @@ class ExecutionPlanner:
                 elif primary_pm == "poetry":
                     install_cmd = ["poetry", "install"]
                 elif primary_pm == "pip":
+                    target_dir = Path(project_info.path) / (scope_path or "")
                     pip_check = env_checks_map.get("pip")
                     use_uv_pip = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK")
                     if use_uv_pip:
-                        target_dir = Path(project_info.path) / (scope_path or "")
                         py_req = next((rt.version for rt in sc_rts if rt.name.lower() == "python"), None)
                         venv_info = inspect_virtual_env(target_dir, required_version=py_req)
                         if venv_info.status == VirtualEnvStatus.NOT_FOUND:
@@ -518,10 +528,20 @@ class ExecutionPlanner:
                             )
                             deps_prereqs.append(replace_step_id)
 
-                        install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
+                        if (target_dir / "requirements.txt").exists():
+                            install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
+                        elif (target_dir / "pyproject.toml").exists() or (target_dir / "setup.py").exists() or (target_dir / "setup.cfg").exists():
+                            install_cmd = ["uv", "pip", "install", "-e", "."]
+                        else:
+                            install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
                         install_pm_name = "uv pip"
                     else:
-                        install_cmd = ["pip", "install", "-r", "requirements.txt"]
+                        if (target_dir / "requirements.txt").exists():
+                            install_cmd = ["pip", "install", "-r", "requirements.txt"]
+                        elif (target_dir / "pyproject.toml").exists() or (target_dir / "setup.py").exists() or (target_dir / "setup.cfg").exists():
+                            install_cmd = ["pip", "install", "-e", "."]
+                        else:
+                            install_cmd = ["pip", "install", "-r", "requirements.txt"]
 
                 if primary_pm in pm_step_ids:
                     deps_prereqs.append(pm_step_ids[primary_pm])
@@ -662,7 +682,9 @@ class ExecutionPlanner:
 
                 pip_check = env_checks_map.get("pip")
                 use_uv_wrapper = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK") or any(pm.name.lower() == "uv" for pm in sc_pms)
-                if start_cmd_tokens and use_uv_wrapper and start_cmd_tokens[0] != "uv":
+                pip_check = env_checks_map.get("pip")
+                use_uv_wrapper = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK") or any(pm.name.lower() == "uv" for pm in sc_pms)
+                if start_cmd_tokens and use_uv_wrapper and start_cmd_tokens[0] not in ("uv", "poetry", "pipenv", "conda"):
                     start_cmd_tokens = ["uv", "run"] + start_cmd_tokens
 
             # Check for config startup command override
@@ -690,20 +712,41 @@ class ExecutionPlanner:
             if migration_step_id:
                 app_prereqs.append(migration_step_id)
 
-            # Determine appropriate target URL based on framework / runtime
+            # Determine appropriate target URL and verification strategy based on framework / runtime
             fw_names_lower = [fw.name.lower() for fw in sc_fws]
+            has_web_framework = any(
+                fw.category in (FrameworkCategory.FULLSTACK, FrameworkCategory.WEB_BACKEND, FrameworkCategory.WEB_FRONTEND)
+                for fw in sc_fws
+            )
+            has_node = any(rt.name == "node" for rt in sc_rts)
+            has_go = any(rt.name == "go" for rt in sc_rts)
+            is_web_project = (
+                has_web_framework
+                or project_info.project_type in (ProjectType.WEB_APPLICATION, ProjectType.API_SERVICE)
+                or (has_node and any(s.name.lower() in ("dev", "start", "serve") for s in sc_scripts))
+            )
+
             if "flask" in fw_names_lower:
                 target_url = "http://127.0.0.1:5000"
+                verify_strategy = "http_health_check"
             elif "fastapi" in fw_names_lower or "django" in fw_names_lower:
                 target_url = "http://127.0.0.1:8000"
+                verify_strategy = "http_health_check"
             elif "vite" in fw_names_lower:
                 target_url = "http://127.0.0.1:5173"
-            elif any(rt.name == "go" for rt in sc_rts):
+                verify_strategy = "http_health_check"
+            elif has_go:
                 target_url = "http://127.0.0.1:8080"
-            elif any(rt.name == "node" for rt in sc_rts):
+                verify_strategy = "http_health_check"
+            elif has_node and is_web_project:
                 target_url = "http://127.0.0.1:3000"
-            else:
+                verify_strategy = "http_health_check"
+            elif is_web_project:
                 target_url = "http://127.0.0.1:8000"
+                verify_strategy = "http_health_check"
+            else:
+                target_url = None
+                verify_strategy = "process_liveness"
 
             if start_cmd_tokens:
                 steps.append(
@@ -718,9 +761,9 @@ class ExecutionPlanner:
                         reason=f"Launch application via {' '.join(start_cmd_tokens)}",
                         candidate_commands=candidate_list,
                         verification=StepVerification(
-                            strategy="http_health_check",
-                            target=target_url,
-                            description="Application HTTP port becomes responsive",
+                            strategy=verify_strategy,
+                            target=target_url if verify_strategy == "http_health_check" else start_step_id,
+                            description="Application HTTP port becomes responsive" if verify_strategy == "http_health_check" else "Application process started successfully",
                         ),
                         rollback=StepRollback(
                             strategy="stop_process",
@@ -740,9 +783,9 @@ class ExecutionPlanner:
                         risk=RiskLevel.SAFE,
                         reason="Confirm application is running and accessible",
                         verification=StepVerification(
-                            strategy="http_health_check",
-                            target=target_url,
-                            description="HTTP health endpoint returns HTTP 200 OK",
+                            strategy=verify_strategy,
+                            target=target_url if verify_strategy == "http_health_check" else start_step_id,
+                            description="HTTP health endpoint returns HTTP 200 OK" if verify_strategy == "http_health_check" else "Application background process remains active and healthy",
                         ),
                     )
                 )

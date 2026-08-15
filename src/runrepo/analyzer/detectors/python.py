@@ -245,6 +245,30 @@ class PythonDetector(BaseDetector):
                     )
                 )
 
+        if not result.entrypoints:
+            root_py_files = [
+                f
+                for f in context.get_all_files()
+                if "/" not in f and f.endswith(".py") and not f.startswith("test_") and f != "setup.py"
+            ]
+            main_block_files = []
+            for py_f in root_py_files:
+                content = context.read_text(py_f)
+                if content and ("__main__" in content or "if __name__" in content):
+                    main_block_files.append(py_f)
+
+            chosen = main_block_files[0] if main_block_files else (root_py_files[0] if len(root_py_files) == 1 else None)
+            if chosen:
+                result.entrypoints.append(chosen)
+                result.evidence.append(
+                    DetectionEvidence(
+                        source=chosen,
+                        detail=f"Detected primary Python script '{chosen}' as entrypoint",
+                        confidence=Confidence.HIGH if main_block_files else Confidence.MEDIUM,
+                        path=chosen,
+                    )
+                )
+
         # 5. Detect Python Subprojects (e.g. backend/pyproject.toml, server/requirements.txt)
         sub_manifests: set[str] = set()
         for f in pyproject_files:
