@@ -1,6 +1,7 @@
 """Deterministic Execution Planner converting ProjectInfo and EnvironmentState into an ordered ExecutionPlan."""
 
 from pathlib import Path
+from typing import Any
 
 from runrepo.environment.models import EnvironmentCheck, EnvironmentState, EnvironmentStatus
 from runrepo.models import ProjectInfo, SubprojectInfo
