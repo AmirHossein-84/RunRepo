@@ -361,7 +361,7 @@ class ExecutionPlanner:
             elif root_pm == "pip":
                 pip_check = env_checks_map.get("pip")
                 use_uv_pip = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK")
-                root_install_cmd = ["uv", "pip", "install", "--system", "-r", "requirements.txt"] if use_uv_pip else ["pip", "install", "-r", "requirements.txt"]
+                root_install_cmd = ["uv", "pip", "install", "--system", "--break-system-packages", "-r", "requirements.txt"] if use_uv_pip else ["pip", "install", "-r", "requirements.txt"]
 
             if root_install_cmd:
                 root_deps_step_id = "install-deps"
@@ -420,7 +420,7 @@ class ExecutionPlanner:
                 elif primary_pm == "pip":
                     pip_check = env_checks_map.get("pip")
                     use_uv_pip = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK")
-                    install_cmd = ["uv", "pip", "install", "--system", "-r", "requirements.txt"] if use_uv_pip else ["pip", "install", "-r", "requirements.txt"]
+                    install_cmd = ["uv", "pip", "install", "--system", "--break-system-packages", "-r", "requirements.txt"] if use_uv_pip else ["pip", "install", "-r", "requirements.txt"]
                     if use_uv_pip:
                         install_pm_name = "uv pip"
 

@@ -368,7 +368,7 @@ class DependencyFailureRule(DiagnosticRule):
         stderr_excerpt: str | None,
     ) -> Diagnostic | None:
         lower = combined_error.lower()
-        if any(p in lower for p in ("eresolve", "npm err!", "pip install", "no matching distribution", "could not solve dependencies", "yarn error", "pnpm err")):
+        if any(p in lower for p in ("eresolve", "npm err!", "pip install", "no matching distribution", "could not solve dependencies", "yarn error", "pnpm err", "externally managed", "externally-managed", "break-system-packages")):
             step_id = step.id if step else (step_result.step_id if step_result else "unknown")
             return Diagnostic(
                 id=f"diag:dependency:{step_id}",
