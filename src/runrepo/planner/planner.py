@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from runrepo.environment.models import EnvironmentCheck, EnvironmentState, EnvironmentStatus
+from runrepo.environment.venv import VirtualEnvStatus, inspect_virtual_env
 from runrepo.models import ProjectInfo, SubprojectInfo
 from runrepo.planner.graph import PlanGraph
 from runrepo.planner.models import (
@@ -362,24 +363,52 @@ class ExecutionPlanner:
                 pip_check = env_checks_map.get("pip")
                 use_uv_pip = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK")
                 if use_uv_pip:
-                    root_venv_step_id = "create-venv"
-                    steps.append(
-                        PlanStep(
-                            id=root_venv_step_id,
-                            description="Create root virtual environment",
-                            action_type=ActionType.INSTALL_DEPENDENCIES,
-                            command=["uv", "venv"],
-                            cwd=None,
-                            depends_on=list(root_prereqs),
-                            risk=RiskLevel.SAFE,
-                            reason="Create isolated Python virtual environment",
-                            verification=StepVerification(
-                                strategy="exit_code",
-                                description="uv venv returns 0",
-                            ),
+                    base_dir = Path(project_info.path)
+                    py_req = next((rt.version for rt in project_info.runtimes if rt.name.lower() == "python"), None)
+                    root_venv_info = inspect_virtual_env(base_dir, required_version=py_req)
+                    if root_venv_info.status == VirtualEnvStatus.NOT_FOUND:
+                        root_venv_step_id = "create-venv"
+                        steps.append(
+                            PlanStep(
+                                id=root_venv_step_id,
+                                description="Create root virtual environment",
+                                action_type=ActionType.INSTALL_DEPENDENCIES,
+                                command=["uv", "venv"],
+                                cwd=None,
+                                depends_on=list(root_prereqs),
+                                risk=RiskLevel.SAFE,
+                                reason="Create isolated Python virtual environment",
+                                verification=StepVerification(
+                                    strategy="exit_code",
+                                    description="uv venv returns 0",
+                                ),
+                            )
                         )
-                    )
-                    root_prereqs.append(root_venv_step_id)
+                        root_prereqs.append(root_venv_step_id)
+                    elif root_venv_info.status in (VirtualEnvStatus.BROKEN, VirtualEnvStatus.WRONG_VERSION):
+                        root_replace_step_id = "replace-venv"
+                        action_desc = (
+                            f"Replace incompatible virtual environment ({root_venv_info.details})"
+                            if root_venv_info.status == VirtualEnvStatus.WRONG_VERSION
+                            else f"Replace broken virtual environment ({root_venv_info.details})"
+                        )
+                        steps.append(
+                            PlanStep(
+                                id=root_replace_step_id,
+                                description="Replace root virtual environment",
+                                action_type=ActionType.INSTALL_DEPENDENCIES,
+                                command=["uv", "venv", "--clear"],
+                                cwd=None,
+                                depends_on=list(root_prereqs),
+                                risk=RiskLevel.REQUIRES_CONFIRMATION,
+                                reason=f"{action_desc} using uv venv --clear",
+                                verification=StepVerification(
+                                    strategy="exit_code",
+                                    description="uv venv --clear returns 0",
+                                ),
+                            )
+                        )
+                        root_prereqs.append(root_replace_step_id)
                     root_install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
                 else:
                     root_install_cmd = ["pip", "install", "-r", "requirements.txt"]
@@ -442,24 +471,53 @@ class ExecutionPlanner:
                     pip_check = env_checks_map.get("pip")
                     use_uv_pip = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK")
                     if use_uv_pip:
-                        venv_step_id = f"create-venv{scope_prefix}"
-                        steps.append(
-                            PlanStep(
-                                id=venv_step_id,
-                                description=f"Create virtual environment for {scope_name}" if scope_name != "root" else "Create virtual environment",
-                                action_type=ActionType.INSTALL_DEPENDENCIES,
-                                command=["uv", "venv"],
-                                cwd=scope_path,
-                                depends_on=list(deps_prereqs),
-                                risk=RiskLevel.SAFE,
-                                reason="Create isolated Python virtual environment",
-                                verification=StepVerification(
-                                    strategy="exit_code",
-                                    description="uv venv returns 0",
-                                ),
+                        target_dir = Path(project_info.path) / (scope_path or "")
+                        py_req = next((rt.version for rt in sc_rts if rt.name.lower() == "python"), None)
+                        venv_info = inspect_virtual_env(target_dir, required_version=py_req)
+                        if venv_info.status == VirtualEnvStatus.NOT_FOUND:
+                            venv_step_id = f"create-venv{scope_prefix}"
+                            steps.append(
+                                PlanStep(
+                                    id=venv_step_id,
+                                    description=f"Create virtual environment for {scope_name}" if scope_name != "root" else "Create virtual environment",
+                                    action_type=ActionType.INSTALL_DEPENDENCIES,
+                                    command=["uv", "venv"],
+                                    cwd=scope_path,
+                                    depends_on=list(deps_prereqs),
+                                    risk=RiskLevel.SAFE,
+                                    reason="Create isolated Python virtual environment",
+                                    verification=StepVerification(
+                                        strategy="exit_code",
+                                        description="uv venv returns 0",
+                                    ),
+                                )
                             )
-                        )
-                        deps_prereqs.append(venv_step_id)
+                            deps_prereqs.append(venv_step_id)
+                        elif venv_info.status in (VirtualEnvStatus.BROKEN, VirtualEnvStatus.WRONG_VERSION):
+                            replace_step_id = f"replace-venv{scope_prefix}"
+                            action_desc = (
+                                f"Replace incompatible virtual environment ({venv_info.details})"
+                                if venv_info.status == VirtualEnvStatus.WRONG_VERSION
+                                else f"Replace broken virtual environment ({venv_info.details})"
+                            )
+                            steps.append(
+                                PlanStep(
+                                    id=replace_step_id,
+                                    description=f"Replace virtual environment for {scope_name}" if scope_name != "root" else "Replace virtual environment",
+                                    action_type=ActionType.INSTALL_DEPENDENCIES,
+                                    command=["uv", "venv", "--clear"],
+                                    cwd=scope_path,
+                                    depends_on=list(deps_prereqs),
+                                    risk=RiskLevel.REQUIRES_CONFIRMATION,
+                                    reason=f"{action_desc} using uv venv --clear",
+                                    verification=StepVerification(
+                                        strategy="exit_code",
+                                        description="uv venv --clear returns 0",
+                                    ),
+                                )
+                            )
+                            deps_prereqs.append(replace_step_id)
+
                         install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
                         install_pm_name = "uv pip"
                     else:
@@ -474,6 +532,16 @@ class ExecutionPlanner:
 
             deps_step_id = f"install-deps{scope_prefix}"
             if install_cmd:
+                deps_reason = f"Install packages using {install_pm_name or 'detected package manager'}"
+                if sc_pms and sc_pms[0].name.lower() == "pip" and use_uv_pip:
+                    target_dir = Path(project_info.path) / (scope_path or "")
+                    py_req = next((rt.version for rt in sc_rts if rt.name.lower() == "python"), None)
+                    v_info = inspect_virtual_env(target_dir, required_version=py_req)
+                    if v_info.status == VirtualEnvStatus.VALID:
+                        deps_reason = f"Install packages into existing virtual environment using uv pip (reusing valid environment: {v_info.details})"
+                    elif v_info.status in (VirtualEnvStatus.BROKEN, VirtualEnvStatus.WRONG_VERSION):
+                        deps_reason = "Install packages into replaced virtual environment using uv pip"
+
                 steps.append(
                     PlanStep(
                         id=deps_step_id,
@@ -483,7 +551,7 @@ class ExecutionPlanner:
                         cwd=scope_path,
                         depends_on=deps_prereqs,
                         risk=RiskLevel.REQUIRES_CONFIRMATION,
-                        reason=f"Install packages using {install_pm_name or 'detected package manager'}",
+                        reason=deps_reason,
                         verification=StepVerification(
                             strategy="exit_code",
                             description=f"{' '.join(install_cmd)} returns 0",
