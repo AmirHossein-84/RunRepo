@@ -248,7 +248,7 @@ def check_pip(
     required_version: str | None = None,
     evidence: list[DetectionEvidence] | None = None,
 ) -> EnvironmentCheck:
-    """Inspect pip tied directly to the discovered Python interpreter."""
+    """Inspect pip tied directly to the discovered Python interpreter or fallback to uv."""
     ev_list = evidence or []
     if python_executable:
         res = runner.run([python_executable, "-m", "pip", "--version"])
@@ -256,12 +256,27 @@ def check_pip(
         res = runner.run(["pip", "--version"])
 
     if not res.success or not res.stdout:
+        # Check if uv is available to fulfill pip capabilities seamlessly
+        uv_res = runner.run(["uv", "--version"])
+        if uv_res.success and uv_res.stdout:
+            v_uv = clean_version_string(uv_res.stdout)
+            return EnvironmentCheck(
+                name="pip",
+                status=EnvironmentStatus.OK,
+                required=required,
+                required_version=required_version,
+                installed_version=f"uv ({v_uv})",
+                executable_path=uv_res.executable,
+                details=f"Satisfied via uv ({v_uv})",
+                evidence=ev_list,
+            )
+
         return EnvironmentCheck(
             name="pip",
             status=EnvironmentStatus.MISSING,
             required=required,
             required_version=required_version,
-            details="pip module not available for Python",
+            details="pip module not available for Python (install pip or uv)",
             evidence=ev_list,
         )
 

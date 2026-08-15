@@ -359,7 +359,9 @@ class ExecutionPlanner:
             elif root_pm == "poetry":
                 root_install_cmd = ["poetry", "install"]
             elif root_pm == "pip":
-                root_install_cmd = ["pip", "install", "-r", "requirements.txt"]
+                pip_check = env_checks_map.get("pip")
+                use_uv_pip = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK")
+                root_install_cmd = ["uv", "pip", "install", "--system", "-r", "requirements.txt"] if use_uv_pip else ["pip", "install", "-r", "requirements.txt"]
 
             if root_install_cmd:
                 root_deps_step_id = "install-deps"
@@ -379,7 +381,7 @@ class ExecutionPlanner:
                         cwd=None,
                         depends_on=root_prereqs,
                         risk=RiskLevel.REQUIRES_CONFIRMATION,
-                        reason=f"Install workspace dependencies using {root_pm}",
+                        reason=f"Install workspace dependencies using {'uv pip' if use_uv_pip else root_pm}",
                         verification=StepVerification(
                             strategy="exit_code",
                             description=f"{' '.join(root_install_cmd)} returns 0",
@@ -416,7 +418,11 @@ class ExecutionPlanner:
                 elif primary_pm == "poetry":
                     install_cmd = ["poetry", "install"]
                 elif primary_pm == "pip":
-                    install_cmd = ["pip", "install", "-r", "requirements.txt"]
+                    pip_check = env_checks_map.get("pip")
+                    use_uv_pip = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK")
+                    install_cmd = ["uv", "pip", "install", "--system", "-r", "requirements.txt"] if use_uv_pip else ["pip", "install", "-r", "requirements.txt"]
+                    if use_uv_pip:
+                        install_pm_name = "uv pip"
 
                 if primary_pm in pm_step_ids:
                     deps_prereqs.append(pm_step_ids[primary_pm])
