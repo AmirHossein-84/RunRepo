@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 
 from rich.console import Console
 import typer
@@ -178,13 +178,13 @@ def cache_default_command(
 @cache_app.command(name="clean")
 def cache_clean_command(
     target: Annotated[
-        str | None,
+        Optional[str],
         typer.Argument(
             help="Specific repository name or slug to remove from cache (e.g. owner/repo)",
         ),
     ] = None,
     days: Annotated[
-        int | None,
+        Optional[int],
         typer.Option(
             "--days",
             help="Only remove cached repositories older than specified days",
@@ -423,7 +423,7 @@ def analyze_command(
 @app.command(name="doctor")
 def doctor_command(
     path: Annotated[
-        str | None,
+        Optional[str],
         typer.Argument(
             help="Optional path or GitHub URL/shorthand to evaluate requirements for",
         ),
@@ -668,13 +668,13 @@ def status_command() -> None:
 @app.command(name="stop")
 def stop_command(
     path: Annotated[
-        Path | None,
+        Optional[Path],
         typer.Argument(
             help="Optional path to repository whose processes should be stopped",
         ),
     ] = None,
     name: Annotated[
-        str | None,
+        Optional[str],
         typer.Option(
             "--name",
             "-n",
@@ -699,13 +699,13 @@ def stop_command(
 @app.command(name="logs")
 def logs_command(
     path: Annotated[
-        Path | None,
+        Optional[Path],
         typer.Argument(
             help="Optional path to repository",
         ),
     ] = None,
     name: Annotated[
-        str | None,
+        Optional[str],
         typer.Option(
             "--name",
             "-n",
@@ -733,7 +733,7 @@ def logs_command(
 @app.command("infra")
 def infra_command(
     path: Annotated[
-        Path | None,
+        Optional[Path],
         typer.Argument(
             help="Optional path to repository",
         ),
@@ -752,7 +752,7 @@ def infra_command(
 @app.command("clean")
 def clean_command(
     path: Annotated[
-        Path | None,
+        Optional[Path],
         typer.Argument(
             help="Optional path to repository to scope cleanup",
         ),
@@ -983,7 +983,7 @@ def export_command(
         ),
     ] = "yaml",
     out: Annotated[
-        Path | None,
+        Optional[Path],
         typer.Option(
             "--out",
             "-o",
@@ -1017,7 +1017,7 @@ def reproduce_command(
         ),
     ] = ".",
     lock_file: Annotated[
-        Path | None,
+        Optional[Path],
         typer.Option(
             "--lock-file",
             "-l",
@@ -1080,7 +1080,7 @@ def share_command(
         ),
     ] = ".",
     out_dir: Annotated[
-        Path | None,
+        Optional[Path],
         typer.Option(
             "--out-dir",
             "-o",

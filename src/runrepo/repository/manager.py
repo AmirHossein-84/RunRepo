@@ -221,14 +221,15 @@ class RepositoryManager:
 
     @classmethod
     def _compute_directory_size(cls, directory: Path) -> int:
-        """Calculate total size of a directory in bytes."""
+        """Calculate total size of a directory in bytes fast."""
         total = 0
         try:
-            for root, _, files in os.walk(directory):
+            for root, dirs, files in os.walk(directory):
+                # Prune huge ignored subtrees from recursion for speed
+                dirs[:] = [d for d in dirs if d not in ("node_modules", ".git", ".venv", "__pycache__", ".cache", "dist", "build")]
                 for f in files:
-                    fp = Path(root) / f
                     try:
-                        total += fp.stat().st_size
+                        total += (Path(root) / f).stat().st_size
                     except OSError:
                         pass
         except Exception:

@@ -93,6 +93,22 @@ class ServiceStepHandler(BaseStepHandler):
         else:
             # 2. Standalone Docker Run Action (Postgres / Redis / Custom)
             res = executor.execute(step.command, cwd=working_dir)
+            if res.exit_code != 0 and ("Conflict" in res.stderr or "already in use" in res.stderr):
+                container_name = None
+                if "--name" in step.command:
+                    idx = step.command.index("--name")
+                    if idx + 1 < len(step.command):
+                        container_name = step.command[idx + 1]
+                if container_name:
+                    # Attempt to start the existing container
+                    start_res = executor.execute(["docker", "start", container_name], cwd=working_dir)
+                    if start_res.exit_code == 0:
+                        res = start_res
+                    else:
+                        # If start fails, remove and recreate
+                        executor.execute(["docker", "rm", "-f", container_name], cwd=working_dir)
+                        res = executor.execute(step.command, cwd=working_dir)
+
             if res.exit_code == 0:
                 # Extract container name from command if present (--name <name>)
                 container_name = None
@@ -119,6 +135,44 @@ class ServiceStepHandler(BaseStepHandler):
                             labels={"runrepo.managed": "true", f"runrepo.service": svc_type.value.lower()},
                         )
                     )
+
+                if "postgres" in step.id:
+                    port = 5432
+                    if "-p" in step.command:
+                        p_idx = step.command.index("-p")
+                        if p_idx + 1 < len(step.command):
+                            port_str = step.command[p_idx + 1].split(":")[0]
+                            try:
+                                port = int(port_str)
+                            except ValueError:
+                                pass
+                    db_name = "app_dev"
+                    for i, token in enumerate(step.command):
+                        if token.startswith("POSTGRES_DB="):
+                            db_name = token.split("=")[1]
+                        elif token == "-e" and i + 1 < len(step.command) and step.command[i + 1].startswith("POSTGRES_DB="):
+                            db_name = step.command[i + 1].split("=")[1]
+
+                    db_url = f"postgresql://postgres:postgres@localhost:{port}/{db_name}"
+                    import os
+
+                    os.environ["DATABASE_URL"] = db_url
+                    env_file = repo_path / ".env"
+                    if not env_file.exists():
+                        env_file.write_text(f"DATABASE_URL={db_url}\n", encoding="utf-8")
+                    else:
+                        lines = env_file.read_text(encoding="utf-8").splitlines()
+                        has_db_url = False
+                        new_lines = []
+                        for line in lines:
+                            if line.startswith("DATABASE_URL="):
+                                has_db_url = True
+                                new_lines.append(f"DATABASE_URL={db_url}")
+                            else:
+                                new_lines.append(line)
+                        if not has_db_url:
+                            new_lines.append(f"DATABASE_URL={db_url}")
+                        env_file.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
             else:
                 # Rollback partially created container on failure
                 if "--name" in step.command:

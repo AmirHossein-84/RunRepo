@@ -1,6 +1,7 @@
 """Tests for GitHub Pull Request URL parsing, cloning, and reproduction."""
 
 from pathlib import Path
+from typing import Any
 import pytest
 from runrepo.executor.process import ProcessExecutionResult, ProcessExecutor
 from runrepo.repository.github import GitHubUrlParser

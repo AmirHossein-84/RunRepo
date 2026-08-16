@@ -51,6 +51,56 @@ class ProcessExecutor(ABC):
 class SystemProcessExecutor(ProcessExecutor):
     """Production process executor using subprocess without shell=True."""
 
+    @staticmethod
+    def _sanitize_proxy_env(env_dict: dict[str, str]) -> None:
+        """Ensure proxy URLs conform to RFC URI format and bypass dead localhost proxies."""
+        import socket
+        from urllib.parse import urlparse
+
+        proxy_keys = ("http_proxy", "https_proxy", "all_proxy", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY")
+        for key in proxy_keys:
+            val = env_dict.get(key)
+            if val and val.strip():
+                clean = val.strip()
+                if not clean.startswith(("http://", "https://", "socks5://", "socks5h://")):
+                    clean = f"http://{clean}"
+
+                # If proxy points to local address, verify that the proxy server is actually listening
+                try:
+                    parsed = urlparse(clean)
+                    host = parsed.hostname
+                    port = parsed.port
+                    if host in ("127.0.0.1", "localhost", "::1") and port:
+                        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                            s.settimeout(0.15)
+                            if s.connect_ex((host, port)) != 0:
+                                # Dead localhost proxy: drop from environment so network calls succeed
+                                env_dict.pop(key, None)
+                                continue
+                except Exception:
+                    pass
+
+                env_dict[key] = clean
+
+    @staticmethod
+    def _load_dotenv(cwd: Path | None, env_dict: dict[str, str]) -> None:
+        """Load .env from cwd if present into env_dict without overriding existing non-empty keys."""
+        if not cwd:
+            return
+        env_file = cwd / ".env"
+        if env_file.exists() and env_file.is_file():
+            try:
+                for line in env_file.read_text(encoding="utf-8", errors="replace").splitlines():
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("'\"")
+                        if k and (k not in env_dict or not env_dict[k]):
+                            env_dict[k] = v
+            except Exception:
+                pass
+
     def execute(
         self,
         command: list[str],
@@ -67,8 +117,11 @@ class SystemProcessExecutor(ProcessExecutor):
             )
 
         merged_env = os.environ.copy()
+        merged_env["COREPACK_ENABLE_DOWNLOAD_PROMPT"] = "0"
+        self._load_dotenv(cwd, merged_env)
         if env:
             merged_env.update(env)
+        self._sanitize_proxy_env(merged_env)
 
         working_dir = str(cwd.resolve()) if cwd else None
         start_time = time.perf_counter()
@@ -147,8 +200,11 @@ class SystemProcessExecutor(ProcessExecutor):
             raise ValueError("Cannot launch empty command in background")
 
         merged_env = os.environ.copy()
+        merged_env["COREPACK_ENABLE_DOWNLOAD_PROMPT"] = "0"
+        self._load_dotenv(cwd, merged_env)
         if env:
             merged_env.update(env)
+        self._sanitize_proxy_env(merged_env)
 
         working_dir = str(cwd.resolve()) if cwd else None
         resolved_cmd = list(command)

@@ -9,6 +9,8 @@ from runrepo.models import (
     DatabaseRequirement,
     DatabaseType,
     DetectionEvidence,
+    EnvironmentVariable,
+    EnvVarCategory,
     ServiceRequirement,
 )
 
@@ -301,4 +303,25 @@ class DatabaseDetector(BaseDetector):
 
         result.databases.extend(databases.values())
         result.services.extend(services.values())
+
+        for db in databases.values():
+            if db.connection_var and not any(ev.name == db.connection_var for ev in result.environment_variables):
+                default_val = "postgresql://postgres:postgres@localhost:5432/app_dev"
+                if db.name == DatabaseType.MYSQL:
+                    default_val = "mysql://root:root@localhost:3306/app_dev"
+                elif db.name == DatabaseType.MONGODB:
+                    default_val = "mongodb://localhost:27017/app_dev"
+                elif db.name == DatabaseType.SQLITE:
+                    default_val = "file:./dev.db"
+
+                result.environment_variables.append(
+                    EnvironmentVariable(
+                        name=db.connection_var,
+                        category=EnvVarCategory.DATABASE,
+                        is_required=True,
+                        default_value=default_val,
+                        description=f"Connection string for {db.name.value} database",
+                    )
+                )
+
         return result

@@ -60,7 +60,7 @@ def test_poetry_zero_install_shim_planner():
     plan = planner.plan(project, env)
 
     install_step = next(s for s in plan.steps if s.id == "install-deps")
-    assert install_step.command == ["uvx", "poetry", "install"]
+    assert install_step.command == ["uvx", "poetry", "install", "--no-root"]
 
     start_step = next(s for s in plan.steps if s.id == "start-app")
     assert start_step.command == ["uvx", "--from", "poetry", "poetry", "run", "python", "main.py"]

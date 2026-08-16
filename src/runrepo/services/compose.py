@@ -36,8 +36,30 @@ class ComposeManager:
         project_path: str,
         registry: InfrastructureRegistry | None = None,
     ) -> ProcessExecutionResult:
-        """Execute `docker compose up -d` and track created resources."""
-        res = executor.execute(["docker", "compose", "up", "-d"], cwd=cwd, timeout_s=60)
+        """Execute `docker compose up -d` targeting backing services, and track created resources."""
+        import yaml
+
+        backing_services: list[str] = []
+        compose_file = cls.find_compose_file(cwd)
+        if compose_file:
+            try:
+                with open(compose_file, "r", encoding="utf-8") as f:
+                    cdata = yaml.safe_load(f)
+                if isinstance(cdata, dict) and isinstance(cdata.get("services"), dict):
+                    all_services = cdata["services"]
+                    has_build = any("build" in sdef for sdef in all_services.values() if isinstance(sdef, dict))
+                    if has_build:
+                        for sname, sdef in all_services.items():
+                            if isinstance(sdef, dict) and "build" not in sdef:
+                                backing_services.append(sname)
+            except Exception:
+                pass
+
+        up_cmd = ["docker", "compose", "up", "-d"]
+        if backing_services:
+            up_cmd.extend(backing_services)
+
+        res = executor.execute(up_cmd, cwd=cwd, timeout_s=60)
         if res.exit_code == 0 and registry is not None:
             # Inspect containers created by compose and register them
             ps_res = executor.execute(["docker", "compose", "ps", "--format", "json"], cwd=cwd, timeout_s=5)

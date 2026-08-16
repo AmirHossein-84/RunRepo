@@ -22,7 +22,7 @@ class HttpVerifier(BaseVerifier):
         self,
         accepted_status_codes: set[int] | None = None,
         poll_interval_s: float = 0.5,
-        max_timeout_s: float = 6.0,
+        max_timeout_s: float = 20.0,
     ) -> None:
         self.accepted_status_codes = accepted_status_codes or DEFAULT_ACCEPTED_HTTP_CODES
         self.poll_interval_s = poll_interval_s

@@ -370,16 +370,30 @@ class ExecutionPlanner:
         if project_info.subprojects and project_info.package_managers:
             root_pm = project_info.package_managers[0].name.lower()
             root_install_cmd: list[str] | None = None
+            root_install_pm_name = root_pm
+            use_uv_pip = False
+            pm_check = env_checks_map.get(root_pm)
+            is_pm_ok = pm_check and pm_check.status.value == "OK"
+            installed_v = pm_check.installed_version if pm_check else ""
+
             if root_pm == "pnpm":
-                root_install_cmd = ["pnpm", "install"]
+                if "npx" in (installed_v or "") or not is_pm_ok:
+                    root_install_cmd = ["npx", "-y", "pnpm", "install"]
+                    root_install_pm_name = "npx -y pnpm"
+                else:
+                    root_install_cmd = ["pnpm", "install"]
             elif root_pm == "yarn":
-                root_install_cmd = ["yarn", "install"]
+                if "npx" in (installed_v or "") or not is_pm_ok:
+                    root_install_cmd = ["npx", "-y", "yarn", "install"]
+                    root_install_pm_name = "npx -y yarn"
+                else:
+                    root_install_cmd = ["yarn", "install"]
             elif root_pm == "npm":
                 root_install_cmd = ["npm", "install"]
             elif root_pm == "uv":
                 root_install_cmd = ["uv", "sync"]
             elif root_pm == "poetry":
-                root_install_cmd = ["poetry", "install"]
+                root_install_cmd = ["poetry", "install", "--no-root"]
             elif root_pm == "pip":
                 pip_check = env_checks_map.get("pip")
                 use_uv_pip = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK")
@@ -462,7 +476,7 @@ class ExecutionPlanner:
                         cwd=None,
                         depends_on=root_prereqs,
                         risk=RiskLevel.REQUIRES_CONFIRMATION,
-                        reason=f"Install workspace dependencies using {'uv pip' if use_uv_pip else root_pm}",
+                        reason=f"Install workspace dependencies using {'uv pip' if use_uv_pip else root_install_pm_name}",
                         verification=StepVerification(
                             strategy="exit_code",
                             description=f"{' '.join(root_install_cmd)} returns 0",
@@ -510,10 +524,10 @@ class ExecutionPlanner:
                     install_cmd = ["uv", "sync"]
                 elif primary_pm == "poetry":
                     if "uvx" in installed_v or not is_pm_ok:
-                        install_cmd = ["uvx", "poetry", "install"]
+                        install_cmd = ["uvx", "poetry", "install", "--no-root"]
                         install_pm_name = "uvx poetry"
                     else:
-                        install_cmd = ["poetry", "install"]
+                        install_cmd = ["poetry", "install", "--no-root"]
                 elif primary_pm == "pipenv":
                     if "uvx" in installed_v or not is_pm_ok:
                         install_cmd = ["uvx", "pipenv", "install"]
@@ -656,20 +670,25 @@ class ExecutionPlanner:
             prisma_step_id = None
             if has_prisma and any(rt.name == "node" for rt in sc_rts):
                 prisma_step_id = f"generate-client:prisma{scope_prefix}"
-                prereq_deps = [deps_step_id] if install_cmd else ([root_deps_step_id] if root_deps_step_id else [])
+                prereq_deps = ([deps_step_id] if install_cmd else ([root_deps_step_id] if root_deps_step_id else [])) + env_step_ids + service_step_ids
+                prisma_cmd = ["npx", "prisma", "generate"]
+                prisma_ev = next((ev.path for db in project_info.databases for ev in db.evidence if "schema.prisma" in ev.path), None)
+                if prisma_ev and prisma_ev not in ("prisma/schema.prisma", "schema.prisma"):
+                    prisma_cmd.append(f"--schema={prisma_ev}")
+
                 steps.append(
                     PlanStep(
                         id=prisma_step_id,
                         description=f"Generate Prisma Client for {scope_name}",
                         action_type=ActionType.GENERATE_CLIENT,
-                        command=["npx", "prisma", "generate"],
+                        command=prisma_cmd,
                         cwd=scope_path,
-                        depends_on=prereq_deps,
+                        depends_on=list(dict.fromkeys(prereq_deps)),
                         risk=RiskLevel.REQUIRES_CONFIRMATION,
                         reason="Prisma schema requires client artifact generation",
                         verification=StepVerification(
                             strategy="exit_code",
-                            description="npx prisma generate returns 0",
+                            description=f"{' '.join(prisma_cmd)} returns 0",
                         ),
                     )
                 )
@@ -681,19 +700,26 @@ class ExecutionPlanner:
                 migration_step_id = f"run-migration:alembic{scope_prefix}"
                 prereq_deps = [deps_step_id] if install_cmd else ([root_deps_step_id] if root_deps_step_id else [])
                 mig_prereqs = prereq_deps + service_step_ids
+                if sc_pms and sc_pms[0].name.lower() == "poetry":
+                    mig_cmd = ["poetry", "run", "alembic", "upgrade", "head"]
+                elif use_uv_pip or any(pm.name.lower() == "uv" for pm in sc_pms):
+                    mig_cmd = ["uv", "run", "alembic", "upgrade", "head"]
+                else:
+                    mig_cmd = ["alembic", "upgrade", "head"]
+
                 steps.append(
                     PlanStep(
                         id=migration_step_id,
                         description=f"Run Alembic database migrations for {scope_name}",
                         action_type=ActionType.RUN_DATABASE_MIGRATION,
-                        command=["alembic", "upgrade", "head"],
+                        command=mig_cmd,
                         cwd=scope_path,
                         depends_on=mig_prereqs,
                         risk=RiskLevel.REQUIRES_CONFIRMATION,
                         reason="Apply pending database schema migrations",
                         verification=StepVerification(
                             strategy="exit_code",
-                            description="alembic upgrade head returns 0",
+                            description=f"{' '.join(mig_cmd)} returns 0",
                         ),
                     )
                 )
@@ -828,7 +854,15 @@ class ExecutionPlanner:
                 or (has_node and any(s.name.lower() in ("dev", "start", "serve") for s in sc_scripts))
             )
 
-            if "flask" in fw_names_lower:
+            # Determine if script is a library build rather than a web server
+            sub_script_cmds = " ".join(s.command for s in sc_scripts).lower()
+            is_library = (bool(scope_path and scope_path.startswith("packages/"))) or any(
+                b in sub_script_cmds for b in ("unbuild", "tsc", "rollup", "tsup")
+            )
+            if is_library and not any(p in (scope_path or "") for p in ("playground", "apps", "examples", "demo")):
+                target_url = None
+                verify_strategy = "process_liveness"
+            elif "flask" in fw_names_lower:
                 target_url = "http://127.0.0.1:5000"
                 verify_strategy = "http_health_check"
             elif "fastapi" in fw_names_lower or "django" in fw_names_lower:
