@@ -5,7 +5,7 @@ import shutil
 import time
 from pathlib import Path
 from runrepo.executor.process import ProcessExecutor, SystemProcessExecutor
-from runrepo.repository.models import CloneStatus, RepositoryResult, RepositoryTarget
+from runrepo.repository.models import CloneStatus, PullRequestTarget, RepositoryResult, RepositorySource, RepositoryTarget
 
 
 class GitManager:
@@ -138,5 +138,83 @@ class GitManager:
             error_message=error_message,
             git_output=sanitized_output,
             exit_code=exec_res.exit_code,
+            duration_ms=duration_ms,
+        )
+
+    def clone_pull_request(
+        self,
+        pr_target: PullRequestTarget,
+        destination: Path,
+    ) -> RepositoryResult:
+        """Clone and checkout a specific GitHub Pull Request ref into destination."""
+        start_time = time.perf_counter()
+        target_model = RepositoryTarget(
+            source=RepositorySource.GITHUB_PR,
+            raw_input=pr_target.raw_input,
+            owner=pr_target.owner,
+            name=pr_target.repo,
+            branch=f"pr-{pr_target.pr_number}",
+            clone_url=pr_target.clone_url,
+        )
+
+        if destination.exists():
+            shutil.rmtree(destination, ignore_errors=True)
+
+        destination.parent.mkdir(parents=True, exist_ok=True)
+
+        # 1. Initialize repo
+        init_res = self.executor.execute(["git", "init", str(destination)], cwd=destination.parent)
+        if init_res.exit_code != 0:
+            return RepositoryResult(
+                success=False,
+                target=target_model,
+                error_message=f"Failed to initialize git repository: {init_res.stderr}",
+            )
+
+        # 2. Add remote
+        remote_res = self.executor.execute(
+            ["git", "-C", str(destination), "remote", "add", "origin", pr_target.clone_url]
+        )
+        if remote_res.exit_code != 0:
+            shutil.rmtree(destination, ignore_errors=True)
+            return RepositoryResult(
+                success=False,
+                target=target_model,
+                error_message=f"Failed to add git remote: {remote_res.stderr}",
+            )
+
+        # 3. Fetch PR ref: refs/pull/<id>/head:pr-<id>
+        fetch_ref = f"refs/pull/{pr_target.pr_number}/head:pr-{pr_target.pr_number}"
+        fetch_res = self.executor.execute(
+            ["git", "-C", str(destination), "fetch", "--depth=1", "origin", fetch_ref]
+        )
+        if fetch_res.exit_code != 0:
+            shutil.rmtree(destination, ignore_errors=True)
+            return RepositoryResult(
+                success=False,
+                target=target_model,
+                error_message=f"Failed to fetch PR ref '{fetch_ref}': {fetch_res.stderr}",
+            )
+
+        # 4. Checkout PR branch
+        checkout_res = self.executor.execute(
+            ["git", "-C", str(destination), "checkout", f"pr-{pr_target.pr_number}"]
+        )
+        duration_ms = (time.perf_counter() - start_time) * 1000.0
+        if checkout_res.exit_code != 0:
+            shutil.rmtree(destination, ignore_errors=True)
+            return RepositoryResult(
+                success=False,
+                target=target_model,
+                error_message=f"Failed to checkout PR branch 'pr-{pr_target.pr_number}': {checkout_res.stderr}",
+            )
+
+        target_model.status = CloneStatus.CLONED
+        target_model.local_path = destination
+        return RepositoryResult(
+            success=True,
+            target=target_model,
+            local_path=destination,
+            exit_code=0,
             duration_ms=duration_ms,
         )

@@ -29,15 +29,16 @@ _COMPILED_EXTERNAL_REGEX = re.compile(
 )
 
 AUTO_GENERATABLE_SECRET_PATTERNS = [
-    r"^JWT_SECRET$",
-    r"^SESSION_SECRET$",
-    r"^APP_SECRET$",
-    r"^SECRET_KEY$",
-    r"^COOKIE_SECRET$",
-    r"^NEXTAUTH_SECRET$",
-    r"^AUTH_SECRET$",
-    r"^ENCRYPTION_KEY$",
-    r"^TOKEN_SECRET$",
+    r".*SECRET.*",
+    r".*TOKEN.*",
+    r".*ENCRYPTION_KEY.*",
+    r".*SALT.*",
+    r".*SIGNING_KEY.*",
+    r"^API_KEY$",
+    r"^APP_KEY$",
+    r"^MASTER_KEY$",
+    r"^COOKIE_KEY$",
+    r"^SESSION_KEY$",
 ]
 
 _COMPILED_AUTO_SECRET_REGEX = re.compile(
@@ -120,15 +121,11 @@ class EnvClassifier:
 
         # 3. Database connection & credentials
         if _COMPILED_DATABASE_REGEX.search(upper_name):
-            if has_local_postgres:
-                return EnvClassification.AUTO_GENERATABLE
-            return EnvClassification.USER_REQUIRED
+            return EnvClassification.AUTO_GENERATABLE
 
         # 4. Redis connection
         if _COMPILED_REDIS_REGEX.search(upper_name):
-            if has_local_redis:
-                return EnvClassification.AUTO_GENERATABLE
-            return EnvClassification.LOCAL_DEFAULT
+            return EnvClassification.AUTO_GENERATABLE
 
         # 5. Local defaults
         if _COMPILED_LOCAL_DEFAULT_REGEX.search(upper_name):

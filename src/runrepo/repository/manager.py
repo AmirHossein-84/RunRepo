@@ -96,6 +96,51 @@ class RepositoryManager:
         # Clone remote repository
         return self.git_manager.clone(target, destination, depth=depth)
 
+    def resolve_pull_request(
+        self,
+        pr_input: str,
+        refresh: bool = False,
+    ) -> RepositoryResult:
+        """Resolve a GitHub Pull Request URL to an isolated cached repository on disk."""
+        target_str = str(pr_input).strip()
+        try:
+            pr_target = GitHubUrlParser.parse_pull_request(target_str)
+        except ValueError as e:
+            dummy_target = RepositoryTarget(
+                source=RepositorySource.GITHUB_PR,
+                raw_input=target_str,
+            )
+            return RepositoryResult(
+                success=False,
+                target=dummy_target,
+                error_message=str(e),
+            )
+
+        pr_cache_dir = self.cache_dir.parent / "pr_cache"
+        pr_folder = f"{pr_target.owner}_{pr_target.repo}_pr{pr_target.pr_number}"
+        destination = (pr_cache_dir / pr_folder).resolve()
+
+        if destination.exists():
+            if not refresh and self.git_manager.verify_repository_valid(destination):
+                target_model = RepositoryTarget(
+                    source=RepositorySource.GITHUB_PR,
+                    raw_input=pr_target.raw_input,
+                    owner=pr_target.owner,
+                    name=pr_target.repo,
+                    branch=f"pr-{pr_target.pr_number}",
+                    clone_url=pr_target.clone_url,
+                    local_path=destination,
+                    status=CloneStatus.CACHED,
+                )
+                return RepositoryResult(
+                    success=True,
+                    target=target_model,
+                    local_path=destination,
+                )
+            shutil.rmtree(destination, ignore_errors=True)
+
+        return self.git_manager.clone_pull_request(pr_target, destination)
+
     def list_cached(self) -> CacheMetadata:
         """List all cached repositories, disk usage, and health status."""
         if not self.cache_dir.exists():

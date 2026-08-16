@@ -10,7 +10,9 @@ from runrepo.environment.checks import (
     check_node,
     check_npm,
     check_pip,
+    check_pipenv,
     check_pnpm,
+    check_poetry,
     check_python,
     check_uv,
     check_yarn,
@@ -155,6 +157,26 @@ class EnvironmentChecker:
                         )
                     )
                     seen_tools.add("pip")
+                elif pm_name == "poetry":
+                    checks.append(
+                        check_poetry(
+                            self.runner,
+                            required=True,
+                            required_version=pm.version,
+                            evidence=pm.evidence,
+                        )
+                    )
+                    seen_tools.add("poetry")
+                elif pm_name == "pipenv":
+                    checks.append(
+                        check_pipenv(
+                            self.runner,
+                            required=True,
+                            required_version=pm.version,
+                            evidence=pm.evidence,
+                        )
+                    )
+                    seen_tools.add("pipenv")
                 elif pm_name == "uv":
                     checks.append(
                         check_uv(

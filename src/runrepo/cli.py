@@ -32,7 +32,7 @@ console = Console(highlight=False)
 
 @app.callback()
 def main() -> None:
-    """RunRepo main CLI entrypoint."""
+    """RunRepo: Deterministic repository analyzer and local environment orchestrator."""
     pass
 
 
@@ -819,6 +819,301 @@ def clean_command(
             cleaned_count += 1
 
     console.print(f"\n[bold green]Successfully cleaned {cleaned_count} resource(s).[/bold green]\n")
+
+
+@app.command(name="start")
+def start_command(
+    path: Annotated[
+        str,
+        typer.Argument(
+            help="Path or GitHub URL/shorthand of repository to start",
+        ),
+    ] = ".",
+    dry_run: Annotated[
+        bool,
+        typer.Option(
+            "--dry-run",
+            help="Simulate startup without modifying files or running processes",
+        ),
+    ] = False,
+    yes: Annotated[
+        bool,
+        typer.Option(
+            "--yes",
+            "-y",
+            help="Automatically approve actions requiring confirmation",
+        ),
+    ] = False,
+    non_interactive: Annotated[
+        bool,
+        typer.Option(
+            "--non-interactive",
+            help="Run without interactive prompts",
+        ),
+    ] = False,
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Output raw structured ExecutionResult JSON",
+        ),
+    ] = False,
+) -> None:
+    """Start application and services for a repository."""
+    setup_command(
+        path=path,
+        dry_run=dry_run,
+        yes=yes,
+        non_interactive=non_interactive,
+        json_output=json_output,
+    )
+
+
+@app.command(name="pr")
+def pr_command(
+    url: Annotated[
+        str,
+        typer.Argument(
+            help="GitHub PR URL (https://github.com/owner/repo/pull/123) or shorthand (owner/repo#123)",
+        ),
+    ],
+    no_tests: Annotated[
+        bool,
+        typer.Option(
+            "--no-tests",
+            help="Skip running automated test suites",
+        ),
+    ] = False,
+    no_start: Annotated[
+        bool,
+        typer.Option(
+            "--no-start",
+            help="Skip application startup and live endpoint probes",
+        ),
+    ] = False,
+    refresh: Annotated[
+        bool,
+        typer.Option(
+            "--refresh",
+            "-r",
+            help="Force re-fetch/clone even if cached",
+        ),
+    ] = False,
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Output raw structured PRReproductionReport JSON",
+        ),
+    ] = False,
+) -> None:
+    """Reproduce, test, and verify a remote GitHub Pull Request locally."""
+    from runrepo.reproduce import PullRequestRunner
+
+    runner = PullRequestRunner()
+    report = runner.reproduce(
+        pr_url=url,
+        refresh=refresh,
+        run_tests=not no_tests,
+        start_app=not no_start,
+    )
+
+    if json_output:
+        typer.echo(report.model_dump_json(indent=2))
+    else:
+        console.print(f"\n{report.summary}\n")
+        if not report.setup_successful:
+            raise typer.Exit(code=1)
+
+
+@app.command(name="repair")
+def repair_command(
+    path: Annotated[
+        str,
+        typer.Argument(
+            help="Path to repository to repair",
+        ),
+    ] = ".",
+    yes: Annotated[
+        bool,
+        typer.Option(
+            "--yes",
+            "-y",
+            help="Automatically execute all remediation actions",
+        ),
+    ] = False,
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Output structured RepairResult JSON",
+        ),
+    ] = False,
+) -> None:
+    """Diagnose and autonomously repair broken virtualenvs, port conflicts, stopped Docker daemon, and .env files."""
+    target_path = resolve_target_path(path)
+    from runrepo.diagnostics.repair import EnvironmentRepairManager
+
+    repair_mgr = EnvironmentRepairManager()
+    result = repair_mgr.repair(target_path)
+
+    if json_output:
+        typer.echo(result.model_dump_json(indent=2))
+    else:
+        console.print(f"\n{result.summary}\n")
+
+
+@app.command(name="export")
+def export_command(
+    path: Annotated[
+        str,
+        typer.Argument(
+            help="Path to repository to export",
+        ),
+    ] = ".",
+    format: Annotated[
+        str,
+        typer.Option(
+            "--format",
+            "-f",
+            help="Output format: 'yaml' (runrepo.yaml) or 'lock' (runrepo.lock)",
+        ),
+    ] = "yaml",
+    out: Annotated[
+        Path | None,
+        typer.Option(
+            "--out",
+            "-o",
+            help="Optional output destination filepath",
+        ),
+    ] = None,
+) -> None:
+    """Export detected repository facts and environment configuration to runrepo.yaml or runrepo.lock."""
+    target_path = resolve_target_path(path)
+    from runrepo.reproduce import EnvironmentExporter
+
+    exporter = EnvironmentExporter()
+    if format.lower() in ("lock", "json"):
+        content = exporter.export_lock(target_path)
+    else:
+        content = exporter.export_yaml(target_path)
+
+    if out:
+        out.write_text(content, encoding="utf-8")
+        console.print(f"[bold green]Exported configuration to:[/] {out}")
+    else:
+        typer.echo(content)
+
+
+@app.command(name="reproduce")
+def reproduce_command(
+    path: Annotated[
+        str,
+        typer.Argument(
+            help="Path to repository to reproduce",
+        ),
+    ] = ".",
+    lock_file: Annotated[
+        Path | None,
+        typer.Option(
+            "--lock-file",
+            "-l",
+            help="Explicit path to runrepo.lock",
+        ),
+    ] = None,
+    dry_run: Annotated[
+        bool,
+        typer.Option(
+            "--dry-run",
+            help="Simulate execution without modifying system",
+        ),
+    ] = False,
+    yes: Annotated[
+        bool,
+        typer.Option(
+            "--yes",
+            "-y",
+            help="Automatically approve reproduction steps",
+        ),
+    ] = False,
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Output raw structured ExecutionResult JSON",
+        ),
+    ] = False,
+) -> None:
+    """Deterministically recreate a project environment from runrepo.lock or runrepo.yaml."""
+    target_path = resolve_target_path(path)
+    from runrepo.reproduce import EnvironmentReproducer
+
+    reproducer = EnvironmentReproducer()
+    success, exec_res, warnings = reproducer.reproduce(target_path, lock_path=lock_file, dry_run=dry_run)
+
+    if warnings:
+        console.print("[bold yellow]Reproducibility Warnings / Drift:[/bold yellow]")
+        for w in warnings:
+            console.print(f"  [yellow]•[/yellow] {w}")
+
+    if json_output and exec_res:
+        typer.echo(exec_res.model_dump_json(indent=2))
+    elif not json_output and exec_res:
+        from runrepo.ui import render_execution_result
+
+        render_execution_result(exec_res, console=console)
+
+    if not success:
+        raise typer.Exit(code=1)
+
+
+@app.command(name="share")
+def share_command(
+    path: Annotated[
+        str,
+        typer.Argument(
+            help="Path to repository to generate onboarding share guide",
+        ),
+    ] = ".",
+    out_dir: Annotated[
+        Path | None,
+        typer.Option(
+            "--out-dir",
+            "-o",
+            help="Directory to write setup.sh, setup.ps1, and GUIDE.md",
+        ),
+    ] = None,
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            "-j",
+            help="Output raw structured ShareSpec JSON",
+        ),
+    ] = False,
+) -> None:
+    """Generate human-readable developer onboarding guides and copy-pasteable setup scripts."""
+    target_path = resolve_target_path(path)
+    from runrepo.reproduce import ShareGenerator
+
+    gen = ShareGenerator()
+    spec = gen.generate(target_path)
+
+    if json_output:
+        typer.echo(spec.model_dump_json(indent=2))
+    else:
+        if out_dir:
+            out_dir.mkdir(parents=True, exist_ok=True)
+            (out_dir / "GUIDE.md").write_text(spec.markdown_guide, encoding="utf-8")
+            (out_dir / "setup.sh").write_text(spec.bash_script, encoding="utf-8")
+            (out_dir / "setup.ps1").write_text(spec.powershell_script, encoding="utf-8")
+            console.print(f"[bold green]Generated onboarding guide and setup scripts in:[/] {out_dir}")
+        else:
+            console.print(spec.markdown_guide)
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ import os
 import re
 from pathlib import Path
 from urllib.parse import urlparse
-from runrepo.repository.models import RepositorySource, RepositoryTarget
+from runrepo.repository.models import PullRequestTarget, RepositorySource, RepositoryTarget
 
 
 class GitHubUrlParser:
@@ -132,4 +132,48 @@ class GitHubUrlParser:
         raise ValueError(
             f"Unrecognized repository format: '{clean_input}'. "
             f"Provide a local directory path, GitHub URL, or 'owner/repo' shorthand."
+        )
+
+    @classmethod
+    def parse_pull_request(cls, input_str: str) -> PullRequestTarget:
+        """Parse a GitHub Pull Request URL or reference into a structured PullRequestTarget."""
+        clean_input = input_str.strip()
+        # Full URL: https://github.com/owner/repo/pull/123
+        pr_match = re.search(
+            r"(?:https?://github\.com/|github\.com/)?([a-zA-Z0-9_-]+)/([a-zA-Z0-9_.-]+?)/(?:pull)/(\d+)",
+            clean_input,
+        )
+        if pr_match:
+            owner, repo, pr_num = pr_match.group(1), pr_match.group(2), int(pr_match.group(3))
+            if repo.endswith(".git"):
+                repo = repo[:-4]
+            cls._validate_owner_repo(owner, repo)
+            return PullRequestTarget(
+                raw_input=clean_input,
+                owner=owner,
+                repo=repo,
+                pr_number=pr_num,
+                clone_url=f"https://github.com/{owner}/{repo}.git",
+                ref=f"pull/{pr_num}/head",
+            )
+
+        # Shorthand: owner/repo#123 or owner/repo#pull/123
+        short_match = re.match(r"^([a-zA-Z0-9_-]+)/([a-zA-Z0-9_.-]+?)(?:#|#pull/)(\d+)$", clean_input)
+        if short_match:
+            owner, repo, pr_num = short_match.group(1), short_match.group(2), int(short_match.group(3))
+            if repo.endswith(".git"):
+                repo = repo[:-4]
+            cls._validate_owner_repo(owner, repo)
+            return PullRequestTarget(
+                raw_input=clean_input,
+                owner=owner,
+                repo=repo,
+                pr_number=pr_num,
+                clone_url=f"https://github.com/{owner}/{repo}.git",
+                ref=f"pull/{pr_num}/head",
+            )
+
+        raise ValueError(
+            f"Invalid GitHub Pull Request URL or reference: '{clean_input}'. "
+            f"Expected 'https://github.com/owner/repo/pull/123' or 'owner/repo#123'."
         )

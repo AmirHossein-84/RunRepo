@@ -13,6 +13,18 @@ class RepositorySource(StrEnum):
     GITHUB_HTTPS = "GITHUB_HTTPS"
     GITHUB_SSH = "GITHUB_SSH"
     GITHUB_SHORTHAND = "GITHUB_SHORTHAND"
+    GITHUB_PR = "GITHUB_PR"
+
+
+class PullRequestTarget(BaseModel):
+    """Structured representation of a parsed GitHub Pull Request target."""
+
+    raw_input: str = Field(description="Original user-provided PR URL")
+    owner: str = Field(description="GitHub repository owner/organization")
+    repo: str = Field(description="Repository name")
+    pr_number: int = Field(description="Pull request issue number")
+    clone_url: str = Field(description="Base GitHub HTTPS clone URL")
+    ref: str = Field(description="Git ref to fetch, e.g. 'pull/123/head'")
 
 
 class CloneStatus(StrEnum):

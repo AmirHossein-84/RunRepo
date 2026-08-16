@@ -1,10 +1,12 @@
 """Cross-platform operating system adapter handling Windows, Linux, and macOS differences."""
 
 import os
+from pathlib import Path
 import platform
 import shutil
 import signal
 import subprocess
+import time
 from runrepo.platform.models import OperatingSystem, PlatformCapabilities, SystemPackageManager
 
 
@@ -49,6 +51,45 @@ class PlatformAdapter:
                     return True
                 except Exception:
                     return False
+
+    @classmethod
+    def start_docker_daemon(cls, timeout_s: float = 10.0) -> bool:
+        """Attempt to start the Docker daemon asynchronously and poll for readiness."""
+        current_os = cls.get_os()
+        try:
+            if current_os == OperatingSystem.WINDOWS:
+                desktop_paths = [
+                    Path(os.environ.get("ProgramFiles", "C:\\Program Files")) / "Docker" / "Docker" / "Docker Desktop.exe",
+                    Path(os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)")) / "Docker" / "Docker" / "Docker Desktop.exe",
+                ]
+                for p in desktop_paths:
+                    if p.exists():
+                        subprocess.Popen([str(p)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                        break
+                else:
+                    subprocess.Popen(["powershell", "-Command", "Start-Process 'Docker Desktop' -ErrorAction SilentlyContinue"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            elif current_os == OperatingSystem.MACOS:
+                subprocess.Popen(["open", "-a", "Docker"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            elif current_os == OperatingSystem.LINUX:
+                if shutil.which("systemctl"):
+                    subprocess.Popen(["systemctl", "start", "docker"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                elif shutil.which("service"):
+                    subprocess.Popen(["service", "docker", "start"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                else:
+                    subprocess.Popen(["dockerd"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception:
+            pass
+
+        start_time = time.perf_counter()
+        while time.perf_counter() - start_time < timeout_s:
+            try:
+                res = subprocess.run(["docker", "info"], capture_output=True, timeout=2.0)
+                if res.returncode == 0:
+                    return True
+            except Exception:
+                pass
+            time.sleep(1.0)
+        return False
 
     @classmethod
     def detect_system_package_managers(cls) -> list[str]:

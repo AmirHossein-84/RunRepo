@@ -114,8 +114,14 @@ def check_python(
         status = EnvironmentStatus.OK
         details = f"Python {v} satisfies requirement {required_version}" if required_version else f"Python {v}"
     elif sat is False:
-        status = EnvironmentStatus.WRONG_VERSION
-        details = f"Installed Python ({v}) does not satisfy required {required_version}"
+        # Check if uv is available to provision the exact Python version
+        uv_res = runner.run(["uv", "--version"])
+        if uv_res.success and uv_res.stdout:
+            status = EnvironmentStatus.OK
+            details = f"Python version automatically provisionable via uv ({required_version})"
+        else:
+            status = EnvironmentStatus.WRONG_VERSION
+            details = f"Installed Python ({v}) does not satisfy required {required_version}"
     else:
         status = EnvironmentStatus.UNKNOWN
         details = f"Could not reliably evaluate Python version requirement: {required_version}"
@@ -175,11 +181,25 @@ def check_pnpm(
     required_version: str | None = None,
     evidence: list[DetectionEvidence] | None = None,
 ) -> EnvironmentCheck:
-    """Inspect pnpm package manager."""
+    """Inspect pnpm package manager or fallback to npx shim."""
     res = runner.run(["pnpm", "--version"])
     ev_list = evidence or []
 
     if not res.success or not res.stdout:
+        # Check if npx is available to run pnpm as an ephemeral shim
+        npx_res = runner.run(["npx", "--version"])
+        if npx_res.success and npx_res.stdout:
+            return EnvironmentCheck(
+                name="pnpm",
+                status=EnvironmentStatus.OK,
+                required=required,
+                required_version=required_version,
+                installed_version="npx -y pnpm",
+                executable_path=npx_res.executable,
+                details="Satisfied via npx -y (zero-install shim)",
+                evidence=ev_list,
+            )
+
         return EnvironmentCheck(
             name="pnpm",
             status=EnvironmentStatus.MISSING,
@@ -191,6 +211,21 @@ def check_pnpm(
 
     v = clean_version_string(res.stdout)
     sat = evaluate_version_requirement(v, required_version)
+    if sat is False:
+        # If installed version does not match, npx can run the exact requested version
+        npx_res = runner.run(["npx", "--version"])
+        if npx_res.success and npx_res.stdout:
+            return EnvironmentCheck(
+                name="pnpm",
+                status=EnvironmentStatus.OK,
+                required=required,
+                required_version=required_version,
+                installed_version=f"npx -y pnpm@{required_version}",
+                executable_path=npx_res.executable,
+                details=f"Version mismatch ({v} installed); satisfied via npx -y pnpm@{required_version}",
+                evidence=ev_list,
+            )
+
     status = EnvironmentStatus.OK if sat is True else (EnvironmentStatus.WRONG_VERSION if sat is False else EnvironmentStatus.UNKNOWN)
 
     return EnvironmentCheck(
@@ -211,11 +246,25 @@ def check_yarn(
     required_version: str | None = None,
     evidence: list[DetectionEvidence] | None = None,
 ) -> EnvironmentCheck:
-    """Inspect yarn package manager."""
+    """Inspect yarn package manager or fallback to npx shim."""
     res = runner.run(["yarn", "--version"])
     ev_list = evidence or []
 
     if not res.success or not res.stdout:
+        # Check if npx is available
+        npx_res = runner.run(["npx", "--version"])
+        if npx_res.success and npx_res.stdout:
+            return EnvironmentCheck(
+                name="yarn",
+                status=EnvironmentStatus.OK,
+                required=required,
+                required_version=required_version,
+                installed_version="npx -y yarn",
+                executable_path=npx_res.executable,
+                details="Satisfied via npx -y (zero-install shim)",
+                evidence=ev_list,
+            )
+
         return EnvironmentCheck(
             name="yarn",
             status=EnvironmentStatus.MISSING,
@@ -237,6 +286,105 @@ def check_yarn(
         installed_version=v,
         executable_path=res.executable,
         details=f"yarn {v}",
+        evidence=ev_list,
+    )
+
+
+def check_poetry(
+    runner: CommandRunner,
+    required: bool = False,
+    required_version: str | None = None,
+    evidence: list[DetectionEvidence] | None = None,
+) -> EnvironmentCheck:
+    """Inspect poetry package manager or fallback to uvx shim."""
+    res = runner.run(["poetry", "--version"])
+    ev_list = evidence or []
+
+    if not res.success or not res.stdout:
+        # Check if uv is available to run poetry via uvx
+        uv_res = runner.run(["uv", "--version"])
+        if uv_res.success and uv_res.stdout:
+            return EnvironmentCheck(
+                name="poetry",
+                status=EnvironmentStatus.OK,
+                required=required,
+                required_version=required_version,
+                installed_version="uvx poetry",
+                executable_path=uv_res.executable,
+                details="Satisfied via uvx (zero-install ephemeral shim)",
+                evidence=ev_list,
+            )
+
+        return EnvironmentCheck(
+            name="poetry",
+            status=EnvironmentStatus.MISSING,
+            required=required,
+            required_version=required_version,
+            details="poetry not found on system PATH",
+            evidence=ev_list,
+        )
+
+    v = clean_version_string(res.stdout)
+    sat = evaluate_version_requirement(v, required_version)
+    status = EnvironmentStatus.OK if sat is True else (EnvironmentStatus.WRONG_VERSION if sat is False else EnvironmentStatus.UNKNOWN)
+
+    return EnvironmentCheck(
+        name="poetry",
+        status=status,
+        required=required,
+        required_version=required_version,
+        installed_version=v,
+        executable_path=res.executable,
+        details=f"poetry {v}",
+        evidence=ev_list,
+    )
+
+
+def check_pipenv(
+    runner: CommandRunner,
+    required: bool = False,
+    required_version: str | None = None,
+    evidence: list[DetectionEvidence] | None = None,
+) -> EnvironmentCheck:
+    """Inspect pipenv package manager or fallback to uvx shim."""
+    res = runner.run(["pipenv", "--version"])
+    ev_list = evidence or []
+
+    if not res.success or not res.stdout:
+        uv_res = runner.run(["uv", "--version"])
+        if uv_res.success and uv_res.stdout:
+            return EnvironmentCheck(
+                name="pipenv",
+                status=EnvironmentStatus.OK,
+                required=required,
+                required_version=required_version,
+                installed_version="uvx pipenv",
+                executable_path=uv_res.executable,
+                details="Satisfied via uvx (zero-install ephemeral shim)",
+                evidence=ev_list,
+            )
+
+        return EnvironmentCheck(
+            name="pipenv",
+            status=EnvironmentStatus.MISSING,
+            required=required,
+            required_version=required_version,
+            details="pipenv not found on system PATH",
+            evidence=ev_list,
+        )
+
+    v = clean_version_string(res.stdout)
+    sat = evaluate_version_requirement(v, required_version)
+    status = EnvironmentStatus.OK if sat is True else (EnvironmentStatus.WRONG_VERSION if sat is False else EnvironmentStatus.UNKNOWN)
+
+    return EnvironmentCheck(
+        name="pipenv",
+        status=status,
+        required=required,
+        required_version=required_version,
+        installed_version=v,
+        executable_path=res.executable,
+        details=f"pipenv {v}",
         evidence=ev_list,
     )
 

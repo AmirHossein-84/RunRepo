@@ -5,7 +5,7 @@ from typing import Any
 
 from runrepo.environment.models import EnvironmentCheck, EnvironmentState, EnvironmentStatus
 from runrepo.environment.venv import VirtualEnvStatus, inspect_virtual_env
-from runrepo.models import FrameworkCategory, ProjectInfo, ProjectType, SubprojectInfo
+from runrepo.models import EnvVarCategory, FrameworkCategory, ProjectInfo, ProjectType, SubprojectInfo
 from runrepo.planner.graph import PlanGraph
 from runrepo.planner.models import (
     ActionType,
@@ -136,18 +136,36 @@ class ExecutionPlanner:
         # ---------------------------------------------------------
         env_step_ids: list[str] = []
         if project_info.environment_variables:
-            required_secrets = [
+            external_secrets = [
                 ev for ev in project_info.environment_variables
-                if ev.is_required and (ev.category.value in ("secret", "external_service") or not ev.default_value)
+                if ev.is_required and (ev.category == EnvVarCategory.EXTERNAL_SERVICE or "OPENAI" in ev.name.upper() or "STRIPE" in ev.name.upper() or "AWS_" in ev.name.upper()) and not ev.default_value
             ]
             local_defaults = [
                 ev for ev in project_info.environment_variables
-                if ev not in required_secrets
+                if ev not in external_secrets
             ]
 
-            if required_secrets:
+            if local_defaults:
+                step_id = "configure-env:template"
+                steps.append(
+                    PlanStep(
+                        id=step_id,
+                        description="Create .env from template configuration",
+                        action_type=ActionType.CONFIGURE_ENV,
+                        risk=RiskLevel.REQUIRES_CONFIRMATION,
+                        reason="Prepare local environment variables from template (.env.example)",
+                        verification=StepVerification(
+                            strategy="file_exists",
+                            target=".env",
+                            description=".env file exists in project directory",
+                        ),
+                    )
+                )
+                env_step_ids.append(step_id)
+
+            if external_secrets:
                 step_id = "configure-env:secrets"
-                keys_str = ", ".join(ev.name for ev in required_secrets)
+                keys_str = ", ".join(ev.name for ev in external_secrets)
                 input_reasons.append(
                     f"Required environment credentials/secrets needed: {keys_str}"
                 )
@@ -167,24 +185,6 @@ class ExecutionPlanner:
                 )
                 env_step_ids.append(step_id)
 
-            if local_defaults and not required_secrets:
-                step_id = "configure-env:template"
-                steps.append(
-                    PlanStep(
-                        id=step_id,
-                        description="Create .env from template configuration",
-                        action_type=ActionType.CONFIGURE_ENV,
-                        risk=RiskLevel.REQUIRES_CONFIRMATION,
-                        reason="Prepare local environment variables from template (.env.example)",
-                        verification=StepVerification(
-                            strategy="file_exists",
-                            target=".env",
-                            description=".env file exists in project directory",
-                        ),
-                    )
-                )
-                env_step_ids.append(step_id)
-
         # ---------------------------------------------------------
         # 4. Infrastructure & Database Services
         # ---------------------------------------------------------
@@ -192,14 +192,37 @@ class ExecutionPlanner:
         docker_check = env_checks_map.get("docker")
         compose_check = env_checks_map.get("docker-compose")
         docker_ok = docker_check is not None and docker_check.status == EnvironmentStatus.OK
+        docker_broken = docker_check is not None and docker_check.status == EnvironmentStatus.BROKEN
         compose_ok = compose_check is not None and compose_check.status == EnvironmentStatus.OK
+        needs_services = bool(project_info.docker.compose_files) or bool(project_info.databases) or bool(project_info.services)
+
+        docker_daemon_step_id: str | None = None
+        if docker_broken and needs_services:
+            docker_daemon_step_id = "start-docker-daemon"
+            steps.append(
+                PlanStep(
+                    id=docker_daemon_step_id,
+                    description="Start Docker daemon in background",
+                    action_type=ActionType.START_SERVICE,
+                    command=["runrepo", "service", "start-docker"],
+                    depends_on=env_step_ids,
+                    risk=RiskLevel.SAFE,
+                    reason="Docker CLI is installed, but the daemon is stopped; attempting background start",
+                    verification=StepVerification(
+                        strategy="exit_code",
+                        description="Docker daemon is active",
+                    ),
+                )
+            )
+
+        svc_deps = ([docker_daemon_step_id] if docker_daemon_step_id else []) + env_step_ids
 
         # 4a. Docker Compose (Preferred if present)
         if project_info.docker.compose_files:
             step_id = "start-service:docker-compose"
-            if not docker_ok or not compose_ok:
-                detail = docker_check.details if docker_check else "Docker CLI or daemon is unavailable"
-                blocking_reasons.append(f"Docker infrastructure services are required, but Docker is non-operational: {detail}")
+            if not docker_ok and not docker_broken:
+                detail = docker_check.details if docker_check else "Docker CLI is not installed"
+                blocking_reasons.append(f"Docker infrastructure services are required, but Docker is missing: {detail}")
                 steps.append(
                     PlanStep(
                         id=step_id,
@@ -218,7 +241,7 @@ class ExecutionPlanner:
                         description="Start Docker Compose infrastructure services",
                         action_type=ActionType.START_SERVICE,
                         command=["docker", "compose", "up", "-d"],
-                        depends_on=env_step_ids,
+                        depends_on=svc_deps,
                         risk=RiskLevel.REQUIRES_CONFIRMATION,
                         reason=f"Start database/cache containers defined in {project_info.docker.compose_files[0]}",
                         verification=StepVerification(
@@ -243,8 +266,8 @@ class ExecutionPlanner:
                 step_id = "start-service:postgres"
                 sanitized_name = "".join(c if c.isalnum() or c == "_" else "_" for c in project_info.name).strip("_").lower() or "app"
                 container_name = f"runrepo-{sanitized_name}-postgres"
-                if not docker_ok:
-                    blocking_reasons.append("PostgreSQL database is required by repository, but Docker is not running")
+                if not docker_ok and not docker_broken:
+                    blocking_reasons.append("PostgreSQL database is required by repository, but Docker is not installed")
                     steps.append(
                         PlanStep(
                             id=step_id,
@@ -275,7 +298,7 @@ class ExecutionPlanner:
                                 "-e", "POSTGRES_PASSWORD=postgres",
                                 "postgres:16-alpine",
                             ],
-                            depends_on=env_step_ids,
+                            depends_on=svc_deps,
                             risk=RiskLevel.REQUIRES_CONFIRMATION,
                             reason="PostgreSQL required by repository schema/configuration",
                             verification=StepVerification(
@@ -296,8 +319,8 @@ class ExecutionPlanner:
                 step_id = "start-service:redis"
                 sanitized_name = "".join(c if c.isalnum() or c == "_" else "_" for c in project_info.name).strip("_").lower() or "app"
                 container_name = f"runrepo-{sanitized_name}-redis"
-                if not docker_ok:
-                    blocking_reasons.append("Redis cache/queue is required by repository, but Docker is not running")
+                if not docker_ok and not docker_broken:
+                    blocking_reasons.append("Redis cache/queue is required by repository, but Docker is not installed")
                     steps.append(
                         PlanStep(
                             id=step_id,
@@ -312,8 +335,6 @@ class ExecutionPlanner:
                 else:
                     from runrepo.services.ports import find_available_port
                     redis_port = find_available_port(6379)
-                    sanitized_name = "".join(c if c.isalnum() or c == "_" else "_" for c in project_info.name).lower()
-                    container_name = f"runrepo-{sanitized_name}-redis"
 
                     steps.append(
                         PlanStep(
@@ -326,9 +347,9 @@ class ExecutionPlanner:
                                 "-p", f"{redis_port}:6379",
                                 "redis:7-alpine",
                             ],
-                            depends_on=env_step_ids,
+                            depends_on=svc_deps,
                             risk=RiskLevel.REQUIRES_CONFIRMATION,
-                            reason="Redis required by repository",
+                            reason="Redis cache required by repository",
                             verification=StepVerification(
                                 strategy="port_reachable",
                                 target=str(redis_port),
@@ -467,23 +488,69 @@ class ExecutionPlanner:
             if sc_pms:
                 primary_pm = sc_pms[0].name.lower()
                 install_pm_name = primary_pm
+                pm_check = env_checks_map.get(primary_pm)
+                is_pm_ok = pm_check and pm_check.status.value == "OK"
+                installed_v = (pm_check.installed_version or "").lower() if pm_check else ""
+
                 if primary_pm == "pnpm":
-                    install_cmd = ["pnpm", "install"]
+                    if "npx" in installed_v or not is_pm_ok:
+                        install_cmd = ["npx", "-y", "pnpm", "install"]
+                        install_pm_name = "npx -y pnpm"
+                    else:
+                        install_cmd = ["pnpm", "install"]
                 elif primary_pm == "yarn":
-                    install_cmd = ["yarn", "install"]
+                    if "npx" in installed_v or not is_pm_ok:
+                        install_cmd = ["npx", "-y", "yarn", "install"]
+                        install_pm_name = "npx -y yarn"
+                    else:
+                        install_cmd = ["yarn", "install"]
                 elif primary_pm == "npm":
                     install_cmd = ["npm", "install"]
                 elif primary_pm == "uv":
                     install_cmd = ["uv", "sync"]
                 elif primary_pm == "poetry":
-                    install_cmd = ["poetry", "install"]
+                    if "uvx" in installed_v or not is_pm_ok:
+                        install_cmd = ["uvx", "poetry", "install"]
+                        install_pm_name = "uvx poetry"
+                    else:
+                        install_cmd = ["poetry", "install"]
+                elif primary_pm == "pipenv":
+                    if "uvx" in installed_v or not is_pm_ok:
+                        install_cmd = ["uvx", "pipenv", "install"]
+                        install_pm_name = "uvx pipenv"
+                    else:
+                        install_cmd = ["pipenv", "install"]
                 elif primary_pm == "pip":
                     target_dir = Path(project_info.path) / (scope_path or "")
                     pip_check = env_checks_map.get("pip")
                     use_uv_pip = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK")
                     if use_uv_pip:
                         py_req = next((rt.version for rt in sc_rts if rt.name.lower() == "python"), None)
+                        py_check = env_checks_map.get("python")
+                        needs_python_download = py_req and py_check and ("uv" in (py_check.installed_version or "").lower() or "provisionable" in (py_check.details or "").lower() or py_check.status.value == "WRONG_VERSION")
+                        if needs_python_download:
+                            py_inst_id = f"install-python:{py_req}"
+                            if not any(s.id == py_inst_id for s in steps):
+                                steps.append(
+                                    PlanStep(
+                                        id=py_inst_id,
+                                        description=f"Auto-provision Python {py_req} via uv",
+                                        action_type=ActionType.INSTALL_DEPENDENCIES,
+                                        command=["uv", "python", "install", py_req],
+                                        cwd=None,
+                                        depends_on=list(deps_prereqs),
+                                        risk=RiskLevel.SAFE,
+                                        reason=f"Download and provision isolated Python {py_req} in user cache",
+                                        verification=StepVerification(
+                                            strategy="exit_code",
+                                            description=f"uv python install {py_req} returns 0",
+                                        ),
+                                    )
+                                )
+                                deps_prereqs.append(py_inst_id)
+
                         venv_info = inspect_virtual_env(target_dir, required_version=py_req)
+                        venv_cmd = ["uv", "venv", "--python", py_req] if (needs_python_download and py_req) else ["uv", "venv"]
                         if venv_info.status == VirtualEnvStatus.NOT_FOUND:
                             venv_step_id = f"create-venv{scope_prefix}"
                             steps.append(
@@ -491,7 +558,7 @@ class ExecutionPlanner:
                                     id=venv_step_id,
                                     description=f"Create virtual environment for {scope_name}" if scope_name != "root" else "Create virtual environment",
                                     action_type=ActionType.INSTALL_DEPENDENCIES,
-                                    command=["uv", "venv"],
+                                    command=venv_cmd,
                                     cwd=scope_path,
                                     depends_on=list(deps_prereqs),
                                     risk=RiskLevel.SAFE,
@@ -510,12 +577,13 @@ class ExecutionPlanner:
                                 if venv_info.status == VirtualEnvStatus.WRONG_VERSION
                                 else f"Replace broken virtual environment ({venv_info.details})"
                             )
+                            replace_cmd = ["uv", "venv", "--clear", "--python", py_req] if (needs_python_download and py_req) else ["uv", "venv", "--clear"]
                             steps.append(
                                 PlanStep(
                                     id=replace_step_id,
                                     description=f"Replace virtual environment for {scope_name}" if scope_name != "root" else "Replace virtual environment",
                                     action_type=ActionType.INSTALL_DEPENDENCIES,
-                                    command=["uv", "venv", "--clear"],
+                                    command=replace_cmd,
                                     cwd=scope_path,
                                     depends_on=list(deps_prereqs),
                                     risk=RiskLevel.REQUIRES_CONFIRMATION,
@@ -640,14 +708,34 @@ class ExecutionPlanner:
                 pm_bin = install_pm_name or "npm"
                 for cand in ("dev", "start", "serve"):
                     if cand in script_names:
-                        candidate_list.append(f"{pm_bin} run {cand}" if pm_bin != "npm" or cand != "start" else "npm start")
+                        if "npx -y pnpm" in pm_bin:
+                            candidate_list.append(f"npx -y pnpm run {cand}" if cand != "start" else "npx -y pnpm start")
+                        elif "npx -y yarn" in pm_bin:
+                            candidate_list.append(f"npx -y yarn {cand}")
+                        else:
+                            candidate_list.append(f"{pm_bin} run {cand}" if pm_bin != "npm" or cand != "start" else "npm start")
 
                 if "dev" in script_names:
-                    start_cmd_tokens = [pm_bin, "run", "dev"] if pm_bin != "npm" else ["npm", "run", "dev"]
+                    if "npx -y pnpm" in pm_bin:
+                        start_cmd_tokens = ["npx", "-y", "pnpm", "run", "dev"]
+                    elif "npx -y yarn" in pm_bin:
+                        start_cmd_tokens = ["npx", "-y", "yarn", "dev"]
+                    else:
+                        start_cmd_tokens = [pm_bin, "run", "dev"] if pm_bin != "npm" else ["npm", "run", "dev"]
                 elif "start" in script_names:
-                    start_cmd_tokens = [pm_bin, "start"]
+                    if "npx -y pnpm" in pm_bin:
+                        start_cmd_tokens = ["npx", "-y", "pnpm", "start"]
+                    elif "npx -y yarn" in pm_bin:
+                        start_cmd_tokens = ["npx", "-y", "yarn", "start"]
+                    else:
+                        start_cmd_tokens = [pm_bin, "start"]
                 elif "serve" in script_names:
-                    start_cmd_tokens = [pm_bin, "run", "serve"]
+                    if "npx -y pnpm" in pm_bin:
+                        start_cmd_tokens = ["npx", "-y", "pnpm", "run", "serve"]
+                    elif "npx -y yarn" in pm_bin:
+                        start_cmd_tokens = ["npx", "-y", "yarn", "serve"]
+                    else:
+                        start_cmd_tokens = [pm_bin, "run", "serve"]
 
             # Python startup resolution
             elif any(rt.name == "python" for rt in sc_rts):
@@ -658,34 +746,48 @@ class ExecutionPlanner:
                     if cand in script_dict:
                         candidate_list.append(script_dict[cand])
 
-                if "dev" in script_dict:
-                    start_cmd_tokens = script_dict["dev"].split()
-                elif "start" in script_dict:
-                    start_cmd_tokens = script_dict["start"].split()
-                elif "run" in script_dict:
-                    start_cmd_tokens = script_dict["run"].split()
-                elif "fastapi" in fw_names:
-                    start_cmd_tokens = ["fastapi", "dev", "main.py"]
-                    candidate_list.append("fastapi dev main.py")
-                elif "django" in fw_names:
-                    start_cmd_tokens = ["python", "manage.py", "runserver"]
-                    candidate_list.append("python manage.py runserver")
-                elif "flask" in fw_names:
-                    start_cmd_tokens = ["flask", "run"]
-                    candidate_list.append("flask run")
-                elif "streamlit" in fw_names:
-                    start_cmd_tokens = ["streamlit", "run", "app.py"]
-                    candidate_list.append("streamlit run app.py")
-                elif project_info.entrypoints:
-                    ep = project_info.entrypoints[0]
-                    start_cmd_tokens = ["python", ep]
+                if sc_pms and sc_pms[0].name.lower() == "poetry":
+                    if "dev" in script_dict:
+                        start_cmd_tokens = script_dict["dev"].split()
+                    elif "start" in script_dict:
+                        start_cmd_tokens = script_dict["start"].split()
+                    elif "fastapi" in fw_names:
+                        start_cmd_tokens = ["uvicorn", "main:app", "--reload"]
+                    elif project_info.entrypoints:
+                        start_cmd_tokens = ["python", project_info.entrypoints[0]]
 
-                pip_check = env_checks_map.get("pip")
-                use_uv_wrapper = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK") or any(pm.name.lower() == "uv" for pm in sc_pms)
-                pip_check = env_checks_map.get("pip")
-                use_uv_wrapper = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK") or any(pm.name.lower() == "uv" for pm in sc_pms)
-                if start_cmd_tokens and use_uv_wrapper and start_cmd_tokens[0] not in ("uv", "poetry", "pipenv", "conda"):
-                    start_cmd_tokens = ["uv", "run"] + start_cmd_tokens
+                    if start_cmd_tokens:
+                        if "uvx" in (install_pm_name or ""):
+                            start_cmd_tokens = ["uvx", "--from", "poetry", "poetry", "run"] + start_cmd_tokens
+                        else:
+                            start_cmd_tokens = ["poetry", "run"] + start_cmd_tokens
+                else:
+                    if "dev" in script_dict:
+                        start_cmd_tokens = script_dict["dev"].split()
+                    elif "start" in script_dict:
+                        start_cmd_tokens = script_dict["start"].split()
+                    elif "run" in script_dict:
+                        start_cmd_tokens = script_dict["run"].split()
+                    elif "fastapi" in fw_names:
+                        start_cmd_tokens = ["fastapi", "dev", "main.py"]
+                        candidate_list.append("fastapi dev main.py")
+                    elif "django" in fw_names:
+                        start_cmd_tokens = ["python", "manage.py", "runserver"]
+                        candidate_list.append("python manage.py runserver")
+                    elif "flask" in fw_names:
+                        start_cmd_tokens = ["flask", "run"]
+                        candidate_list.append("flask run")
+                    elif "streamlit" in fw_names:
+                        start_cmd_tokens = ["streamlit", "run", "app.py"]
+                        candidate_list.append("streamlit run app.py")
+                    elif project_info.entrypoints:
+                        ep = project_info.entrypoints[0]
+                        start_cmd_tokens = ["python", ep]
+
+                    pip_check = env_checks_map.get("pip")
+                    use_uv_wrapper = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK") or any(pm.name.lower() == "uv" for pm in sc_pms)
+                    if start_cmd_tokens and use_uv_wrapper and start_cmd_tokens[0] not in ("uv", "uvx", "poetry", "pipenv", "conda"):
+                        start_cmd_tokens = ["uv", "run"] + start_cmd_tokens
 
             # Check for config startup command override
             if config and hasattr(config, "startup") and config.startup and config.startup.command:

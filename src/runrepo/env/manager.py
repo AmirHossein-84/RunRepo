@@ -24,6 +24,40 @@ class EnvManager:
         return backup_path
 
     @classmethod
+    def is_placeholder_value(cls, val: str | None) -> bool:
+        """Check if a string is empty or a common template dummy placeholder."""
+        if val is None or not val.strip():
+            return True
+        v = val.strip().lower().strip("'\"")
+        if not v:
+            return True
+        if v in (
+            "changeme",
+            "change_me",
+            "replace_me",
+            "replaceme",
+            "your_key",
+            "your_secret",
+            "your_token",
+            "xxx",
+            "yyy",
+            "zzz",
+            "todo",
+            "fixme",
+            "dummy",
+            "test",
+            "test_secret",
+            "secret",
+            "password",
+            "123456",
+            "admin",
+        ):
+            return True
+        if (v.startswith("<") and v.endswith(">")) or (v.startswith("your_") and v.endswith(("_here", "_secret", "_key", "_token"))):
+            return True
+        return False
+
+    @classmethod
     def apply_env_updates(
         cls,
         root_path: Path,
@@ -35,8 +69,9 @@ class EnvManager:
         """Safely merge new values and local defaults into .env without overwriting user data."""
         env_path = root_path / ".env"
         backup_created = None
+        has_existing_env = env_path.exists()
 
-        if env_path.exists():
+        if has_existing_env:
             backup_created = cls.backup_env_file(env_path)
             env_file = EnvDetector.parse_env_file(env_path)
         else:
@@ -54,9 +89,11 @@ class EnvManager:
         external_stubs_added: list[str] = []
 
         for req in requirements:
-            # Never overwrite existing non-empty user variables
             existing_val = env_file.get_value(req.name)
-            if existing_val is not None and existing_val.strip() != "":
+            is_placeholder = cls.is_placeholder_value(existing_val)
+
+            # Never overwrite existing non-empty user variables in an existing .env
+            if has_existing_env and existing_val is not None and not is_placeholder:
                 continue
 
             if req.classification == EnvClassification.EXTERNAL_SERVICE:

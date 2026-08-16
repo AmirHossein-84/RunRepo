@@ -210,7 +210,37 @@ def test_plan_multiple_startup_scripts_needs_input():
     assert any("Multiple startup commands detected" in w for w in plan.warnings)
 
 
-def test_plan_docker_broken_daemon_blocked():
+def test_plan_docker_missing_blocked():
+    ev = [DetectionEvidence(source="compose.yaml", confidence=Confidence.HIGH)]
+    project = ProjectInfo(
+        path="/repo",
+        name="docker-app",
+        runtimes=[RuntimeInfo(name="node", evidence=ev)],
+        package_managers=[PackageManagerInfo(name="npm", evidence=ev)],
+        docker=DockerInfo(has_dockerfile=True, compose_files=["compose.yaml"]),
+    )
+
+    env = _make_env(
+        [
+            EnvironmentCheck(name="node", status=EnvironmentStatus.OK, installed_version="22.0.0", required=True),
+            EnvironmentCheck(name="npm", status=EnvironmentStatus.OK, installed_version="10.0.0", required=True),
+            EnvironmentCheck(
+                name="docker",
+                status=EnvironmentStatus.MISSING,
+                details="Docker CLI is not installed",
+                required=True,
+            ),
+        ]
+    )
+
+    planner = ExecutionPlanner()
+    plan = planner.plan(project, env)
+
+    assert plan.status == PlanStatus.BLOCKED
+    assert any("Docker" in r for r in plan.blocking_reasons)
+
+
+def test_plan_docker_broken_daemon_auto_remediated():
     ev = [DetectionEvidence(source="compose.yaml", confidence=Confidence.HIGH)]
     project = ProjectInfo(
         path="/repo",
@@ -236,8 +266,9 @@ def test_plan_docker_broken_daemon_blocked():
     planner = ExecutionPlanner()
     plan = planner.plan(project, env)
 
-    assert plan.status == PlanStatus.BLOCKED
-    assert any("Docker" in r for r in plan.blocking_reasons)
+    daemon_step = next((s for s in plan.steps if s.id == "start-docker-daemon"), None)
+    assert daemon_step is not None
+    assert daemon_step.action_type == ActionType.START_SERVICE
 
 
 def test_plan_polyglot_subprojects_dag():
