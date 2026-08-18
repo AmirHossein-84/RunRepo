@@ -18,6 +18,24 @@ from runrepo.repository.models import (
 )
 
 
+def _safe_rmtree(path: Path) -> None:
+    """Safely delete directory trees, handling Windows read-only file locks."""
+    import stat
+
+    def _onerror(func, p, exc_info):
+        try:
+            os.chmod(p, stat.S_IWRITE)
+            func(p)
+        except Exception:
+            pass
+
+    if path.exists():
+        try:
+            shutil.rmtree(path, onerror=_onerror)
+        except Exception:
+            pass
+
+
 class RepositoryManager:
     """Acquires and manages local and remote GitHub repositories."""
 
@@ -91,7 +109,7 @@ class RepositoryManager:
                     local_path=destination,
                 )
             # Remove invalid or refresh-requested cache
-            shutil.rmtree(destination, ignore_errors=True)
+            _safe_rmtree(destination)
 
         # Clone remote repository
         return self.git_manager.clone(target, destination, depth=depth)

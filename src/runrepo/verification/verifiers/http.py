@@ -129,6 +129,7 @@ class HttpVerifier(BaseVerifier):
                 )
 
         # 2. HTTP Health Check Strategy
+        import re
         url = target if target.startswith("http") else f"http://127.0.0.1:{target}"
         deadline = time.perf_counter() + self.max_timeout_s
         http_success = False
@@ -150,6 +151,15 @@ class HttpVerifier(BaseVerifier):
                     failure_reason="Process exited during HTTP readiness check",
                     diagnostic_data={"pid": associated_pid, "recent_logs": logs},
                 )
+
+            # Check if process logs announced a specific port/URL
+            if process_manager and (":3000" in url or not target):
+                recent_logs = process_manager.get_process_logs(repo_path=repo_path, tail=30)
+                m = re.search(r"https?://(?:localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]):(\d+)", recent_logs)
+                if m:
+                    discovered_port = m.group(1)
+                    if f":{discovered_port}" not in url:
+                        url = f"http://127.0.0.1:{discovered_port}"
 
             try:
                 req = urllib.request.Request(url, headers={"User-Agent": "RunRepo/0.1"})

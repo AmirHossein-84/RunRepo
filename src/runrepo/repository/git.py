@@ -1,11 +1,29 @@
 """Git operations wrapper for safe, deterministic repository cloning and validation."""
 
+import os
 import re
 import shutil
+import stat
 import time
 from pathlib import Path
 from runrepo.executor.process import ProcessExecutor, SystemProcessExecutor
 from runrepo.repository.models import CloneStatus, PullRequestTarget, RepositoryResult, RepositorySource, RepositoryTarget
+
+
+def _safe_rmtree(path: Path) -> None:
+    """Safely delete directory trees, handling Windows read-only git file locks."""
+    def _onerror(func, p, exc_info):
+        try:
+            os.chmod(p, stat.S_IWRITE)
+            func(p)
+        except Exception:
+            pass
+
+    if path.exists():
+        try:
+            shutil.rmtree(path, onerror=_onerror)
+        except Exception:
+            pass
 
 
 class GitManager:
@@ -75,11 +93,11 @@ class GitManager:
 
         # Clean destination if incomplete directory exists
         if destination.exists() and not self.verify_repository_valid(destination):
-            shutil.rmtree(destination, ignore_errors=True)
+            _safe_rmtree(destination)
 
         destination.parent.mkdir(parents=True, exist_ok=True)
 
-        cmd = ["git", "clone"]
+        cmd = ["git", "-c", "core.longpaths=true", "clone"]
         if depth and depth > 0:
             cmd.extend(["--depth", str(depth)])
         if target.branch:
@@ -91,7 +109,7 @@ class GitManager:
             exec_res = self.executor.execute(cmd, cwd=destination.parent)
         except Exception as e:
             if destination.exists():
-                shutil.rmtree(destination, ignore_errors=True)
+                _safe_rmtree(destination)
             return RepositoryResult(
                 success=False,
                 target=target,
@@ -116,7 +134,7 @@ class GitManager:
 
         # Clone failed - clean up partial artifacts to avoid corrupted states
         if destination.exists():
-            shutil.rmtree(destination, ignore_errors=True)
+            _safe_rmtree(destination)
 
         target.status = CloneStatus.FAILED
         err_lower = (sanitized_output or "").lower()
@@ -163,13 +181,14 @@ class GitManager:
         destination.parent.mkdir(parents=True, exist_ok=True)
 
         # 1. Initialize repo
-        init_res = self.executor.execute(["git", "init", str(destination)], cwd=destination.parent)
+        init_res = self.executor.execute(["git", "-c", "core.longpaths=true", "init", str(destination)], cwd=destination.parent)
         if init_res.exit_code != 0:
             return RepositoryResult(
                 success=False,
                 target=target_model,
                 error_message=f"Failed to initialize git repository: {init_res.stderr}",
             )
+        self.executor.execute(["git", "-C", str(destination), "config", "core.longpaths", "true"])
 
         # 2. Add remote
         remote_res = self.executor.execute(

@@ -1,0 +1,557 @@
+id: 3
+name: NestJS
+url: https://github.com/nestjs/nest
+batch: 1
+category: FULLSTACK
+language: TypeScript
+expected_runtime: node
+expected_package_manager: npm
+expected_services: []
+difficulty: HARD
+result: PARTIAL_SUCCESS
+status: FAILED
+failure_stage: start-app:nest-typescript-starter:sample-01-cats-app
+failure_category: VERIFICATION
+root_cause: 'Verification failed: HTTP endpoint http://127.0.0.1:3000 failed readiness
+  check: <urlopen error timed out>'
+manual_intervention: null
+verification: null
+cleanup: SUCCESS
+duration_seconds: 47.66
+executed_steps:
+- step_id: verify-runtime:node
+  status: SUCCESS
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: configure-env:template
+  status: SUCCESS
+  command: null
+  duration_ms: 10.0
+  error: null
+- step_id: verify-pm:npm
+  status: SUCCESS
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: start-docker-daemon
+  status: SUCCESS
+  command:
+  - runrepo
+  - service
+  - start-docker
+  duration_ms: 10.0
+  error: null
+- step_id: install-deps
+  status: SUCCESS
+  command:
+  - npm
+  - install
+  duration_ms: 6170.008799992502
+  error: null
+- step_id: install-deps:@nestjs/benchmarks:tools-benchmarks
+  status: SUCCESS
+  command:
+  - npm
+  - install
+  duration_ms: 1675.8755000046222
+  error: null
+- step_id: start-service:docker-compose
+  status: SUCCESS
+  command:
+  - docker
+  - compose
+  - up
+  - -d
+  duration_ms: 323.5239000059664
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-01-cats-app
+  status: FAILED
+  command:
+  - npm
+  - start
+  duration_ms: 10.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-02-gateways
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-03-microservices
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-04-grpc
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-05-sql-typeorm
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-06-mongoose
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-07-sequelize
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-08-webpack
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-babel-starter:sample-09-babel-example
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-10-fastify
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-11-swagger
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-12-graphql-schema-first
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-13-mongo-typeorm
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-14-mongoose-base
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-15-mvc
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-16-gateways-ws
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-17-mvc-fastify
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-18-context
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:auth-sample:sample-19-auth-jwt
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-20-cache
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-21-serializer
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: generate-client:prisma:nest-typescript-starter:sample-22-graphql-prisma
+  status: SKIPPED
+  command:
+  - npx
+  - prisma
+  - generate
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-23-graphql-code-first
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-24-serve-static
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-25-dynamic-modules
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-26-queues
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-27-scheduling
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-28-sse
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-29-file-upload
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-30-event-emitter
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:gateway:sample-31-graphql-federation-code-first-gateway
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:posts-application:sample-31-graphql-federation-code-first-posts-application
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:users-application:sample-31-graphql-federation-code-first-users-application
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:gateway:sample-32-graphql-federation-schema-first-gateway
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:posts-application:sample-32-graphql-federation-schema-first-posts-application
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:users-application:sample-32-graphql-federation-schema-first-users-application
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-33-graphql-mercurius
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-34-hmr-esm
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-35-zod-validation
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-36-valibot-serializer
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-01-cats-app
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-02-gateways
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-03-microservices
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-04-grpc
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-05-sql-typeorm
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-06-mongoose
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-07-sequelize
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-08-webpack
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-babel-starter:sample-09-babel-example
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-10-fastify
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-11-swagger
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-12-graphql-schema-first
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-13-mongo-typeorm
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-14-mongoose-base
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-15-mvc
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-16-gateways-ws
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-17-mvc-fastify
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-18-context
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:auth-sample:sample-19-auth-jwt
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-20-cache
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-21-serializer
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:nest-typescript-starter:sample-22-graphql-prisma
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-23-graphql-code-first
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-24-serve-static
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-25-dynamic-modules
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-26-queues
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-27-scheduling
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-28-sse
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-29-file-upload
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-30-event-emitter
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:gateway:sample-31-graphql-federation-code-first-gateway
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:posts-application:sample-31-graphql-federation-code-first-posts-application
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:users-application:sample-31-graphql-federation-code-first-users-application
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:gateway:sample-32-graphql-federation-schema-first-gateway
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:posts-application:sample-32-graphql-federation-schema-first-posts-application
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:users-application:sample-32-graphql-federation-schema-first-users-application
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-33-graphql-mercurius
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-34-hmr-esm
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-35-zod-validation
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-36-valibot-serializer
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:nest-typescript-starter:sample-22-graphql-prisma
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+notes: ''
+timestamp: '2026-08-18T00:40:46.622407+00:00'

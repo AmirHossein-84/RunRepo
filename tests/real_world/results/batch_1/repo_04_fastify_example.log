@@ -1,0 +1,538 @@
+=== STDOUT ===
+Using cached repository: 
+C:\Users\Undeadmoon\AppData\Local\runrepo\runrepo\repositories\fastify_example
+{
+  "plan_id": "plan_1787013698",
+  "repository_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\fastify_example",
+  "status": "FAILED",
+  "steps": [
+    {
+      "step_id": "verify-runtime:node",
+      "status": "SUCCESS",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-18T00:41:38.049845Z",
+      "finished_at": "2026-08-18T00:41:38.049845Z",
+      "duration_ms": 0.0,
+      "stdout": "Repository requires node; host has 24.18.0 installed",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Command exited cleanly (code 0)",
+      "verification": {
+        "step_id": "verify-runtime:node",
+        "verification_type": "EXIT_CODE_CHECK",
+        "status": "PASSED",
+        "target": "exit_code",
+        "message": "Command exited cleanly (code 0)",
+        "details": {},
+        "duration_ms": 0.0005999900167807937,
+        "failure_reason": null,
+        "diagnostic_data": {
+          "exit_code": 0,
+          "stderr": ""
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "start-service:docker-compose",
+      "status": "SUCCESS",
+      "command": [
+        "docker",
+        "compose",
+        "up",
+        "-d"
+      ],
+      "cwd": "fastify-postgres",
+      "started_at": "2026-08-18T00:41:38.049946Z",
+      "finished_at": "2026-08-18T00:41:42.598007Z",
+      "duration_ms": 1037.6863999990746,
+      "stdout": "",
+      "stderr": "time=\"2026-08-18T04:11:38+03:30\" level=warning msg=\"C:\\\\Users\\\\Undeadmoon\\\\AppData\\\\Local\\\\runrepo\\\\runrepo\\\\repositories\\\\fastify_example\\\\fastify-postgres\\\\docker-compose.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion\"\n Container fastify-postgres-db-1  Starting\n Container fastify-postgres-db-1  Started\n",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Services running (1 active container(s))",
+      "verification": {
+        "step_id": "start-service:docker-compose",
+        "verification_type": "SERVICE_CHECK",
+        "status": "PASSED",
+        "target": "docker-compose",
+        "message": "Services running (1 active container(s))",
+        "details": {
+          "containers": [
+            {
+              "name": "fastify-postgres-db-1",
+              "state": "running"
+            }
+          ],
+          "port_probed": null
+        },
+        "duration_ms": 3394.163799996022,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": true
+    },
+    {
+      "step_id": "verify-pm:npm",
+      "status": "SUCCESS",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-18T00:41:45.992320Z",
+      "finished_at": "2026-08-18T00:41:45.992320Z",
+      "duration_ms": 0.0,
+      "stdout": "Project uses npm; host has 11.18.0 available",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Command exited cleanly (code 0)",
+      "verification": {
+        "step_id": "verify-pm:npm",
+        "verification_type": "EXIT_CODE_CHECK",
+        "status": "PASSED",
+        "target": "exit_code",
+        "message": "Command exited cleanly (code 0)",
+        "details": {},
+        "duration_ms": 0.0005999900167807937,
+        "failure_reason": null,
+        "diagnostic_data": {
+          "exit_code": 0,
+          "stderr": ""
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "install-deps:fastify-database-example",
+      "status": "SUCCESS",
+      "command": [
+        "npm",
+        "install"
+      ],
+      "cwd": "fastify-postgres",
+      "started_at": "2026-08-18T00:41:45.992382Z",
+      "finished_at": "2026-08-18T00:41:47.665158Z",
+      "duration_ms": 1508.9955000003101,
+      "stdout": "\nup to date, audited 105 packages in 1s\n\n31 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Node dependencies verified (node_modules present and populated)",
+      "verification": {
+        "step_id": "install-deps:fastify-database-example",
+        "verification_type": "DEPENDENCY_CHECK",
+        "status": "PASSED",
+        "target": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\fastify_example\\fastify-postgres\\node_modules",
+        "message": "Node dependencies verified (node_modules present and populated)",
+        "details": {
+          "node_modules_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\fastify_example\\fastify-postgres\\node_modules",
+          "has_package_json": true
+        },
+        "duration_ms": 0.5363999953260645,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": true
+    },
+    {
+      "step_id": "install-deps:authentication",
+      "status": "SUCCESS",
+      "command": [
+        "npm",
+        "install"
+      ],
+      "cwd": "fastify-session-authentication",
+      "started_at": "2026-08-18T00:41:47.665777Z",
+      "finished_at": "2026-08-18T00:41:49.349779Z",
+      "duration_ms": 1519.1431999992346,
+      "stdout": "\nup to date, audited 131 packages in 1s\n\n43 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Node dependencies verified (node_modules present and populated)",
+      "verification": {
+        "step_id": "install-deps:authentication",
+        "verification_type": "DEPENDENCY_CHECK",
+        "status": "PASSED",
+        "target": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\fastify_example\\fastify-session-authentication\\node_modules",
+        "message": "Node dependencies verified (node_modules present and populated)",
+        "details": {
+          "node_modules_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\fastify_example\\fastify-session-authentication\\node_modules",
+          "has_package_json": true
+        },
+        "duration_ms": 0.5903999990550801,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": true
+    },
+    {
+      "step_id": "install-deps:database-connection",
+      "status": "SUCCESS",
+      "command": [
+        "npm",
+        "install"
+      ],
+      "cwd": "tests",
+      "started_at": "2026-08-18T00:41:49.350453Z",
+      "finished_at": "2026-08-18T00:41:50.882933Z",
+      "duration_ms": 1369.7300000058021,
+      "stdout": "\nup to date, audited 106 packages in 1s\n\n23 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Node dependencies verified (node_modules present and populated)",
+      "verification": {
+        "step_id": "install-deps:database-connection",
+        "verification_type": "DEPENDENCY_CHECK",
+        "status": "PASSED",
+        "target": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\fastify_example\\tests\\node_modules",
+        "message": "Node dependencies verified (node_modules present and populated)",
+        "details": {
+          "node_modules_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\fastify_example\\tests\\node_modules",
+          "has_package_json": true
+        },
+        "duration_ms": 0.5509000038728118,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": true
+    },
+    {
+      "step_id": "install-deps:typescript-decorators",
+      "status": "SUCCESS",
+      "command": [
+        "npm",
+        "install"
+      ],
+      "cwd": "typescript-decorators",
+      "started_at": "2026-08-18T00:41:50.883562Z",
+      "finished_at": "2026-08-18T00:41:57.867836Z",
+      "duration_ms": 6827.5202000077115,
+      "stdout": "\nup to date, audited 448 packages in 7s\n\n25 packages are looking for funding\n  run `npm fund` for details\n\n30 vulnerabilities (5 low, 9 moderate, 12 high, 4 critical)\n\nTo address issues that do not require attention, run:\n  npm audit fix\n\nTo address all issues (including breaking changes), run:\n  npm audit fix --force\n\nRun `npm audit` for details.\n",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Node dependencies verified (node_modules present and populated)",
+      "verification": {
+        "step_id": "install-deps:typescript-decorators",
+        "verification_type": "DEPENDENCY_CHECK",
+        "status": "PASSED",
+        "target": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\fastify_example\\typescript-decorators\\node_modules",
+        "message": "Node dependencies verified (node_modules present and populated)",
+        "details": {
+          "node_modules_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\fastify_example\\typescript-decorators\\node_modules",
+          "has_package_json": true
+        },
+        "duration_ms": 1.4666999923065305,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": true
+    },
+    {
+      "step_id": "install-deps:validation-messages",
+      "status": "SUCCESS",
+      "command": [
+        "npm",
+        "install"
+      ],
+      "cwd": "validation-messages",
+      "started_at": "2026-08-18T00:41:57.869395Z",
+      "finished_at": "2026-08-18T00:41:59.634629Z",
+      "duration_ms": 1613.3520000003045,
+      "stdout": "\nup to date, audited 349 packages in 1s\n\n150 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Node dependencies verified (node_modules present and populated)",
+      "verification": {
+        "step_id": "install-deps:validation-messages",
+        "verification_type": "DEPENDENCY_CHECK",
+        "status": "PASSED",
+        "target": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\fastify_example\\validation-messages\\node_modules",
+        "message": "Node dependencies verified (node_modules present and populated)",
+        "details": {
+          "node_modules_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\fastify_example\\validation-messages\\node_modules",
+          "has_package_json": true
+        },
+        "duration_ms": 1.0554000036790967,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": true
+    },
+    {
+      "step_id": "install-deps:winston-logger",
+      "status": "SUCCESS",
+      "command": [
+        "npm",
+        "install"
+      ],
+      "cwd": "winston-logger",
+      "started_at": "2026-08-18T00:41:59.635811Z",
+      "finished_at": "2026-08-18T00:42:01.547300Z",
+      "duration_ms": 1752.0694999984698,
+      "stdout": "\nup to date, audited 341 packages in 2s\n\n143 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Node dependencies verified (node_modules present and populated)",
+      "verification": {
+        "step_id": "install-deps:winston-logger",
+        "verification_type": "DEPENDENCY_CHECK",
+        "status": "PASSED",
+        "target": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\fastify_example\\winston-logger\\node_modules",
+        "message": "Node dependencies verified (node_modules present and populated)",
+        "details": {
+          "node_modules_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\fastify_example\\winston-logger\\node_modules",
+          "has_package_json": true
+        },
+        "duration_ms": 1.2266999983694404,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": true
+    },
+    {
+      "step_id": "start-app:fastify-database-example",
+      "status": "FAILED",
+      "command": [
+        "npm",
+        "start"
+      ],
+      "cwd": "fastify-postgres",
+      "started_at": "2026-08-18T00:42:01.548629Z",
+      "finished_at": "2026-08-18T00:42:01.768504Z",
+      "duration_ms": 10.0,
+      "stdout": "Application started in background (PID: 5296). Output logged to: C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\processes\\logs\\start-app_fastify-database-example_20260818_004201.log",
+      "stderr": "Verification failed: Application crashed before responding to HTTP requests at http://127.0.0.1:3000",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": "Application crashed before responding to HTTP requests at http://127.0.0.1:3000",
+      "verification": {
+        "step_id": "start-app:fastify-database-example",
+        "verification_type": "HTTP_CHECK",
+        "status": "FAILED",
+        "target": "http://127.0.0.1:3000",
+        "message": "Application crashed before responding to HTTP requests at http://127.0.0.1:3000",
+        "details": {},
+        "duration_ms": 12243.670399999246,
+        "failure_reason": "Process exited during HTTP readiness check",
+        "diagnostic_data": {
+          "pid": 5296,
+          "recent_logs": ""
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "start-app:authentication",
+      "status": "SKIPPED",
+      "command": [
+        "npm",
+        "start"
+      ],
+      "cwd": "fastify-session-authentication",
+      "started_at": "2026-08-18T00:42:14.050500Z",
+      "finished_at": "2026-08-18T00:42:14.050502Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'previous step' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    },
+    {
+      "step_id": "start-app:typescript-decorators",
+      "status": "SKIPPED",
+      "command": [
+        "npm",
+        "start"
+      ],
+      "cwd": "typescript-decorators",
+      "started_at": "2026-08-18T00:42:14.050523Z",
+      "finished_at": "2026-08-18T00:42:14.050523Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'previous step' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    },
+    {
+      "step_id": "start-app:validation-messages",
+      "status": "SKIPPED",
+      "command": [
+        "npm",
+        "start"
+      ],
+      "cwd": "validation-messages",
+      "started_at": "2026-08-18T00:42:14.050529Z",
+      "finished_at": "2026-08-18T00:42:14.050529Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'previous step' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    },
+    {
+      "step_id": "start-app:winston-logger",
+      "status": "SKIPPED",
+      "command": [
+        "npm",
+        "start"
+      ],
+      "cwd": "winston-logger",
+      "started_at": "2026-08-18T00:42:14.050538Z",
+      "finished_at": "2026-08-18T00:42:14.050538Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'previous step' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    },
+    {
+      "step_id": "verify-app:fastify-database-example",
+      "status": "SKIPPED",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-18T00:42:14.050542Z",
+      "finished_at": "2026-08-18T00:42:14.050542Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'start-app:fastify-database-example' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    },
+    {
+      "step_id": "verify-app:authentication",
+      "status": "SKIPPED",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-18T00:42:14.050546Z",
+      "finished_at": "2026-08-18T00:42:14.050547Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'start-app:authentication' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    },
+    {
+      "step_id": "verify-app:typescript-decorators",
+      "status": "SKIPPED",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-18T00:42:14.050550Z",
+      "finished_at": "2026-08-18T00:42:14.050550Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'start-app:typescript-decorators' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    },
+    {
+      "step_id": "verify-app:validation-messages",
+      "status": "SKIPPED",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-18T00:42:14.050560Z",
+      "finished_at": "2026-08-18T00:42:14.050561Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'start-app:validation-messages' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    },
+    {
+      "step_id": "verify-app:winston-logger",
+      "status": "SKIPPED",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-18T00:42:14.050572Z",
+      "finished_at": "2026-08-18T00:42:14.050572Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'start-app:winston-logger' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    }
+  ],
+  "successful_steps": [
+    "install-deps:authentication",
+    "install-deps:database-connection",
+    "install-deps:fastify-database-example",
+    "install-deps:typescript-decorators",
+    "install-deps:validation-messages",
+    "install-deps:winston-logger",
+    "start-service:docker-compose",
+    "verify-pm:npm",
+    "verify-runtime:node"
+  ],
+  "failed_steps": [
+    "start-app:fastify-database-example"
+  ],
+  "skipped_steps": [
+    "start-app:authentication",
+    "start-app:typescript-decorators",
+    "start-app:validation-messages",
+    "start-app:winston-logger",
+    "verify-app:fastify-database-example",
+    "verify-app:authentication",
+    "verify-app:typescript-decorators",
+    "verify-app:validation-messages",
+    "verify-app:winston-logger"
+  ],
+  "started_at": "2026-08-18T00:41:38.049736Z",
+  "finished_at": "2026-08-18T00:42:14.050576Z",
+  "summary": "Execution failed at step(s): start-app:fastify-database-example"
+}
+
+
+=== STDERR ===
+

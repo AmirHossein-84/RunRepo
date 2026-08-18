@@ -1,8 +1,12 @@
 """Docker operations manager constructing safe docker CLI commands and inspecting containers."""
 
+from __future__ import annotations
+
 import json
-from typing import Any
-from runrepo.executor.process import ProcessExecutionResult, ProcessExecutor
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from runrepo.executor.process import ProcessExecutionResult, ProcessExecutor
 from runrepo.services.models import DockerContainerConfig
 
 

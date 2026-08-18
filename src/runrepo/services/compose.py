@@ -1,9 +1,13 @@
 """Docker Compose service manager handling compose lifecycle and resource tracking."""
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
-from typing import Any
-from runrepo.executor.process import ProcessExecutionResult, ProcessExecutor
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from runrepo.executor.process import ProcessExecutionResult, ProcessExecutor
 from runrepo.services.models import OwnedResource, ResourceType, ServiceType
 from runrepo.services.registry import InfrastructureRegistry
 
@@ -15,11 +19,16 @@ class ComposeManager:
 
     @classmethod
     def find_compose_file(cls, directory: Path) -> Path | None:
-        """Find the primary Docker Compose file in a directory."""
+        """Find the primary Docker Compose file in a directory or immediate subdirectories."""
+        EXCLUDED_DIRS = {"test", "tests", "integration", "e2e", "fixtures", "benchmark", "benchmarks", "ci", ".github", "scripts"}
         for name in cls.COMPOSE_FILENAMES:
             candidate = directory / name
             if candidate.exists() and candidate.is_file():
                 return candidate
+        for name in cls.COMPOSE_FILENAMES:
+            for cand in directory.glob(f"*/{name}"):
+                if cand.parent.name.lower() not in EXCLUDED_DIRS and cand.is_file():
+                    return cand
         return None
 
     @classmethod
@@ -41,6 +50,8 @@ class ComposeManager:
 
         backing_services: list[str] = []
         compose_file = cls.find_compose_file(cwd)
+        actual_cwd = compose_file.parent if compose_file else cwd
+
         if compose_file:
             try:
                 with open(compose_file, "r", encoding="utf-8") as f:
@@ -59,10 +70,10 @@ class ComposeManager:
         if backing_services:
             up_cmd.extend(backing_services)
 
-        res = executor.execute(up_cmd, cwd=cwd, timeout_s=60)
+        res = executor.execute(up_cmd, cwd=actual_cwd, timeout_s=180)
         if res.exit_code == 0 and registry is not None:
             # Inspect containers created by compose and register them
-            ps_res = executor.execute(["docker", "compose", "ps", "--format", "json"], cwd=cwd, timeout_s=5)
+            ps_res = executor.execute(["docker", "compose", "ps", "--format", "json"], cwd=actual_cwd, timeout_s=5)
             if ps_res.exit_code == 0 and ps_res.stdout.strip():
                 try:
                     for line in ps_res.stdout.splitlines():

@@ -1,0 +1,473 @@
+# Curated 50-Repository Real-World Benchmark Corpus for RunRepo
+version: 1
+
+batches:
+  - batch: 1
+    name: "Core Node.js & Fullstack Web"
+    repositories:
+      - id: 1
+        name: "Express"
+        url: "https://github.com/expressjs/express"
+        category: "WEB_BACKEND"
+        language: "JavaScript"
+        expected_runtime: "node"
+        expected_package_manager: "npm"
+        expected_services: []
+        difficulty: "MEDIUM"
+      - id: 2
+        name: "Fastify"
+        url: "https://github.com/fastify/fastify"
+        category: "WEB_BACKEND"
+        language: "JavaScript"
+        expected_runtime: "node"
+        expected_package_manager: "npm"
+        expected_services: []
+        difficulty: "MEDIUM"
+      - id: 3
+        name: "NestJS"
+        url: "https://github.com/nestjs/nest"
+        category: "FULLSTACK"
+        language: "TypeScript"
+        expected_runtime: "node"
+        expected_package_manager: "npm"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 4
+        name: "Fastify Example"
+        url: "https://github.com/fastify/example"
+        category: "WEB_BACKEND"
+        language: "JavaScript"
+        expected_runtime: "node"
+        expected_package_manager: "npm"
+        expected_services: []
+        difficulty: "EASY"
+      - id: 5
+        name: "p-map"
+        url: "https://github.com/sindresorhus/p-map"
+        category: "LIBRARY"
+        language: "JavaScript"
+        expected_runtime: "node"
+        expected_package_manager: "npm"
+        expected_services: []
+        difficulty: "EASY"
+      - id: 6
+        name: "Chalk"
+        url: "https://github.com/chalk/chalk"
+        category: "LIBRARY"
+        language: "JavaScript"
+        expected_runtime: "node"
+        expected_package_manager: "npm"
+        expected_services: []
+        difficulty: "EASY"
+      - id: 7
+        name: "Commander.js"
+        url: "https://github.com/tj/commander.js"
+        category: "CLI_TOOL"
+        language: "JavaScript"
+        expected_runtime: "node"
+        expected_package_manager: "npm"
+        expected_services: []
+        difficulty: "EASY"
+      - id: 8
+        name: "Axios"
+        url: "https://github.com/axios/axios"
+        category: "LIBRARY"
+        language: "JavaScript"
+        expected_runtime: "node"
+        expected_package_manager: "npm"
+        expected_services: []
+        difficulty: "MEDIUM"
+      - id: 9
+        name: "Next.js"
+        url: "https://github.com/vercel/next.js"
+        category: "FULLSTACK"
+        language: "TypeScript"
+        expected_runtime: "node"
+        expected_package_manager: "pnpm"
+        expected_services: []
+        difficulty: "VERY_HARD"
+      - id: 10
+        name: "Remix"
+        url: "https://github.com/remix-run/remix"
+        category: "FULLSTACK"
+        language: "TypeScript"
+        expected_runtime: "node"
+        expected_package_manager: "pnpm"
+        expected_services: []
+        difficulty: "HARD"
+
+  - batch: 2
+    name: "Modern Frontend & Core Python"
+    repositories:
+      - id: 11
+        name: "Svelte"
+        url: "https://github.com/sveltejs/svelte"
+        category: "FRONTEND"
+        language: "TypeScript"
+        expected_runtime: "node"
+        expected_package_manager: "pnpm"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 12
+        name: "Vue"
+        url: "https://github.com/vuejs/core"
+        category: "FRONTEND"
+        language: "TypeScript"
+        expected_runtime: "node"
+        expected_package_manager: "pnpm"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 13
+        name: "Vite"
+        url: "https://github.com/vitejs/vite"
+        category: "TOOLING"
+        language: "TypeScript"
+        expected_runtime: "node"
+        expected_package_manager: "pnpm"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 14
+        name: "Astro"
+        url: "https://github.com/withastro/astro"
+        category: "FULLSTACK"
+        language: "TypeScript"
+        expected_runtime: "node"
+        expected_package_manager: "pnpm"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 15
+        name: "Nuxt"
+        url: "https://github.com/nuxt/nuxt"
+        category: "FULLSTACK"
+        language: "TypeScript"
+        expected_runtime: "node"
+        expected_package_manager: "pnpm"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 16
+        name: "FastAPI"
+        url: "https://github.com/fastapi/fastapi"
+        category: "WEB_BACKEND"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "pdm/uv"
+        expected_services: []
+        difficulty: "MEDIUM"
+      - id: 17
+        name: "Flask"
+        url: "https://github.com/pallets/flask"
+        category: "WEB_BACKEND"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "pip/flit"
+        expected_services: []
+        difficulty: "EASY"
+      - id: 18
+        name: "Django"
+        url: "https://github.com/django/django"
+        category: "WEB_BACKEND"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "pip"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 19
+        name: "Requests"
+        url: "https://github.com/psf/requests"
+        category: "LIBRARY"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "pip"
+        expected_services: []
+        difficulty: "EASY"
+      - id: 20
+        name: "Pydantic"
+        url: "https://github.com/pydantic/pydantic"
+        category: "LIBRARY"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "hatch/uv"
+        expected_services: []
+        difficulty: "MEDIUM"
+
+  - batch: 3
+    name: "Python Ecosystem, Templates & Workflows"
+    repositories:
+      - id: 21
+        name: "SQLAlchemy"
+        url: "https://github.com/sqlalchemy/sqlalchemy"
+        category: "LIBRARY"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "pip"
+        expected_services: []
+        difficulty: "MEDIUM"
+      - id: 22
+        name: "HTTPX"
+        url: "https://github.com/encode/httpx"
+        category: "LIBRARY"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "hatch/pip"
+        expected_services: []
+        difficulty: "EASY"
+      - id: 23
+        name: "Typer"
+        url: "https://github.com/fastapi/typer"
+        category: "CLI_TOOL"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "pdm/uv"
+        expected_services: []
+        difficulty: "EASY"
+      - id: 24
+        name: "Full Stack FastAPI Template"
+        url: "https://github.com/fastapi/full-stack-fastapi-template"
+        category: "FULLSTACK"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "uv"
+        expected_services: ["postgres", "docker"]
+        difficulty: "HARD"
+      - id: 25
+        name: "Cookiecutter Django"
+        url: "https://github.com/cookiecutter/cookiecutter-django"
+        category: "TEMPLATE"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "pip"
+        expected_services: ["postgres"]
+        difficulty: "MEDIUM"
+      - id: 26
+        name: "Locust"
+        url: "https://github.com/locustio/locust"
+        category: "CLI_TOOL"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "pip"
+        expected_services: []
+        difficulty: "MEDIUM"
+      - id: 27
+        name: "Celery"
+        url: "https://github.com/celery/celery"
+        category: "TASK_QUEUE"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "pip"
+        expected_services: ["redis"]
+        difficulty: "HARD"
+      - id: 28
+        name: "Prefect"
+        url: "https://github.com/PrefectHQ/prefect"
+        category: "ORCHESTRATION"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "hatch/pip"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 29
+        name: "Poetry"
+        url: "https://github.com/python-poetry/poetry"
+        category: "PACKAGE_MANAGER"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "poetry"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 30
+        name: "Supabase"
+        url: "https://github.com/supabase/supabase"
+        category: "BACKEND_SERVICE"
+        language: "TypeScript/Go"
+        expected_runtime: "node"
+        expected_package_manager: "npm"
+        expected_services: ["postgres", "docker"]
+        difficulty: "VERY_HARD"
+
+  - batch: 4
+    name: "Complex Multi-Service, CMS & Apps"
+    repositories:
+      - id: 31
+        name: "Appwrite"
+        url: "https://github.com/appwrite/appwrite"
+        category: "BACKEND_SERVICE"
+        language: "PHP/Docker"
+        expected_runtime: "docker"
+        expected_package_manager: "compose"
+        expected_services: ["docker", "redis", "mariadb"]
+        difficulty: "VERY_HARD"
+      - id: 32
+        name: "Directus"
+        url: "https://github.com/directus/directus"
+        category: "CMS"
+        language: "TypeScript"
+        expected_runtime: "node"
+        expected_package_manager: "pnpm"
+        expected_services: ["postgres"]
+        difficulty: "VERY_HARD"
+      - id: 33
+        name: "Strapi"
+        url: "https://github.com/strapi/strapi"
+        category: "CMS"
+        language: "JavaScript"
+        expected_runtime: "node"
+        expected_package_manager: "yarn"
+        expected_services: []
+        difficulty: "VERY_HARD"
+      - id: 34
+        name: "Ghost"
+        url: "https://github.com/TryGhost/Ghost"
+        category: "PUBLISHING"
+        language: "JavaScript"
+        expected_runtime: "node"
+        expected_package_manager: "yarn"
+        expected_services: ["mysql"]
+        difficulty: "VERY_HARD"
+      - id: 35
+        name: "Hasura GraphQL Engine"
+        url: "https://github.com/hasura/graphql-engine"
+        category: "GRAPHQL_ENGINE"
+        language: "Haskell/Docker"
+        expected_runtime: "docker"
+        expected_package_manager: "docker"
+        expected_services: ["postgres", "docker"]
+        difficulty: "VERY_HARD"
+      - id: 36
+        name: "Saleor"
+        url: "https://github.com/saleor/saleor"
+        category: "ECOMMERCE"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "poetry"
+        expected_services: ["postgres", "redis"]
+        difficulty: "VERY_HARD"
+      - id: 37
+        name: "Medusa"
+        url: "https://github.com/medusajs/medusa"
+        category: "ECOMMERCE"
+        language: "TypeScript"
+        expected_runtime: "node"
+        expected_package_manager: "yarn"
+        expected_services: ["postgres", "redis"]
+        difficulty: "HARD"
+      - id: 38
+        name: "Cal.com"
+        url: "https://github.com/calcom/cal.com"
+        category: "WEB_APPLICATION"
+        language: "TypeScript"
+        expected_runtime: "node"
+        expected_package_manager: "yarn"
+        expected_services: ["postgres"]
+        difficulty: "VERY_HARD"
+      - id: 39
+        name: "Chatwoot"
+        url: "https://github.com/chatwoot/chatwoot"
+        category: "CUSTOMER_ENGAGEMENT"
+        language: "Ruby/Vue"
+        expected_runtime: "ruby/node"
+        expected_package_manager: "bundle/yarn"
+        expected_services: ["postgres", "redis"]
+        difficulty: "VERY_HARD"
+      - id: 40
+        name: "Discourse"
+        url: "https://github.com/discourse/discourse"
+        category: "COMMUNITY_PLATFORM"
+        language: "Ruby/Ember"
+        expected_runtime: "ruby/node"
+        expected_package_manager: "bundle/yarn"
+        expected_services: ["postgres", "redis"]
+        difficulty: "VERY_HARD"
+
+  - batch: 5
+    name: "Build Systems, ML & Complex Frameworks"
+    repositories:
+      - id: 41
+        name: "Focalboard"
+        url: "https://github.com/mattermost-community/focalboard"
+        category: "COLLABORATION"
+        language: "Go/TypeScript"
+        expected_runtime: "go/node"
+        expected_package_manager: "npm"
+        expected_services: ["postgres"]
+        difficulty: "HARD"
+      - id: 42
+        name: "Turborepo"
+        url: "https://github.com/vercel/turborepo"
+        category: "BUILD_SYSTEM"
+        language: "Rust/TypeScript"
+        expected_runtime: "rust/node"
+        expected_package_manager: "pnpm"
+        expected_services: []
+        difficulty: "VERY_HARD"
+      - id: 43
+        name: "Nx"
+        url: "https://github.com/nrwl/nx"
+        category: "BUILD_SYSTEM"
+        language: "TypeScript"
+        expected_runtime: "node"
+        expected_package_manager: "yarn/pnpm"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 44
+        name: "pnpm"
+        url: "https://github.com/pnpm/pnpm"
+        category: "PACKAGE_MANAGER"
+        language: "TypeScript"
+        expected_runtime: "node"
+        expected_package_manager: "pnpm"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 45
+        name: "Babel"
+        url: "https://github.com/babel/babel"
+        category: "COMPILER"
+        language: "JavaScript"
+        expected_runtime: "node"
+        expected_package_manager: "yarn"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 46
+        name: "Transformers"
+        url: "https://github.com/huggingface/transformers"
+        category: "MACHINE_LEARNING"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "pip"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 47
+        name: "scikit-learn"
+        url: "https://github.com/scikit-learn/scikit-learn"
+        category: "MACHINE_LEARNING"
+        language: "Python/C"
+        expected_runtime: "python"
+        expected_package_manager: "pip"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 48
+        name: "pandas"
+        url: "https://github.com/pandas-dev/pandas"
+        category: "DATA_ANALYSIS"
+        language: "Python/Cython"
+        expected_runtime: "python"
+        expected_package_manager: "pip/meson"
+        expected_services: []
+        difficulty: "HARD"
+      - id: 49
+        name: "PyTorch"
+        url: "https://github.com/pytorch/pytorch"
+        category: "MACHINE_LEARNING"
+        language: "C++/Python"
+        expected_runtime: "python"
+        expected_package_manager: "pip/cmake"
+        expected_services: []
+        difficulty: "VERY_HARD"
+      - id: 50
+        name: "Flask Mega-Tutorial"
+        url: "https://github.com/miguelgrinberg/microblog"
+        category: "WEB_APPLICATION"
+        language: "Python"
+        expected_runtime: "python"
+        expected_package_manager: "pip"
+        expected_services: []
+        difficulty: "MEDIUM"

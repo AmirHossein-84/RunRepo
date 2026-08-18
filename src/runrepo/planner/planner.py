@@ -5,7 +5,7 @@ from typing import Any
 
 from runrepo.environment.models import EnvironmentCheck, EnvironmentState, EnvironmentStatus
 from runrepo.environment.venv import VirtualEnvStatus, inspect_virtual_env
-from runrepo.models import EnvVarCategory, FrameworkCategory, ProjectInfo, ProjectType, SubprojectInfo
+from runrepo.models import EnvVarCategory, FrameworkCategory, PackageManagerInfo, ProjectInfo, ProjectType, SubprojectInfo
 from runrepo.planner.graph import PlanGraph
 from runrepo.planner.models import (
     ActionType,
@@ -219,6 +219,8 @@ class ExecutionPlanner:
 
         # 4a. Docker Compose (Preferred if present)
         if project_info.docker.compose_files:
+            compose_rel = project_info.docker.compose_files[0]
+            compose_parent = str(Path(compose_rel).parent) if str(Path(compose_rel).parent) != "." else None
             step_id = "start-service:docker-compose"
             if not docker_ok and not docker_broken:
                 detail = docker_check.details if docker_check else "Docker CLI is not installed"
@@ -229,9 +231,10 @@ class ExecutionPlanner:
                         description="Start Docker Compose services",
                         action_type=ActionType.START_SERVICE,
                         command=["docker", "compose", "up", "-d"],
+                        cwd=compose_parent,
                         risk=RiskLevel.BLOCKED,
                         is_blocked=True,
-                        reason=f"Docker Compose file '{project_info.docker.compose_files[0]}' detected, but Docker is unavailable",
+                        reason=f"Docker Compose file '{compose_rel}' detected, but Docker is unavailable",
                     )
                 )
             else:
@@ -241,9 +244,10 @@ class ExecutionPlanner:
                         description="Start Docker Compose infrastructure services",
                         action_type=ActionType.START_SERVICE,
                         command=["docker", "compose", "up", "-d"],
+                        cwd=compose_parent,
                         depends_on=svc_deps,
                         risk=RiskLevel.REQUIRES_CONFIRMATION,
-                        reason=f"Start database/cache containers defined in {project_info.docker.compose_files[0]}",
+                        reason=f"Start database/cache containers defined in {compose_rel}",
                         verification=StepVerification(
                             strategy="port_reachable",
                             description="Container ports become reachable",
@@ -491,142 +495,167 @@ class ExecutionPlanner:
         else:
             scopes.append(("root", None, project_info.runtimes, project_info.package_managers, project_info.frameworks, project_info.scripts))
 
+        sp_names = [sp.name for sp in project_info.subprojects] if project_info.subprojects else []
+        has_duplicate_names = len(sp_names) != len(set(sp_names))
+
         for scope_name, scope_path, sc_rts, sc_pms, sc_fws, sc_scripts in scopes:
-            scope_prefix = f":{scope_name}" if scope_name != "root" else ""
+            if scope_name != "root":
+                if has_duplicate_names and scope_path:
+                    sanitized_p = scope_path.replace("/", "-").replace("\\", "-").strip("-")
+                    scope_prefix = f":{scope_name}:{sanitized_p}"
+                else:
+                    scope_prefix = f":{scope_name}"
+            else:
+                scope_prefix = ""
 
             # 5a. Dependency Installation
             install_cmd: list[str] | None = None
             install_pm_name: str | None = None
             deps_prereqs: list[str] = []
 
-            if sc_pms:
-                primary_pm = sc_pms[0].name.lower()
-                install_pm_name = primary_pm
-                pm_check = env_checks_map.get(primary_pm)
-                is_pm_ok = pm_check and pm_check.status.value == "OK"
-                installed_v = (pm_check.installed_version or "").lower() if pm_check else ""
+            # If root workspace already installed all packages in a monorepo, skip internal packages and samples
+            skip_sub_install = False
+            if project_info.is_monorepo and root_deps_step_id and scope_name != "root":
+                if scope_path and any(scope_path.startswith(p) for p in (
+                    "packages/", "packages\\", "libs/", "libs\\", "packages", "libs",
+                    "sample/", "sample\\", "samples/", "samples\\", "example/", "example\\", "examples/", "examples\\"
+                )):
+                    skip_sub_install = True
 
-                if primary_pm == "pnpm":
-                    if "npx" in installed_v or not is_pm_ok:
-                        install_cmd = ["npx", "-y", "pnpm", "install"]
-                        install_pm_name = "npx -y pnpm"
-                    else:
-                        install_cmd = ["pnpm", "install"]
-                elif primary_pm == "yarn":
-                    if "npx" in installed_v or not is_pm_ok:
-                        install_cmd = ["npx", "-y", "yarn", "install"]
-                        install_pm_name = "npx -y yarn"
-                    else:
-                        install_cmd = ["yarn", "install"]
-                elif primary_pm == "npm":
-                    install_cmd = ["npm", "install"]
-                elif primary_pm == "uv":
-                    install_cmd = ["uv", "sync"]
-                elif primary_pm == "poetry":
-                    if "uvx" in installed_v or not is_pm_ok:
-                        install_cmd = ["uvx", "poetry", "install", "--no-root"]
-                        install_pm_name = "uvx poetry"
-                    else:
-                        install_cmd = ["poetry", "install", "--no-root"]
-                elif primary_pm == "pipenv":
-                    if "uvx" in installed_v or not is_pm_ok:
-                        install_cmd = ["uvx", "pipenv", "install"]
-                        install_pm_name = "uvx pipenv"
-                    else:
-                        install_cmd = ["pipenv", "install"]
-                elif primary_pm == "pip":
-                    target_dir = Path(project_info.path) / (scope_path or "")
-                    pip_check = env_checks_map.get("pip")
-                    use_uv_pip = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK")
-                    if use_uv_pip:
-                        py_req = next((rt.version for rt in sc_rts if rt.name.lower() == "python"), None)
-                        py_check = env_checks_map.get("python")
-                        needs_python_download = py_req and py_check and ("uv" in (py_check.installed_version or "").lower() or "provisionable" in (py_check.details or "").lower() or py_check.status.value == "WRONG_VERSION")
-                        if needs_python_download:
-                            py_inst_id = f"install-python:{py_req}"
-                            if not any(s.id == py_inst_id for s in steps):
+            if not skip_sub_install:
+                if not sc_pms and project_info.package_managers:
+                    sc_pms = list(project_info.package_managers)
+                elif not sc_pms and any(rt.name == "node" for rt in sc_rts):
+                    sc_pms = [PackageManagerInfo(name="npm", evidence=[])]
+
+                if sc_pms:
+                    primary_pm = sc_pms[0].name.lower()
+                    install_pm_name = primary_pm
+                    pm_check = env_checks_map.get(primary_pm)
+                    is_pm_ok = pm_check and pm_check.status.value == "OK"
+                    installed_v = (pm_check.installed_version or "").lower() if pm_check else ""
+
+                    if primary_pm == "pnpm":
+                        if "npx" in installed_v or not is_pm_ok:
+                            install_cmd = ["npx", "-y", "pnpm", "install"]
+                            install_pm_name = "npx -y pnpm"
+                        else:
+                            install_cmd = ["pnpm", "install"]
+                    elif primary_pm == "yarn":
+                        if "npx" in installed_v or not is_pm_ok:
+                            install_cmd = ["npx", "-y", "yarn", "install"]
+                            install_pm_name = "npx -y yarn"
+                        else:
+                            install_cmd = ["yarn", "install"]
+                    elif primary_pm == "npm":
+                        install_cmd = ["npm", "install"]
+                    elif primary_pm == "uv":
+                        install_cmd = ["uv", "sync"]
+                    elif primary_pm == "poetry":
+                        if "uvx" in installed_v or not is_pm_ok:
+                            install_cmd = ["uvx", "poetry", "install", "--no-root"]
+                            install_pm_name = "uvx poetry"
+                        else:
+                            install_cmd = ["poetry", "install", "--no-root"]
+                    elif primary_pm == "pipenv":
+                        if "uvx" in installed_v or not is_pm_ok:
+                            install_cmd = ["uvx", "pipenv", "install"]
+                            install_pm_name = "uvx pipenv"
+                        else:
+                            install_cmd = ["pipenv", "install"]
+                    elif primary_pm == "pip":
+                        target_dir = Path(project_info.path) / (scope_path or "")
+                        pip_check = env_checks_map.get("pip")
+                        use_uv_pip = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK")
+                        if use_uv_pip:
+                            py_req = next((rt.version for rt in sc_rts if rt.name.lower() == "python"), None)
+                            py_check = env_checks_map.get("python")
+                            needs_python_download = py_req and py_check and ("uv" in (py_check.installed_version or "").lower() or "provisionable" in (py_check.details or "").lower() or py_check.status.value == "WRONG_VERSION")
+                            if needs_python_download:
+                                py_inst_id = f"install-python:{py_req}"
+                                if not any(s.id == py_inst_id for s in steps):
+                                    steps.append(
+                                        PlanStep(
+                                            id=py_inst_id,
+                                            description=f"Auto-provision Python {py_req} via uv",
+                                            action_type=ActionType.INSTALL_DEPENDENCIES,
+                                            command=["uv", "python", "install", py_req],
+                                            cwd=None,
+                                            depends_on=list(deps_prereqs),
+                                            risk=RiskLevel.SAFE,
+                                            reason=f"Download and provision isolated Python {py_req} in user cache",
+                                            verification=StepVerification(
+                                                strategy="exit_code",
+                                                description=f"uv python install {py_req} returns 0",
+                                            ),
+                                        )
+                                    )
+                                    deps_prereqs.append(py_inst_id)
+
+                            venv_info = inspect_virtual_env(target_dir, required_version=py_req)
+                            venv_cmd = ["uv", "venv", "--python", py_req] if (needs_python_download and py_req) else ["uv", "venv"]
+                            if venv_info.status == VirtualEnvStatus.NOT_FOUND:
+                                venv_step_id = f"create-venv{scope_prefix}"
                                 steps.append(
                                     PlanStep(
-                                        id=py_inst_id,
-                                        description=f"Auto-provision Python {py_req} via uv",
+                                        id=venv_step_id,
+                                        description=f"Create virtual environment for {scope_name}" if scope_name != "root" else "Create virtual environment",
                                         action_type=ActionType.INSTALL_DEPENDENCIES,
-                                        command=["uv", "python", "install", py_req],
-                                        cwd=None,
+                                        command=venv_cmd,
+                                        cwd=scope_path,
                                         depends_on=list(deps_prereqs),
                                         risk=RiskLevel.SAFE,
-                                        reason=f"Download and provision isolated Python {py_req} in user cache",
+                                        reason="Create isolated Python virtual environment",
                                         verification=StepVerification(
                                             strategy="exit_code",
-                                            description=f"uv python install {py_req} returns 0",
+                                            description="uv venv returns 0",
                                         ),
                                     )
                                 )
-                                deps_prereqs.append(py_inst_id)
-
-                        venv_info = inspect_virtual_env(target_dir, required_version=py_req)
-                        venv_cmd = ["uv", "venv", "--python", py_req] if (needs_python_download and py_req) else ["uv", "venv"]
-                        if venv_info.status == VirtualEnvStatus.NOT_FOUND:
-                            venv_step_id = f"create-venv{scope_prefix}"
-                            steps.append(
-                                PlanStep(
-                                    id=venv_step_id,
-                                    description=f"Create virtual environment for {scope_name}" if scope_name != "root" else "Create virtual environment",
-                                    action_type=ActionType.INSTALL_DEPENDENCIES,
-                                    command=venv_cmd,
-                                    cwd=scope_path,
-                                    depends_on=list(deps_prereqs),
-                                    risk=RiskLevel.SAFE,
-                                    reason="Create isolated Python virtual environment",
-                                    verification=StepVerification(
-                                        strategy="exit_code",
-                                        description="uv venv returns 0",
-                                    ),
+                                deps_prereqs.append(venv_step_id)
+                            elif venv_info.status in (VirtualEnvStatus.BROKEN, VirtualEnvStatus.WRONG_VERSION):
+                                replace_step_id = f"replace-venv{scope_prefix}"
+                                action_desc = (
+                                    f"Replace incompatible virtual environment ({venv_info.details})"
+                                    if venv_info.status == VirtualEnvStatus.WRONG_VERSION
+                                    else f"Replace broken virtual environment ({venv_info.details})"
                                 )
-                            )
-                            deps_prereqs.append(venv_step_id)
-                        elif venv_info.status in (VirtualEnvStatus.BROKEN, VirtualEnvStatus.WRONG_VERSION):
-                            replace_step_id = f"replace-venv{scope_prefix}"
-                            action_desc = (
-                                f"Replace incompatible virtual environment ({venv_info.details})"
-                                if venv_info.status == VirtualEnvStatus.WRONG_VERSION
-                                else f"Replace broken virtual environment ({venv_info.details})"
-                            )
-                            replace_cmd = ["uv", "venv", "--clear", "--python", py_req] if (needs_python_download and py_req) else ["uv", "venv", "--clear"]
-                            steps.append(
-                                PlanStep(
-                                    id=replace_step_id,
-                                    description=f"Replace virtual environment for {scope_name}" if scope_name != "root" else "Replace virtual environment",
-                                    action_type=ActionType.INSTALL_DEPENDENCIES,
-                                    command=replace_cmd,
-                                    cwd=scope_path,
-                                    depends_on=list(deps_prereqs),
-                                    risk=RiskLevel.REQUIRES_CONFIRMATION,
-                                    reason=f"{action_desc} using uv venv --clear",
-                                    verification=StepVerification(
-                                        strategy="exit_code",
-                                        description="uv venv --clear returns 0",
-                                    ),
+                                replace_cmd = ["uv", "venv", "--clear", "--python", py_req] if (needs_python_download and py_req) else ["uv", "venv", "--clear"]
+                                steps.append(
+                                    PlanStep(
+                                        id=replace_step_id,
+                                        description=f"Replace virtual environment for {scope_name}" if scope_name != "root" else "Replace virtual environment",
+                                        action_type=ActionType.INSTALL_DEPENDENCIES,
+                                        command=replace_cmd,
+                                        cwd=scope_path,
+                                        depends_on=list(deps_prereqs),
+                                        risk=RiskLevel.REQUIRES_CONFIRMATION,
+                                        reason=f"{action_desc} using uv venv --clear",
+                                        verification=StepVerification(
+                                            strategy="exit_code",
+                                            description="uv venv --clear returns 0",
+                                        ),
+                                    )
                                 )
-                            )
-                            deps_prereqs.append(replace_step_id)
+                                deps_prereqs.append(replace_step_id)
 
-                        if (target_dir / "requirements.txt").exists():
-                            install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
-                        elif (target_dir / "pyproject.toml").exists() or (target_dir / "setup.py").exists() or (target_dir / "setup.cfg").exists():
-                            install_cmd = ["uv", "pip", "install", "-e", "."]
+                            if (target_dir / "requirements.txt").exists():
+                                install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
+                            elif (target_dir / "pyproject.toml").exists() or (target_dir / "setup.py").exists() or (target_dir / "setup.cfg").exists():
+                                install_cmd = ["uv", "pip", "install", "-e", "."]
+                            else:
+                                install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
+                            install_pm_name = "uv pip"
                         else:
-                            install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
-                        install_pm_name = "uv pip"
-                    else:
-                        if (target_dir / "requirements.txt").exists():
-                            install_cmd = ["pip", "install", "-r", "requirements.txt"]
-                        elif (target_dir / "pyproject.toml").exists() or (target_dir / "setup.py").exists() or (target_dir / "setup.cfg").exists():
-                            install_cmd = ["pip", "install", "-e", "."]
-                        else:
-                            install_cmd = ["pip", "install", "-r", "requirements.txt"]
+                            if (target_dir / "requirements.txt").exists():
+                                install_cmd = ["pip", "install", "-r", "requirements.txt"]
+                            elif (target_dir / "pyproject.toml").exists() or (target_dir / "setup.py").exists() or (target_dir / "setup.cfg").exists():
+                                install_cmd = ["pip", "install", "-e", "."]
+                            else:
+                                install_cmd = ["pip", "install", "-r", "requirements.txt"]
 
-                if primary_pm in pm_step_ids:
-                    deps_prereqs.append(pm_step_ids[primary_pm])
+                    if primary_pm in pm_step_ids:
+                        deps_prereqs.append(pm_step_ids[primary_pm])
 
             for rt in sc_rts:
                 if rt.name.lower() in runtime_step_ids and runtime_step_ids[rt.name.lower()] not in deps_prereqs:
@@ -665,16 +694,21 @@ class ExecutionPlanner:
                     )
                 )
 
-            # 5b. Prisma Client Generation
-            has_prisma = any(db.orm == "prisma" for db in project_info.databases)
+            # 5b. Prisma Client Generation (scoped strictly to the directory containing schema.prisma)
+            scope_dir = (Path(project_info.path) / (scope_path or "")).resolve()
+            scope_prisma_file = None
+            if (scope_dir / "prisma" / "schema.prisma").exists():
+                scope_prisma_file = "prisma/schema.prisma"
+            elif (scope_dir / "schema.prisma").exists():
+                scope_prisma_file = "schema.prisma"
+
             prisma_step_id = None
-            if has_prisma and any(rt.name == "node" for rt in sc_rts):
+            if scope_prisma_file and any(rt.name == "node" for rt in sc_rts):
                 prisma_step_id = f"generate-client:prisma{scope_prefix}"
                 prereq_deps = ([deps_step_id] if install_cmd else ([root_deps_step_id] if root_deps_step_id else [])) + env_step_ids + service_step_ids
                 prisma_cmd = ["npx", "prisma", "generate"]
-                prisma_ev = next((ev.path for db in project_info.databases for ev in db.evidence if "schema.prisma" in ev.path), None)
-                if prisma_ev and prisma_ev not in ("prisma/schema.prisma", "schema.prisma"):
-                    prisma_cmd.append(f"--schema={prisma_ev}")
+                if scope_prisma_file != "prisma/schema.prisma":
+                    prisma_cmd.append(f"--schema={scope_prisma_file}")
 
                 steps.append(
                     PlanStep(
@@ -693,10 +727,10 @@ class ExecutionPlanner:
                     )
                 )
 
-            # 5c. Database Migrations (e.g. Alembic)
-            has_alembic = any(db.orm == "alembic" for db in project_info.databases)
+            # 5c. Database Migrations (e.g. Alembic - scoped to directory containing alembic.ini)
+            scope_has_alembic = (scope_dir / "alembic.ini").exists()
             migration_step_id = None
-            if has_alembic and any(rt.name == "python" for rt in sc_rts):
+            if scope_has_alembic and any(rt.name == "python" for rt in sc_rts):
                 migration_step_id = f"run-migration:alembic{scope_prefix}"
                 prereq_deps = [deps_step_id] if install_cmd else ([root_deps_step_id] if root_deps_step_id else [])
                 mig_prereqs = prereq_deps + service_step_ids
@@ -731,7 +765,7 @@ class ExecutionPlanner:
 
             # Node.js startup resolution
             if any(rt.name == "node" for rt in sc_rts):
-                pm_bin = install_pm_name or "npm"
+                pm_bin = install_pm_name or (root_install_pm_name if "root_install_pm_name" in locals() and root_install_pm_name else "npm")
                 for cand in ("dev", "start", "serve"):
                     if cand in script_names:
                         if "npx -y pnpm" in pm_bin:
@@ -929,6 +963,18 @@ class ExecutionPlanner:
         # ---------------------------------------------------------
         # 6. Graph Compilation & Status Determination
         # ---------------------------------------------------------
+        seen_ids: dict[str, int] = {}
+        unique_steps: list[PlanStep] = []
+        for st in steps:
+            if st.id in seen_ids:
+                seen_ids[st.id] += 1
+                new_id = f"{st.id}_{seen_ids[st.id]}"
+                st.id = new_id
+            else:
+                seen_ids[st.id] = 1
+            unique_steps.append(st)
+        steps = unique_steps
+
         graph = PlanGraph()
         graph.add_steps(steps)
         ordered_steps = graph.topological_sort()

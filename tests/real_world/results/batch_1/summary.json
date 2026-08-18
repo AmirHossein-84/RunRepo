@@ -1,0 +1,1850 @@
+[
+  {
+    "id": 1,
+    "name": "Express",
+    "url": "https://github.com/expressjs/express",
+    "batch": 1,
+    "category": "WEB_BACKEND",
+    "language": "JavaScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "npm",
+    "expected_services": [],
+    "difficulty": "MEDIUM",
+    "result": "FULL_SUCCESS",
+    "status": "SUCCESS",
+    "failure_stage": null,
+    "failure_category": null,
+    "root_cause": null,
+    "manual_intervention": null,
+    "verification": "PASSED",
+    "cleanup": "SUCCESS",
+    "duration_seconds": 4.85,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:npm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 3448.2024000026286,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-18T00:40:19.681933+00:00"
+  },
+  {
+    "id": 2,
+    "name": "Fastify",
+    "url": "https://github.com/fastify/fastify",
+    "batch": 1,
+    "category": "WEB_BACKEND",
+    "language": "JavaScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "npm",
+    "expected_services": [],
+    "difficulty": "MEDIUM",
+    "result": "FULL_SUCCESS",
+    "status": "SUCCESS",
+    "failure_stage": null,
+    "failure_category": null,
+    "root_cause": null,
+    "manual_intervention": null,
+    "verification": "PASSED",
+    "cleanup": "SUCCESS",
+    "duration_seconds": 21.02,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:npm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 12153.18649999972,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:esbuild",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 5683.964299998479,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:webpack",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 1413.125899998704,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-18T00:40:25.092804+00:00"
+  },
+  {
+    "id": 3,
+    "name": "NestJS",
+    "url": "https://github.com/nestjs/nest",
+    "batch": 1,
+    "category": "FULLSTACK",
+    "language": "TypeScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "npm",
+    "expected_services": [],
+    "difficulty": "HARD",
+    "result": "PARTIAL_SUCCESS",
+    "status": "FAILED",
+    "failure_stage": "start-app:nest-typescript-starter:sample-01-cats-app",
+    "failure_category": "VERIFICATION",
+    "root_cause": "Verification failed: HTTP endpoint http://127.0.0.1:3000 failed readiness check: <urlopen error timed out>",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 47.66,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "configure-env:template",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:npm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-docker-daemon",
+        "status": "SUCCESS",
+        "command": [
+          "runrepo",
+          "service",
+          "start-docker"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 6170.008799992502,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:@nestjs/benchmarks:tools-benchmarks",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 1675.8755000046222,
+        "error": null
+      },
+      {
+        "step_id": "start-service:docker-compose",
+        "status": "SUCCESS",
+        "command": [
+          "docker",
+          "compose",
+          "up",
+          "-d"
+        ],
+        "duration_ms": 323.5239000059664,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-01-cats-app",
+        "status": "FAILED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-02-gateways",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-03-microservices",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-04-grpc",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-05-sql-typeorm",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-06-mongoose",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-07-sequelize",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-08-webpack",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-babel-starter:sample-09-babel-example",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-10-fastify",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-11-swagger",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-12-graphql-schema-first",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-13-mongo-typeorm",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-14-mongoose-base",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-15-mvc",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-16-gateways-ws",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-17-mvc-fastify",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-18-context",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:auth-sample:sample-19-auth-jwt",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-20-cache",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-21-serializer",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "generate-client:prisma:nest-typescript-starter:sample-22-graphql-prisma",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "prisma",
+          "generate"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-23-graphql-code-first",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-24-serve-static",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-25-dynamic-modules",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-26-queues",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-27-scheduling",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-28-sse",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-29-file-upload",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-30-event-emitter",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:gateway:sample-31-graphql-federation-code-first-gateway",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:posts-application:sample-31-graphql-federation-code-first-posts-application",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:users-application:sample-31-graphql-federation-code-first-users-application",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:gateway:sample-32-graphql-federation-schema-first-gateway",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:posts-application:sample-32-graphql-federation-schema-first-posts-application",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:users-application:sample-32-graphql-federation-schema-first-users-application",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-33-graphql-mercurius",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-34-hmr-esm",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-35-zod-validation",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-36-valibot-serializer",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-01-cats-app",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-02-gateways",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-03-microservices",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-04-grpc",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-05-sql-typeorm",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-06-mongoose",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-07-sequelize",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-08-webpack",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-babel-starter:sample-09-babel-example",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-10-fastify",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-11-swagger",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-12-graphql-schema-first",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-13-mongo-typeorm",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-14-mongoose-base",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-15-mvc",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-16-gateways-ws",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-17-mvc-fastify",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-18-context",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:auth-sample:sample-19-auth-jwt",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-20-cache",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-21-serializer",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nest-typescript-starter:sample-22-graphql-prisma",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-23-graphql-code-first",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-24-serve-static",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-25-dynamic-modules",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-26-queues",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-27-scheduling",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-28-sse",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-29-file-upload",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-30-event-emitter",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:gateway:sample-31-graphql-federation-code-first-gateway",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:posts-application:sample-31-graphql-federation-code-first-posts-application",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:users-application:sample-31-graphql-federation-code-first-users-application",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:gateway:sample-32-graphql-federation-schema-first-gateway",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:posts-application:sample-32-graphql-federation-schema-first-posts-application",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:users-application:sample-32-graphql-federation-schema-first-users-application",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-33-graphql-mercurius",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-34-hmr-esm",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-35-zod-validation",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-36-valibot-serializer",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nest-typescript-starter:sample-22-graphql-prisma",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-18T00:40:46.622407+00:00"
+  },
+  {
+    "id": 4,
+    "name": "Fastify Example",
+    "url": "https://github.com/fastify/example",
+    "batch": 1,
+    "category": "WEB_BACKEND",
+    "language": "JavaScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "npm",
+    "expected_services": [],
+    "difficulty": "EASY",
+    "result": "PARTIAL_SUCCESS",
+    "status": "FAILED",
+    "failure_stage": "start-app:fastify-database-example",
+    "failure_category": "VERIFICATION",
+    "root_cause": "Verification failed: Application crashed before responding to HTTP requests at http://127.0.0.1:3000",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 38.48,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-service:docker-compose",
+        "status": "SUCCESS",
+        "command": [
+          "docker",
+          "compose",
+          "up",
+          "-d"
+        ],
+        "duration_ms": 1037.6863999990746,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:npm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:fastify-database-example",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 1508.9955000003101,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:authentication",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 1519.1431999992346,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:database-connection",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 1369.7300000058021,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:typescript-decorators",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 6827.5202000077115,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:validation-messages",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 1613.3520000003045,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:winston-logger",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 1752.0694999984698,
+        "error": null
+      },
+      {
+        "step_id": "start-app:fastify-database-example",
+        "status": "FAILED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:authentication",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:typescript-decorators",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:validation-messages",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:winston-logger",
+        "status": "SKIPPED",
+        "command": [
+          "npm",
+          "start"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:fastify-database-example",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:authentication",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:typescript-decorators",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:validation-messages",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:winston-logger",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-18T00:41:35.633732+00:00"
+  },
+  {
+    "id": 5,
+    "name": "p-map",
+    "url": "https://github.com/sindresorhus/p-map",
+    "batch": 1,
+    "category": "LIBRARY",
+    "language": "JavaScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "npm",
+    "expected_services": [],
+    "difficulty": "EASY",
+    "result": "FULL_SUCCESS",
+    "status": "SUCCESS",
+    "failure_stage": null,
+    "failure_category": null,
+    "root_cause": null,
+    "manual_intervention": null,
+    "verification": "PASSED",
+    "cleanup": "SUCCESS",
+    "duration_seconds": 5.89,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:npm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 4416.857499993057,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-18T00:42:14.835650+00:00"
+  },
+  {
+    "id": 6,
+    "name": "Chalk",
+    "url": "https://github.com/chalk/chalk",
+    "batch": 1,
+    "category": "LIBRARY",
+    "language": "JavaScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "npm",
+    "expected_services": [],
+    "difficulty": "EASY",
+    "result": "FULL_SUCCESS",
+    "status": "SUCCESS",
+    "failure_stage": null,
+    "failure_category": null,
+    "root_cause": null,
+    "manual_intervention": null,
+    "verification": "PASSED",
+    "cleanup": "SUCCESS",
+    "duration_seconds": 5.01,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:npm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 3492.7363000024343,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-18T00:42:21.462378+00:00"
+  },
+  {
+    "id": 7,
+    "name": "Commander.js",
+    "url": "https://github.com/tj/commander.js",
+    "batch": 1,
+    "category": "CLI_TOOL",
+    "language": "JavaScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "npm",
+    "expected_services": [],
+    "difficulty": "EASY",
+    "result": "FULL_SUCCESS",
+    "status": "SUCCESS",
+    "failure_stage": null,
+    "failure_category": null,
+    "root_cause": null,
+    "manual_intervention": null,
+    "verification": "PASSED",
+    "cleanup": "SUCCESS",
+    "duration_seconds": 3.13,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:npm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 1712.169400008861,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-18T00:42:27.125362+00:00"
+  },
+  {
+    "id": 8,
+    "name": "Axios",
+    "url": "https://github.com/axios/axios",
+    "batch": 1,
+    "category": "LIBRARY",
+    "language": "JavaScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "npm",
+    "expected_services": [],
+    "difficulty": "MEDIUM",
+    "result": "FULL_SUCCESS",
+    "status": "SUCCESS",
+    "failure_stage": null,
+    "failure_category": null,
+    "root_cause": null,
+    "manual_intervention": null,
+    "verification": "PASSED",
+    "cleanup": "SUCCESS",
+    "duration_seconds": 23.2,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:npm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 2047.94160000165,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:axios",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 10869.509199997992,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:@axios/cjs-module-tests",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 2040.410100002191,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:@axios/esm-module-tests",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 1387.1227000054205,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:@axios/bun-smoke-tests",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 1346.2566999951378,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:@axios/cjs-smoke-tests",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 1483.7123000033898,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:@axios/esm-smoke-tests",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 1348.939599993173,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-18T00:42:30.989611+00:00"
+  },
+  {
+    "id": 9,
+    "name": "Next.js",
+    "url": "https://github.com/vercel/next.js",
+    "batch": 1,
+    "category": "FULLSTACK",
+    "language": "TypeScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "pnpm",
+    "expected_services": [],
+    "difficulty": "VERY_HARD",
+    "result": "CORRECTLY_UNSUPPORTED",
+    "status": "BLOCKED",
+    "failure_stage": "PREREQUISITE_CHECK",
+    "failure_category": "UNSUPPORTED_RUNTIME",
+    "root_cause": "Execution blocked by prerequisites: Node version mismatch: required 20, but found 24.18.0 installed.; Rust runtime is required but not installed on host machine.; Package manager 'cargo' is required by lockfile/manifest but missing on host.",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 14.74,
+    "executed_steps": [],
+    "notes": "",
+    "timestamp": "2026-08-18T00:42:54.851868+00:00"
+  },
+  {
+    "id": 10,
+    "name": "Remix",
+    "url": "https://github.com/remix-run/remix",
+    "batch": 1,
+    "category": "FULLSTACK",
+    "language": "TypeScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "pnpm",
+    "expected_services": [],
+    "difficulty": "HARD",
+    "result": "PARTIAL_SUCCESS",
+    "status": "FAILED",
+    "failure_stage": "start-app:ui-demo",
+    "failure_category": "VERIFICATION",
+    "root_cause": "Verification failed: Application crashed before responding to HTTP requests at http://127.0.0.1:3000",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 108.75,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "configure-env:template",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:pnpm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 18008.210100000724,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:assets-demo",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 6348.284499996225,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:bookstore-demo",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 5085.755300009623,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:frame-navigation-demo",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 5158.940499997698,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:frames-demo",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 5162.388600001577,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:social-auth-demo",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 5458.6748000001535,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:sse-demo",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 5381.35009999678,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:timeboxer-demo",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 5130.4319000046235,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:unpkg-demo",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 5614.605399998254,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:remix-api",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 6343.275399995036,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:remix-guides",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 6221.953100000974,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:remix-docs-shared",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 5423.714999997173,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:remix-the-scripts",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 5330.502799988608,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:remix-template",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 5189.194400009001,
+        "error": null
+      },
+      {
+        "step_id": "start-app:bench",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:ui-demo",
+        "status": "FAILED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:assets-demo",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:bookstore-demo",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:frame-navigation-demo",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:frames-demo",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:social-auth-demo",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:sse-demo",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:timeboxer-demo",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:unpkg-demo",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:remix-api",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:remix-guides",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:remix-template",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:bench",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:ui-demo",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:assets-demo",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:bookstore-demo",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:frame-navigation-demo",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:frames-demo",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:social-auth-demo",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:sse-demo",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:timeboxer-demo",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:unpkg-demo",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:remix-api",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:remix-guides",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:remix-template",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-18T00:43:10.183348+00:00"
+  }
+]

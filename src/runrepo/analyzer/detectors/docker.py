@@ -39,9 +39,12 @@ class DockerDetector(BaseDetector):
             if file_name == "Dockerfile" or file_name.startswith("Dockerfile."):
                 discovered_dockerfiles.append(file_path)
 
+        EXCLUDED_COMPOSE_DIRS = ("test/", "tests/", "integration/", "e2e/", "fixtures/", "benchmark/", "benchmarks/", "ci/", ".github/")
         discovered_compose_files: list[str] = []
         for compose_name in COMPOSE_FILENAMES:
             for file_path in context.get_all_files():
+                if any(file_path.startswith(ex) or f"/{ex}" in file_path for ex in EXCLUDED_COMPOSE_DIRS):
+                    continue
                 if file_path == compose_name or file_path.endswith(f"/{compose_name}"):
                     if file_path not in discovered_compose_files:
                         discovered_compose_files.append(file_path)

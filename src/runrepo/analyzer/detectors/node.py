@@ -266,6 +266,22 @@ class NodeDetector(BaseDetector):
                         ],
                     )
                 )
+            elif pkg_managers:
+                sub_pm.extend(pkg_managers)
+            else:
+                sub_pm.append(
+                    PackageManagerInfo(
+                        name="npm",
+                        evidence=[
+                            DetectionEvidence(
+                                source="package.json",
+                                detail="Subproject contains package.json",
+                                confidence=Confidence.MEDIUM,
+                                path=pkg_path,
+                            )
+                        ],
+                    )
+                )
 
             sub_languages: list[str] = []
             if any(f.startswith(sub_dir + "/") and f.endswith((".ts", ".tsx")) for f in context.get_all_files()):

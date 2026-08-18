@@ -56,6 +56,25 @@ class InstallDepsStepHandler(BaseStepHandler):
             )
 
         res = executor.execute(step.command, cwd=working_dir)
+        # 1. Fallback for npm peer dependency resolution conflicts (ERESOLVE)
+        if res.exit_code != 0 and "ERESOLVE" in (res.stderr or ""):
+            fallback_cmd = list(step.command) + ["--legacy-peer-deps"]
+            res = executor.execute(fallback_cmd, cwd=working_dir)
+
+        # 2. Fallback for broken postinstall/lifecycle scripts (e.g. opencollective crashing libuv on Windows)
+        if res.exit_code != 0 and any(err in (res.stderr or "") for err in ("Assertion failed", "postinstall", "3221226505", "UV_HANDLE_CLOSING")):
+            fallback_flags = ["--ignore-scripts"]
+            if "ERESOLVE" in (res.stderr or ""):
+                fallback_flags.append("--legacy-peer-deps")
+            fallback_cmd = list(step.command) + fallback_flags
+            res = executor.execute(fallback_cmd, cwd=working_dir)
+
+        # 3. Retry on transient network resets/timeouts
+        if res.exit_code != 0:
+            err_combined = f"{res.stdout or ''}\n{res.stderr or ''}".lower()
+            if any(net_err in err_combined for net_err in ("econnreset", "etimedout", "socket hang up", "fetch failed", "connection reset", "network error")):
+                res = executor.execute(step.command, cwd=working_dir)
+
         finished_at = datetime.now(timezone.utc)
         status = ExecutionStatus.SUCCESS if res.exit_code == 0 else ExecutionStatus.FAILED
 

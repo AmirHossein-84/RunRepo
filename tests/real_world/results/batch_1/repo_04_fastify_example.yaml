@@ -1,0 +1,144 @@
+id: 4
+name: Fastify Example
+url: https://github.com/fastify/example
+batch: 1
+category: WEB_BACKEND
+language: JavaScript
+expected_runtime: node
+expected_package_manager: npm
+expected_services: []
+difficulty: EASY
+result: PARTIAL_SUCCESS
+status: FAILED
+failure_stage: start-app:fastify-database-example
+failure_category: VERIFICATION
+root_cause: 'Verification failed: Application crashed before responding to HTTP requests
+  at http://127.0.0.1:3000'
+manual_intervention: null
+verification: null
+cleanup: SUCCESS
+duration_seconds: 38.48
+executed_steps:
+- step_id: verify-runtime:node
+  status: SUCCESS
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: start-service:docker-compose
+  status: SUCCESS
+  command:
+  - docker
+  - compose
+  - up
+  - -d
+  duration_ms: 1037.6863999990746
+  error: null
+- step_id: verify-pm:npm
+  status: SUCCESS
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: install-deps:fastify-database-example
+  status: SUCCESS
+  command:
+  - npm
+  - install
+  duration_ms: 1508.9955000003101
+  error: null
+- step_id: install-deps:authentication
+  status: SUCCESS
+  command:
+  - npm
+  - install
+  duration_ms: 1519.1431999992346
+  error: null
+- step_id: install-deps:database-connection
+  status: SUCCESS
+  command:
+  - npm
+  - install
+  duration_ms: 1369.7300000058021
+  error: null
+- step_id: install-deps:typescript-decorators
+  status: SUCCESS
+  command:
+  - npm
+  - install
+  duration_ms: 6827.5202000077115
+  error: null
+- step_id: install-deps:validation-messages
+  status: SUCCESS
+  command:
+  - npm
+  - install
+  duration_ms: 1613.3520000003045
+  error: null
+- step_id: install-deps:winston-logger
+  status: SUCCESS
+  command:
+  - npm
+  - install
+  duration_ms: 1752.0694999984698
+  error: null
+- step_id: start-app:fastify-database-example
+  status: FAILED
+  command:
+  - npm
+  - start
+  duration_ms: 10.0
+  error: null
+- step_id: start-app:authentication
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:typescript-decorators
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:validation-messages
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: start-app:winston-logger
+  status: SKIPPED
+  command:
+  - npm
+  - start
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:fastify-database-example
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:authentication
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:typescript-decorators
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:validation-messages
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:winston-logger
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+notes: ''
+timestamp: '2026-08-18T00:41:35.633732+00:00'
