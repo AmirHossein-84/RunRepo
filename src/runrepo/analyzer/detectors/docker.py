@@ -42,6 +42,8 @@ class DockerDetector(BaseDetector):
         EXCLUDED_COMPOSE_DIRS = {
             "test", "tests", "integration", "e2e", "fixtures",
             "benchmark", "benchmarks", "ci", ".github", "scripts", "docker",
+            "examples", "example", "samples", "sample", "docs", "documentation",
+            "playground", "templates",
         }
         discovered_compose_files: list[str] = []
         for compose_name in COMPOSE_FILENAMES:

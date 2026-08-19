@@ -102,6 +102,7 @@ jobs:
           RUNREPO_NO_AI: "1"
           COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
         run: |
+          rm -rf tests/real_world/results
           EPHEMERAL_FLAG=""
           if [ "${{ inputs.ephemeral }}" = "true" ]; then
             EPHEMERAL_FLAG="--ephemeral"

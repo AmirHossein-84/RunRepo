@@ -20,7 +20,11 @@ class ComposeManager:
     @classmethod
     def find_compose_file(cls, directory: Path) -> Path | None:
         """Find the primary Docker Compose file in a directory or immediate subdirectories."""
-        EXCLUDED_DIRS = {"test", "tests", "integration", "e2e", "fixtures", "benchmark", "benchmarks", "ci", ".github", "scripts", "docker"}
+        EXCLUDED_DIRS = {
+            "test", "tests", "integration", "e2e", "fixtures", "benchmark", "benchmarks",
+            "ci", ".github", "scripts", "docker", "examples", "example", "samples", "sample",
+            "docs", "documentation", "playground", "templates",
+        }
         for name in cls.COMPOSE_FILENAMES:
             candidate = directory / name
             if candidate.exists() and candidate.is_file():
@@ -58,25 +62,27 @@ class ComposeManager:
         backing_services: list[str] = []
         all_infra_services: list[str] = []
         compose_file = cls.find_compose_file(cwd)
-        actual_cwd = compose_file.parent if compose_file else cwd
+        actual_cwd = cwd
+        if compose_file is not None:
+            actual_cwd = compose_file.parent
 
-        if compose_file:
+            # Inspect compose file to filter out unbuilt dev images (e.g. appwrite-dev)
             try:
-                with open(compose_file, "r", encoding="utf-8") as f:
-                    cdata = yaml.safe_load(f)
-                if isinstance(cdata, dict) and isinstance(cdata.get("services"), dict):
-                    all_services = cdata["services"]
+                content = yaml.safe_load(compose_file.read_text(encoding="utf-8", errors="replace"))
+                if isinstance(content, dict) and "services" in content and isinstance(content["services"], dict):
+                    all_services = content["services"]
+                    has_dev_images = False
+                    has_build = False
                     for sname, sdef in all_services.items():
-                        if not isinstance(sdef, dict):
-                            continue
-                        img = str(sdef.get("image", "")).lower().strip()
-                        # Extract repo name from image tag (e.g. "library/postgres:14" -> "postgres", "redis:alpine" -> "redis")
-                        raw_img = img.split(":")[0].split("/")[-1]
-                        if any(raw_img == pfx or raw_img.startswith(f"{pfx}-") for pfx in OFFICIAL_INFRA_PREFIXES) and not img.endswith("-dev"):
-                            all_infra_services.append(sname)
+                        if isinstance(sdef, dict):
+                            img = str(sdef.get("image", "")).lower()
+                            if "build" in sdef:
+                                has_build = True
+                            if img.endswith("-dev") or img.endswith(":dev") or "/dev" in img or not img:
+                                has_dev_images = True
+                            elif any(img.startswith(p) or f"/{p}" in img for p in OFFICIAL_INFRA_PREFIXES):
+                                all_infra_services.append(sname)
 
-                    has_dev_images = any("-dev" in str(sdef.get("image", "")).lower() or not sdef.get("image") for sdef in all_services.values() if isinstance(sdef, dict))
-                    has_build = any("build" in sdef for sdef in all_services.values() if isinstance(sdef, dict))
                     if has_dev_images or has_build:
                         if all_infra_services:
                             # Prioritize primary DB (mariadb or postgres) + cache (redis)
@@ -111,6 +117,16 @@ class ComposeManager:
             res = ProcessExecutionResult(
                 exit_code=0,
                 stdout=f"[runrepo] Required port already allocated on host; reusing active service.\n{res.stdout}",
+                stderr="",
+                duration_ms=res.duration_ms,
+            )
+
+        # If Windows container daemon cannot pull/run Linux container images, warn and continue
+        if res.exit_code != 0 and any(err in (res.stderr or "").lower() for err in ("no matching manifest for windows", "cannot be used on this platform", "image operating system", "daemon in windows mode")):
+            from runrepo.executor.process import ProcessExecutionResult
+            res = ProcessExecutionResult(
+                exit_code=0,
+                stdout=f"[runrepo] Host Docker daemon runs in Windows container mode and cannot run Linux compose images. Continuing with local environment.\n{res.stdout}",
                 stderr="",
                 duration_ms=res.duration_ms,
             )

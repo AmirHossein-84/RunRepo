@@ -441,3 +441,64 @@ def test_regression_conda_planner_falls_back_to_pip(tmp_path: Path):
     assert "verify-pm:conda" in step_ids
     conda_step = next(s for s in plan.steps if s.id == "verify-pm:conda")
     assert not conda_step.is_blocked
+
+
+def test_regression_install_handler_retries_with_ignore_engines_on_ebaddevengines(tmp_path: Path):
+    """Ensure InstallDepsStepHandler adds --ignore-engines when npm/yarn encounters EBADDEVENGINES."""
+    from runrepo.executor.handlers.install import InstallDepsStepHandler
+    from runrepo.executor.process import ProcessExecutor, ProcessExecutionResult
+
+    step = PlanStep(
+        id="install-deps",
+        action_type=ActionType.INSTALL_DEPENDENCIES,
+        command=["npm", "install"],
+        description="Install dependencies",
+        reason="Project dependencies",
+    )
+
+    calls = []
+
+    class MockExecutor(ProcessExecutor):
+        def execute(self, cmd, cwd=None, env=None, timeout_s=None):
+            calls.append(list(cmd))
+            if len(calls) == 1:
+                return ProcessExecutionResult(
+                    exit_code=1,
+                    stdout="",
+                    stderr="npm error code EBADDEVENGINES\nnpm error EBADDEVENGINES The developer has specified devEngines node 22.23.1",
+                    duration_ms=10.0,
+                )
+            return ProcessExecutionResult(exit_code=0, stdout="installed packages", stderr="", duration_ms=10.0)
+
+        def start_background(self, cmd, cwd=None, env=None):
+            raise NotImplementedError()
+
+    from runrepo.executor.process_manager import ProcessManager
+    mock_exec = MockExecutor()
+    pm = ProcessManager(state_dir=tmp_path)
+
+    handler = InstallDepsStepHandler()
+    res = handler.execute(step, tmp_path, mock_exec, pm)
+
+    assert res.status == ExecutionStatus.SUCCESS
+    assert len(calls) == 2
+    assert "--ignore-engines" in calls[1]
+
+
+def test_regression_docker_detector_excludes_examples_and_samples_compose(tmp_path: Path):
+    """Ensure DockerDetector and ComposeManager ignore compose files located in examples/ or samples/ directories."""
+    from runrepo.analyzer.context import ScanContext
+    from runrepo.analyzer.detectors.docker import DockerDetector
+    from runrepo.services.compose import ComposeManager
+
+    ex_dir = tmp_path / "examples" / "docker-compose"
+    ex_dir.mkdir(parents=True)
+    (ex_dir / "docker-compose.yml").write_text("services:\n  worker:\n    image: redis:alpine\n", encoding="utf-8")
+
+    ctx = ScanContext(tmp_path)
+    res = DockerDetector().detect(ctx)
+    assert not any("examples" in ev.source for ev in res.evidence)
+
+    found = ComposeManager.find_compose_file(tmp_path)
+    assert found is None
+

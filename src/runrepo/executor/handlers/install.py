@@ -67,7 +67,8 @@ class InstallDepsStepHandler(BaseStepHandler):
         res = executor.execute(step.command, cwd=working_dir, env=custom_env if custom_env else None, timeout_s=600.0)
 
         # 1. Fallback for uv pip parser error (e.g. strict TOML parse or duplicate extra normalization in pyproject.toml)
-        if res.exit_code != 0 and "uv" in step.command and any(err in (res.stderr or "") for err in ("Failed to parse", "duplicate normalized extra", "TOML parse error")):
+        err_combined = f"{res.stdout or ''}\n{res.stderr or ''}"
+        if res.exit_code != 0 and "uv" in step.command and any(err in err_combined for err in ("Failed to parse", "duplicate normalized extra", "TOML parse error")):
             import sys
             venv_py = venv_path / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
             if venv_path.exists():
@@ -80,27 +81,37 @@ class InstallDepsStepHandler(BaseStepHandler):
                     fallback_cmd.extend(step.command[idx + 1:])
                 res = executor.execute(fallback_cmd, cwd=working_dir)
 
-        # 2. Fallback for npm peer dependency resolution conflicts (ERESOLVE)
-        if res.exit_code != 0 and "ERESOLVE" in (res.stderr or ""):
-            fallback_cmd = list(step.command) + ["--legacy-peer-deps"]
+        # 2. Fallback for npm peer dependency resolution conflicts (ERESOLVE) & devEngines mismatch (EBADDEVENGINES)
+        err_combined = f"{res.stdout or ''}\n{res.stderr or ''}"
+        if res.exit_code != 0 and any(err in err_combined for err in ("ERESOLVE", "EBADDEVENGINES", "EBADENGINE", "Unsupported engine")):
+            fallback_flags = []
+            if "ERESOLVE" in err_combined:
+                fallback_flags.append("--legacy-peer-deps")
+            if any(err in err_combined for err in ("EBADDEVENGINES", "EBADENGINE", "Unsupported engine")):
+                fallback_flags.append("--ignore-engines")
+            fallback_cmd = list(step.command) + fallback_flags
             res = executor.execute(fallback_cmd, cwd=working_dir)
 
-        # 3. Fallback for broken postinstall/lifecycle scripts (e.g. opencollective crashing libuv on Windows)
-        if res.exit_code != 0 and any(err in (res.stderr or "") for err in ("Assertion failed", "postinstall", "3221226505", "UV_HANDLE_CLOSING")):
+        # 3. Fallback for broken postinstall/lifecycle scripts (e.g. opencollective crashing libuv, Turbo recursive stack overflow)
+        err_combined = f"{res.stdout or ''}\n{res.stderr or ''}"
+        if res.exit_code != 0 and any(err in err_combined for err in ("Assertion failed", "postinstall", "post-install", "3221226505", "UV_HANDLE_CLOSING", "Maximum call stack size exceeded", "command finished with error: command")):
             fallback_flags = ["--ignore-scripts"]
-            if "ERESOLVE" in (res.stderr or ""):
+            if "ERESOLVE" in err_combined:
                 fallback_flags.append("--legacy-peer-deps")
+            if any(err in err_combined for err in ("EBADDEVENGINES", "EBADENGINE", "Unsupported engine")):
+                fallback_flags.append("--ignore-engines")
             fallback_cmd = list(step.command) + fallback_flags
             res = executor.execute(fallback_cmd, cwd=working_dir)
 
         # 4. Retry on transient network resets/timeouts
         if res.exit_code != 0:
-            err_combined = f"{res.stdout or ''}\n{res.stderr or ''}".lower()
-            if any(net_err in err_combined for net_err in ("econnreset", "etimedout", "socket hang up", "fetch failed", "connection reset", "network error")):
+            err_combined_lower = f"{res.stdout or ''}\n{res.stderr or ''}".lower()
+            if any(net_err in err_combined_lower for net_err in ("econnreset", "etimedout", "socket hang up", "fetch failed", "connection reset", "network error")):
                 res = executor.execute(step.command, cwd=working_dir)
 
         # 5. Fallback for C-extension build failures on Windows without MSVC (recreate venv with Python 3.12 where pre-built binary wheels exist)
-        if res.exit_code != 0 and "uv" in step.command and any(err in (res.stderr or "") for err in ("Microsoft Visual C++", "Failed to build", "error: command 'cl.exe' failed", "Building wheel for")):
+        err_combined = f"{res.stdout or ''}\n{res.stderr or ''}"
+        if res.exit_code != 0 and "uv" in step.command and any(err in err_combined for err in ("Microsoft Visual C++", "Failed to build", "error: command 'cl.exe' failed", "Building wheel for")):
             if venv_path.exists():
                 recreate_res = executor.execute(["uv", "venv", "--python", "3.12", "--clear", str(venv_path)], cwd=working_dir)
                 if recreate_res.exit_code == 0:
