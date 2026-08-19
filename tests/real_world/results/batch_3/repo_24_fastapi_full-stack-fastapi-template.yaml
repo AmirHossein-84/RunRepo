@@ -1,0 +1,26 @@
+id: 24
+name: Full Stack FastAPI Template
+url: https://github.com/fastapi/full-stack-fastapi-template
+batch: 3
+category: FULLSTACK
+language: Python
+expected_runtime: python
+expected_package_manager: uv
+expected_services:
+- postgres
+- docker
+difficulty: HARD
+result: CORRECTLY_UNSUPPORTED
+status: BLOCKED
+failure_stage: PREREQUISITE_CHECK
+failure_category: UNSUPPORTED_RUNTIME
+root_cause: 'Execution blocked by prerequisites: Bun runtime is required but not installed
+  on host machine.; Package manager ''bun'' is required by lockfile/manifest but missing
+  on host.'
+manual_intervention: null
+verification: null
+cleanup: SUCCESS
+duration_seconds: 1.67
+executed_steps: []
+notes: ''
+timestamp: '2026-08-19T04:25:49.325605+00:00'

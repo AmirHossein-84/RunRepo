@@ -55,13 +55,37 @@ class InstallDepsStepHandler(BaseStepHandler):
                 verification_passed=False,
             )
 
-        res = executor.execute(step.command, cwd=working_dir, timeout_s=600.0)
-        # 1. Fallback for npm peer dependency resolution conflicts (ERESOLVE)
+        # Set VIRTUAL_ENV if a local virtual environment exists
+        venv_path = working_dir / ".venv"
+        if not venv_path.exists() and (repo_path / ".venv").exists():
+            venv_path = repo_path / ".venv"
+
+        custom_env = {}
+        if venv_path.exists():
+            custom_env["VIRTUAL_ENV"] = str(venv_path)
+
+        res = executor.execute(step.command, cwd=working_dir, env=custom_env if custom_env else None, timeout_s=600.0)
+
+        # 1. Fallback for uv pip parser error (e.g. strict TOML parse or duplicate extra normalization in pyproject.toml)
+        if res.exit_code != 0 and "uv" in step.command and any(err in (res.stderr or "") for err in ("Failed to parse", "duplicate normalized extra", "TOML parse error")):
+            import sys
+            venv_py = venv_path / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
+            if venv_path.exists():
+                # Ensure seed packages (pip) are available inside the virtualenv
+                executor.execute(["uv", "venv", "--seed", "--clear", str(venv_path)], cwd=working_dir)
+            if venv_py.exists():
+                fallback_cmd = [str(venv_py), "-m", "pip", "install"]
+                if "install" in step.command:
+                    idx = step.command.index("install")
+                    fallback_cmd.extend(step.command[idx + 1:])
+                res = executor.execute(fallback_cmd, cwd=working_dir)
+
+        # 2. Fallback for npm peer dependency resolution conflicts (ERESOLVE)
         if res.exit_code != 0 and "ERESOLVE" in (res.stderr or ""):
             fallback_cmd = list(step.command) + ["--legacy-peer-deps"]
             res = executor.execute(fallback_cmd, cwd=working_dir)
 
-        # 2. Fallback for broken postinstall/lifecycle scripts (e.g. opencollective crashing libuv on Windows)
+        # 3. Fallback for broken postinstall/lifecycle scripts (e.g. opencollective crashing libuv on Windows)
         if res.exit_code != 0 and any(err in (res.stderr or "") for err in ("Assertion failed", "postinstall", "3221226505", "UV_HANDLE_CLOSING")):
             fallback_flags = ["--ignore-scripts"]
             if "ERESOLVE" in (res.stderr or ""):
@@ -69,7 +93,7 @@ class InstallDepsStepHandler(BaseStepHandler):
             fallback_cmd = list(step.command) + fallback_flags
             res = executor.execute(fallback_cmd, cwd=working_dir)
 
-        # 3. Retry on transient network resets/timeouts
+        # 4. Retry on transient network resets/timeouts
         if res.exit_code != 0:
             err_combined = f"{res.stdout or ''}\n{res.stderr or ''}".lower()
             if any(net_err in err_combined for net_err in ("econnreset", "etimedout", "socket hang up", "fetch failed", "connection reset", "network error")):

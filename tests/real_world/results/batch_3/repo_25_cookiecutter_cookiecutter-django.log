@@ -1,0 +1,151 @@
+=== STDOUT ===
+Using cached repository: 
+C:\Users\Undeadmoon\AppData\Local\runrepo\runrepo\repositories\cookiecutter_coo
+kiecutter-django
+{
+  "plan_id": "plan_1787113552",
+  "repository_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\cookiecutter_cookiecutter-django",
+  "status": "SUCCESS",
+  "steps": [
+    {
+      "step_id": "verify-runtime:node",
+      "status": "SUCCESS",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T04:25:52.596411Z",
+      "finished_at": "2026-08-19T04:25:52.596411Z",
+      "duration_ms": 0.0,
+      "stdout": "Repository requires node; host has 24.18.0 installed",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Command exited cleanly (code 0)",
+      "verification": {
+        "step_id": "verify-runtime:node",
+        "verification_type": "EXIT_CODE_CHECK",
+        "status": "PASSED",
+        "target": "exit_code",
+        "message": "Command exited cleanly (code 0)",
+        "details": {},
+        "duration_ms": 0.000900006853044033,
+        "failure_reason": null,
+        "diagnostic_data": {
+          "exit_code": 0,
+          "stderr": ""
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "verify-runtime:python",
+      "status": "SUCCESS",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T04:25:52.596529Z",
+      "finished_at": "2026-08-19T04:25:52.596529Z",
+      "duration_ms": 0.0,
+      "stdout": "Repository requires python (requires ==3.14.*); host has 3.14.0 installed",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Command exited cleanly (code 0)",
+      "verification": {
+        "step_id": "verify-runtime:python",
+        "verification_type": "EXIT_CODE_CHECK",
+        "status": "PASSED",
+        "target": "exit_code",
+        "message": "Command exited cleanly (code 0)",
+        "details": {},
+        "duration_ms": 0.0004999747034162283,
+        "failure_reason": null,
+        "diagnostic_data": {
+          "exit_code": 0,
+          "stderr": ""
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "verify-pm:uv",
+      "status": "SUCCESS",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T04:25:52.596560Z",
+      "finished_at": "2026-08-19T04:25:52.596560Z",
+      "duration_ms": 0.0,
+      "stdout": "Project uses uv; host has 0.12.0 available",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Command exited cleanly (code 0)",
+      "verification": {
+        "step_id": "verify-pm:uv",
+        "verification_type": "EXIT_CODE_CHECK",
+        "status": "PASSED",
+        "target": "exit_code",
+        "message": "Command exited cleanly (code 0)",
+        "details": {},
+        "duration_ms": 0.000300002284348011,
+        "failure_reason": null,
+        "diagnostic_data": {
+          "exit_code": 0,
+          "stderr": ""
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "install-deps",
+      "status": "SUCCESS",
+      "command": [
+        "uv",
+        "sync"
+      ],
+      "cwd": null,
+      "started_at": "2026-08-19T04:25:52.596583Z",
+      "finished_at": "2026-08-19T04:25:52.835532Z",
+      "duration_ms": 77.34830002300441,
+      "stdout": "",
+      "stderr": "Resolved 92 packages in 0.83ms\nChecked 67 packages in 11ms\n",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Python dependencies verified (.venv)",
+      "verification": {
+        "step_id": "install-deps",
+        "verification_type": "DEPENDENCY_CHECK",
+        "status": "PASSED",
+        "target": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\cookiecutter_cookiecutter-django\\.venv",
+        "message": "Python dependencies verified (.venv)",
+        "details": {
+          "working_dir": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\cookiecutter_cookiecutter-django",
+          "has_pyproject": true,
+          "has_requirements": false,
+          "venv_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\cookiecutter_cookiecutter-django\\.venv"
+        },
+        "duration_ms": 0.4220000118948519,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": true
+    }
+  ],
+  "successful_steps": [
+    "install-deps",
+    "verify-pm:uv",
+    "verify-runtime:node",
+    "verify-runtime:python"
+  ],
+  "failed_steps": [],
+  "skipped_steps": [],
+  "started_at": "2026-08-19T04:25:52.596221Z",
+  "finished_at": "2026-08-19T04:25:52.836067Z",
+  "summary": "Successfully executed 4 step(s)"
+}
+
+
+=== STDERR ===
+

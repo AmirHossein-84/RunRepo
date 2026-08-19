@@ -1,0 +1,42 @@
+id: 22
+name: HTTPX
+url: https://github.com/encode/httpx
+batch: 3
+category: LIBRARY
+language: Python
+expected_runtime: python
+expected_package_manager: hatch/pip
+expected_services: []
+difficulty: EASY
+result: FULL_SUCCESS
+status: SUCCESS
+failure_stage: null
+failure_category: null
+root_cause: null
+manual_intervention: null
+verification: PASSED
+cleanup: SUCCESS
+duration_seconds: 1.28
+executed_steps:
+- step_id: verify-runtime:python
+  status: SUCCESS
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-pm:pip
+  status: SUCCESS
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: install-deps
+  status: SUCCESS
+  command:
+  - uv
+  - pip
+  - install
+  - -r
+  - requirements.txt
+  duration_ms: 91.90649999072775
+  error: null
+notes: ''
+timestamp: '2026-08-19T04:25:45.003603+00:00'

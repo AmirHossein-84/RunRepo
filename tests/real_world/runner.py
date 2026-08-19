@@ -146,7 +146,7 @@ def test_repository(repo: Dict[str, Any], batch_num: int) -> Dict[str, Any]:
                 summary = str(parsed_json.get("summary", "")).lower()
                 result_data["root_cause"] = parsed_json.get("summary")
                 result_data["failure_stage"] = "PREREQUISITE_CHECK"
-                if any(k in summary for k in ("rust", "cargo", "go ", "golang", "ruby", "unsupported", "version mismatch")):
+                if any(k in summary for k in ("rust", "cargo", "go ", "golang", "ruby", "bun", "deno", "php", "unsupported", "version mismatch", "node version mismatch", "python version mismatch")):
                     result_data["result"] = "CORRECTLY_UNSUPPORTED"
                     result_data["failure_category"] = "UNSUPPORTED_RUNTIME"
                     console.print(f"[bold yellow]? CORRECTLY_UNSUPPORTED[/bold yellow] ({result_data['root_cause']})")

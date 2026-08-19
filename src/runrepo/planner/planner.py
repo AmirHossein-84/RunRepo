@@ -491,8 +491,15 @@ class ExecutionPlanner:
 
         scopes: list[tuple[str, str | None, list, list, list, list]] = []
         if project_info.subprojects:
-            for sp in project_info.subprojects:
-                scopes.append((sp.name, sp.path, sp.runtimes, sp.package_managers, sp.frameworks, sp.scripts))
+            if project_info.is_monorepo and len(project_info.subprojects) > 2:
+                primary_prefixes = ("apps/", "app/", "web/", "studio/", "dashboard/", "playground/", "frontend/", "backend/", "server/")
+                primary_sps = [sp for sp in project_info.subprojects if sp.path and any(sp.path.startswith(p) for p in primary_prefixes)]
+                chosen_sps = primary_sps[:2] if primary_sps else project_info.subprojects[:2]
+                for sp in chosen_sps:
+                    scopes.append((sp.name, sp.path, sp.runtimes, sp.package_managers, sp.frameworks, sp.scripts))
+            else:
+                for sp in project_info.subprojects:
+                    scopes.append((sp.name, sp.path, sp.runtimes, sp.package_managers, sp.frameworks, sp.scripts))
         else:
             scopes.append(("root", None, project_info.runtimes, project_info.package_managers, project_info.frameworks, project_info.scripts))
 

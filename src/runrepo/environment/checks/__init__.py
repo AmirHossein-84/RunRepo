@@ -276,6 +276,21 @@ def check_yarn(
 
     v = clean_version_string(res.stdout)
     sat = evaluate_version_requirement(v, required_version)
+    if sat is False:
+        # If installed version does not match (e.g. Yarn Classic vs Yarn Berry), npx can run the exact requested version
+        npx_res = runner.run(["npx", "--version"])
+        if npx_res.success and npx_res.stdout:
+            return EnvironmentCheck(
+                name="yarn",
+                status=EnvironmentStatus.OK,
+                required=required,
+                required_version=required_version,
+                installed_version=f"npx -y yarn@{required_version}",
+                executable_path=npx_res.executable,
+                details=f"Version mismatch ({v} installed); satisfied via npx -y yarn@{required_version}",
+                evidence=ev_list,
+            )
+
     status = EnvironmentStatus.OK if sat is True else (EnvironmentStatus.WRONG_VERSION if sat is False else EnvironmentStatus.UNKNOWN)
 
     return EnvironmentCheck(

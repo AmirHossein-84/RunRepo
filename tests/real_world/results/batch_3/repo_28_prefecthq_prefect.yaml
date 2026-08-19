@@ -1,0 +1,23 @@
+id: 28
+name: Prefect
+url: https://github.com/PrefectHQ/prefect
+batch: 3
+category: ORCHESTRATION
+language: Python
+expected_runtime: python
+expected_package_manager: hatch/pip
+expected_services: []
+difficulty: HARD
+result: CORRECTLY_UNSUPPORTED
+status: BLOCKED
+failure_stage: PREREQUISITE_CHECK
+failure_category: UNSUPPORTED_RUNTIME
+root_cause: 'Execution blocked by prerequisites: Node version mismatch: required 24.19.0,
+  but found 24.18.0 installed.'
+manual_intervention: null
+verification: null
+cleanup: SUCCESS
+duration_seconds: 1.81
+executed_steps: []
+notes: ''
+timestamp: '2026-08-19T04:26:34.783086+00:00'

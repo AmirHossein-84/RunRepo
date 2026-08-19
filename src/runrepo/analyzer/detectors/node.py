@@ -236,11 +236,18 @@ class NodeDetector(BaseDetector):
             if pkg_path == "package.json":
                 continue
 
+            sub_dir = str(Path(pkg_path).parent.as_posix())
+            # Skip test fixtures, benchmarks, ci directories, and template placeholders
+            if "{{" in sub_dir or "}}" in sub_dir or "{%" in sub_dir or "%}" in sub_dir:
+                continue
+            parts = sub_dir.lower().split("/")
+            if any(p in {"test", "tests", "fixtures", "fixture", "test_fixtures", "spec", "specs", "e2e", "benchmark", "benchmarks", "ci", ".github", "vendor"} for p in parts):
+                continue
+
             sub_data = context.read_json(pkg_path)
             if not isinstance(sub_data, dict):
                 continue
 
-            sub_dir = str(Path(pkg_path).parent.as_posix())
             sub_name = sub_data.get("name") or sub_dir.split("/")[-1]
 
             sub_scripts, sub_deps, sub_fws = self._parse_package_json_content(

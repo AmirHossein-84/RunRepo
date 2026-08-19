@@ -1,0 +1,212 @@
+=== STDOUT ===
+Using cached repository: 
+C:\Users\Undeadmoon\AppData\Local\runrepo\runrepo\repositories\celery_celery
+{
+  "plan_id": "plan_1787113591",
+  "repository_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\celery_celery",
+  "status": "FAILED",
+  "steps": [
+    {
+      "step_id": "verify-runtime:python",
+      "status": "SUCCESS",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T04:26:31.018183Z",
+      "finished_at": "2026-08-19T04:26:31.018183Z",
+      "duration_ms": 0.0,
+      "stdout": "Repository requires python; host has 3.14.0 installed",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Command exited cleanly (code 0)",
+      "verification": {
+        "step_id": "verify-runtime:python",
+        "verification_type": "EXIT_CODE_CHECK",
+        "status": "PASSED",
+        "target": "exit_code",
+        "message": "Command exited cleanly (code 0)",
+        "details": {},
+        "duration_ms": 0.000500003807246685,
+        "failure_reason": null,
+        "diagnostic_data": {
+          "exit_code": 0,
+          "stderr": ""
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "verify-pm:uv",
+      "status": "SUCCESS",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T04:26:31.018277Z",
+      "finished_at": "2026-08-19T04:26:31.018277Z",
+      "duration_ms": 0.0,
+      "stdout": "Project uses uv; host has 0.12.0 available",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Command exited cleanly (code 0)",
+      "verification": {
+        "step_id": "verify-pm:uv",
+        "verification_type": "EXIT_CODE_CHECK",
+        "status": "PASSED",
+        "target": "exit_code",
+        "message": "Command exited cleanly (code 0)",
+        "details": {},
+        "duration_ms": 0.000300002284348011,
+        "failure_reason": null,
+        "diagnostic_data": {
+          "exit_code": 0,
+          "stderr": ""
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "install-deps",
+      "status": "SUCCESS",
+      "command": [
+        "uv",
+        "sync"
+      ],
+      "cwd": null,
+      "started_at": "2026-08-19T04:26:31.018304Z",
+      "finished_at": "2026-08-19T04:26:31.614372Z",
+      "duration_ms": 436.01209999178536,
+      "stdout": "",
+      "stderr": "warning: No `requires-python` value found in the workspace. Defaulting to `>=3.14`.\nResolved in 1ms\nUninstalled 17 packages in 386ms\n - amqp==5.3.1\n - billiard==4.2.4\n - celery==5.6.2 (from file:///C:/Users/Undeadmoon/AppData/Local/runrepo/runrepo/repositories/celery_celery)\n - click==8.4.2\n - click-didyoumean==0.3.1\n - click-plugins==1.1.1.2\n - click-repl==0.3.0\n - colorama==0.4.6\n - kombu==5.6.2\n - packaging==26.3\n - prompt-toolkit==3.0.53\n - python-dateutil==2.9.0.post0\n - six==1.17.0\n - tzdata==2026.3\n - tzlocal==5.4.4\n - vine==5.1.0\n - wcwidth==0.8.2\n",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Python dependencies verified (.venv)",
+      "verification": {
+        "step_id": "install-deps",
+        "verification_type": "DEPENDENCY_CHECK",
+        "status": "PASSED",
+        "target": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\celery_celery\\.venv",
+        "message": "Python dependencies verified (.venv)",
+        "details": {
+          "working_dir": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\celery_celery",
+          "has_pyproject": true,
+          "has_requirements": false,
+          "venv_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\celery_celery\\.venv"
+        },
+        "duration_ms": 0.588800001423806,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "install-deps:django",
+      "status": "SUCCESS",
+      "command": [
+        "uv",
+        "sync"
+      ],
+      "cwd": "examples/django",
+      "started_at": "2026-08-19T04:26:31.615137Z",
+      "finished_at": "2026-08-19T04:26:31.826759Z",
+      "duration_ms": 55.26530000497587,
+      "stdout": "",
+      "stderr": "warning: `VIRTUAL_ENV=.venv` does not match the project environment path `C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\celery_celery\\.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: No `requires-python` value found in the workspace. Defaulting to `>=3.14`.\nResolved in 1ms\nChecked in 0.01ms\n",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Python dependencies verified (.venv)",
+      "verification": {
+        "step_id": "install-deps:django",
+        "verification_type": "DEPENDENCY_CHECK",
+        "status": "PASSED",
+        "target": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\celery_celery\\examples\\django\\.venv",
+        "message": "Python dependencies verified (.venv)",
+        "details": {
+          "working_dir": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\celery_celery\\examples\\django",
+          "has_pyproject": false,
+          "has_requirements": true,
+          "venv_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\celery_celery\\examples\\django\\.venv"
+        },
+        "duration_ms": 1.195199991343543,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": true
+    },
+    {
+      "step_id": "start-app:django",
+      "status": "FAILED",
+      "command": [
+        "uv",
+        "run",
+        "python",
+        "manage.py",
+        "runserver"
+      ],
+      "cwd": "examples/django",
+      "started_at": "2026-08-19T04:26:31.828216Z",
+      "finished_at": "2026-08-19T04:26:32.045035Z",
+      "duration_ms": 10.0,
+      "stdout": "Application started in background (PID: 19824). Output logged to: C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\processes\\logs\\start-app_django_20260819_042631.log",
+      "stderr": "Verification failed: Application crashed before responding to HTTP requests at http://127.0.0.1:8000",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": "Application crashed before responding to HTTP requests at http://127.0.0.1:8000",
+      "verification": {
+        "step_id": "start-app:django",
+        "verification_type": "HTTP_CHECK",
+        "status": "FAILED",
+        "target": "http://127.0.0.1:8000",
+        "message": "Application crashed before responding to HTTP requests at http://127.0.0.1:8000",
+        "details": {},
+        "duration_ms": 2045.3395000076853,
+        "failure_reason": "Process exited during HTTP readiness check",
+        "diagnostic_data": {
+          "pid": 19824,
+          "recent_logs": "warning: `VIRTUAL_ENV=C:\\Users\\Undeadmoon\\RunRepo\\.venv` does not match the project environment path `C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\celery_celery\\.venv` and will be ignored; use `--active` to target the active environment instead\nwarning: No `requires-python` value found in the workspace. Defaulting to `>=3.14`.\nTraceback (most recent call last):\n  File \"C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\celery_celery\\examples\\django\\manage.py\", line 9, in <module>\n    from django.core.management import execute_from_command_line\nModuleNotFoundError: No module named 'django'"
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "verify-app:django",
+      "status": "SKIPPED",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T04:26:34.140573Z",
+      "finished_at": "2026-08-19T04:26:34.140577Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'start-app:django' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    }
+  ],
+  "successful_steps": [
+    "install-deps",
+    "install-deps:django",
+    "verify-pm:uv",
+    "verify-runtime:python"
+  ],
+  "failed_steps": [
+    "start-app:django"
+  ],
+  "skipped_steps": [
+    "verify-app:django"
+  ],
+  "started_at": "2026-08-19T04:26:31.018073Z",
+  "finished_at": "2026-08-19T04:26:34.140602Z",
+  "summary": "Execution failed at step(s): start-app:django"
+}
+
+
+=== STDERR ===
+

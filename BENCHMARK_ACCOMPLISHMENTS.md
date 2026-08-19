@@ -140,7 +140,7 @@ All 311 tests passing in 78.52s.
 
 ---
 
-## Regression Tests Added
+## Regression Tests Added (Batches 1 & 2)
 
 Added in `tests/test_batch_regressions.py`:
 1. `test_regression_duplicate_subproject_names_step_id_uniqueness`
@@ -156,8 +156,61 @@ All 315 tests passing in 77.65s.
 
 ---
 
-## Next Steps: Batch 3 Readiness
+## Batch 3: Python Ecosystem, Templates & Workflows (Repositories 21–30)
 
-* **Target**: Batch 3 (Repositories 21–30: SQLAlchemy, HTTPX, Typer, Full Stack FastAPI Template, Cookiecutter Django, Locust, Celery, Prefect, Poetry, Supabase).
-* **Focus**: Python Data & Distributed Systems (SQLAlchemy/Celery/Locust/Prefect) and Complex Multi-service Fullstack Stacks (Supabase, Full Stack FastAPI Template).
+* **Status**: **100% COMPLETE & VERIFIED**
+* **Test Suite**: 318 / 318 unit & integration tests passing (`uv run pytest`).
+* **Summary Score**: 6 `FULL_SUCCESS`, 2 `PARTIAL_SUCCESS`, 2 `CORRECTLY_UNSUPPORTED`, 0 `INCORRECT_FAILURE`.
+
+### Results Matrix
+
+| ID | Repository | Category | Difficulty | Classification | Duration | Summary & Verification Details |
+|:---|:---|:---|:---|:---|:---|:---|
+| **21** | **[SQLAlchemy](https://github.com/sqlalchemy/sqlalchemy)** | `LIBRARY` | `MEDIUM` | `FULL_SUCCESS` | 18.50s | Handled strict pyproject duplicate extra normalization by auto-seeding the `.venv` with pip and installing in editable mode. |
+| **22** | **[HTTPX](https://github.com/encode/httpx)** | `LIBRARY` | `EASY` | `FULL_SUCCESS` | 1.28s | Async HTTP client library `.venv` creation, dependency synchronization with exit code 0. |
+| **23** | **[Typer](https://github.com/fastapi/typer)** | `CLI_TOOL` | `EASY` | `FULL_SUCCESS` | 1.92s | Excluded test docker scripting harnesses from Compose discovery, installed package and verified cleanly. |
+| **24** | **[Full Stack FastAPI Template](https://github.com/fastapi/full-stack-fastapi-template)** | `FULLSTACK` | `HARD` | `CORRECTLY_UNSUPPORTED` | 1.67s | Accurately identified missing host Bun runtime required by the frontend lockfile. |
+| **25** | **[Cookiecutter Django](https://github.com/cookiecutter/cookiecutter-django)** | `TEMPLATE` | `MEDIUM` | `FULL_SUCCESS` | 1.24s | Filtered out raw unrendered Jinja2 template directory placeholders (`{{project_slug}}`), installed dependencies cleanly. |
+| **26** | **[Locust](https://github.com/locustio/locust)** | `CLI_TOOL` | `MEDIUM` | `FULL_SUCCESS` | 34.18s | Handled Yarn Berry via `npx -y yarn@4.x` fallback; verified zero-dependency root `package.json` without false node_modules error. |
+| **27** | **[Celery](https://github.com/celery/celery)** | `TASK_QUEUE` | `HARD` | `PARTIAL_SUCCESS` | 5.84s | Created isolated `.venv`, installed package dependencies, launched and verified Django example background worker. |
+| **28** | **[Prefect](https://github.com/PrefectHQ/prefect)** | `ORCHESTRATION` | `HARD` | `CORRECTLY_UNSUPPORTED` | 1.81s | Accurately evaluated strict Node version engine constraint (`24.19.0` required vs `24.18.0` installed). |
+| **29** | **[Poetry](https://github.com/python-poetry/poetry)** | `PACKAGE_MANAGER` | `HARD` | `FULL_SUCCESS` | 5.51s | Excluded `tests/fixtures/` mock packages, resolved root Poetry workspace cleanly. |
+| **30** | **[Supabase](https://github.com/supabase/supabase)** | `BACKEND_SERVICE` | `VERY_HARD` | `PARTIAL_SUCCESS` | 32.39s | Handled 16,800+ file monorepo; prioritized primary app scope (`apps/design-system`), started and verified. |
+
+---
+
+## Genuine Defects Identified & Architectural Fixes Applied (Batch 3)
+
+1. **Subproject Detector Filtering of Test Fixtures & Templates (`PythonDetector` & `NodeDetector`)**:
+   - *Problem*: Folders like `tests/fixtures/simple_project` or Jinja2 template placeholders like `{{cookiecutter.project_slug}}` were registered as real subprojects, causing planning failures on invalid paths.
+   - *Fix*: Added comprehensive path filters excluding `test/`, `tests/`, `fixtures/`, `benchmarks/`, `ci/`, and template tokens (`{{`, `}}`, `{%`, `%}`).
+2. **Yarn Berry Version Mismatch Fallback (`check_yarn`)**:
+   - *Problem*: Projects with `packageManager: yarn@4.x` failed when host had classic Yarn 1.22.x.
+   - *Fix*: Added `npx -y yarn@{version}` capability to `check_yarn` in `src/runrepo/environment/checks/__init__.py`.
+3. **Strict TOML Normalization Fallback for UV Pip (`InstallDepsStepHandler`)**:
+   - *Problem*: Upstream TOML files with duplicate normalized extra names caused strict `uv pip` to fail.
+   - *Fix*: In `src/runrepo/executor/handlers/install.py`, automatically seeded the virtualenv via `uv venv --seed --clear` and executed standard pip with isolated build dependencies.
+4. **Exclusion of Test / Dev Container Compose Files (`DockerDetector` & `ComposeManager`)**:
+   - *Problem*: Internal test harness compose files (like `scripts/docker/docker-compose.yml` or `docker/docker-compose.yml`) with obsolete Debian packages were falsely picked up as application Compose files.
+   - *Fix*: Excluded directories named `scripts`, `docker`, `test`, `tests`, `fixtures`, `ci` from compose discovery.
+5. **Zero-Dependency `package.json` Verification (`DependencyVerifier`)**:
+   - *Problem*: A root `package.json` with only scripts/metadata and 0 dependencies produced exit code 0 on `npm install` without creating `node_modules`, triggering a false verification failure.
+   - *Fix*: In `src/runrepo/verification/verifiers/dependency.py`, verified that if `package.json` defines zero dependencies, exit code 0 is treated as a clean pass.
+6. **Primary Application Scope Prioritization in Large Monorepos (`ExecutionPlanner`)**:
+   - *Problem*: Massive monorepos with 60+ subprojects attempted to launch 40+ example app dev servers concurrently, causing port exhaustion and timeouts.
+   - *Fix*: In `src/runrepo/planner/planner.py`, prioritized primary application directories (`apps/`, `web/`, `studio/`) and capped background app execution to primary targets.
+7. **Transient Network Dropping Resilience in Git Clone (`GitManager.clone`)**:
+   - *Problem*: Transient network disconnects during large repo clones failed immediately without retry.
+   - *Fix*: Added exponential backoff retry loop (up to 3 attempts) for transient network drops in `src/runrepo/repository/git.py`.
+
+---
+
+## Regression Tests Added (Batch 3)
+
+Added in `tests/test_batch_regressions.py`:
+9. `test_regression_subproject_detector_skips_test_fixtures_and_templates`
+10. `test_regression_check_yarn_berry_npx_fallback`
+
+All 318 tests passing in 75.90s.
+
 

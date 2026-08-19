@@ -105,33 +105,67 @@ class GitManager:
 
         cmd.extend([target.clone_url, str(destination)])
 
-        try:
-            exec_res = self.executor.execute(cmd, cwd=destination.parent)
-        except Exception as e:
+        git_env = {"GIT_TERMINAL_PROMPT": "0"}
+        max_attempts = 3
+        exec_res = None
+        sanitized_output = ""
+
+        for attempt in range(1, max_attempts + 1):
             if destination.exists():
                 _safe_rmtree(destination)
-            return RepositoryResult(
-                success=False,
-                target=target,
-                error_message=f"Failed to execute git clone: {e}",
+
+            try:
+                exec_res = self.executor.execute(cmd, cwd=destination.parent, env=git_env, timeout_s=300.0)
+            except Exception as e:
+                if destination.exists():
+                    _safe_rmtree(destination)
+                if attempt == max_attempts:
+                    return RepositoryResult(
+                        success=False,
+                        target=target,
+                        error_message=f"Failed to execute git clone: {e}",
+                    )
+                time.sleep(1.5 * attempt)
+                continue
+
+            combined_output = f"{exec_res.stdout}\n{exec_res.stderr}".strip()
+            sanitized_output = self.sanitize_git_output(combined_output) or ""
+
+            if exec_res.exit_code == 0:
+                duration_ms = (time.perf_counter() - start_time) * 1000.0
+                target.status = CloneStatus.CLONED
+                target.local_path = destination
+                return RepositoryResult(
+                    success=True,
+                    target=target,
+                    local_path=destination,
+                    git_output=sanitized_output,
+                    exit_code=0,
+                    duration_ms=duration_ms,
+                )
+
+            # Check if failure is transient network error
+            err_lower = sanitized_output.lower()
+            is_transient = any(
+                p in err_lower
+                for p in (
+                    "could not connect to server",
+                    "connection reset",
+                    "timed out",
+                    "early eof",
+                    "rpc failed",
+                    "the remote end hung up unexpectedly",
+                    "could not resolve host",
+                    "failed to connect",
+                )
             )
+            if is_transient and attempt < max_attempts:
+                time.sleep(2.0 * attempt)
+                continue
+            else:
+                break
 
         duration_ms = (time.perf_counter() - start_time) * 1000.0
-        combined_output = f"{exec_res.stdout}\n{exec_res.stderr}".strip()
-        sanitized_output = self.sanitize_git_output(combined_output)
-
-        if exec_res.exit_code == 0:
-            target.status = CloneStatus.CLONED
-            target.local_path = destination
-            return RepositoryResult(
-                success=True,
-                target=target,
-                local_path=destination,
-                git_output=sanitized_output,
-                exit_code=0,
-                duration_ms=duration_ms,
-            )
-
         # Clone failed - clean up partial artifacts to avoid corrupted states
         if destination.exists():
             _safe_rmtree(destination)

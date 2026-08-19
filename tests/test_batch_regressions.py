@@ -236,3 +236,46 @@ def test_regression_monorepo_skips_redundant_subpackage_installs():
     assert install_steps[0].id == "install-deps"
 
 
+def test_regression_subproject_detector_skips_test_fixtures_and_templates(tmp_path: Path):
+    """Ensure Python and Node detectors skip mock fixtures in tests/fixtures/ and template interpolation folders."""
+    from runrepo.analyzer.context import ScanContext
+    from runrepo.analyzer.detectors.python import PythonDetector
+    from runrepo.analyzer.detectors.node import NodeDetector
+
+    # Create test fixture subfolder and template folder
+    fixture_dir = tmp_path / "tests" / "fixtures" / "mock_pkg"
+    fixture_dir.mkdir(parents=True)
+    (fixture_dir / "pyproject.toml").write_text('[project]\nname = "mock-fixture"\nversion = "0.1.0"\n', encoding="utf-8")
+    (fixture_dir / "package.json").write_text('{"name": "mock-fixture"}', encoding="utf-8")
+
+    template_dir = tmp_path / "{{cookiecutter.project_slug}}"
+    template_dir.mkdir(parents=True)
+    (template_dir / "pyproject.toml").write_text('[project]\nname = "{{cookiecutter.project_slug}}"\n', encoding="utf-8")
+    (template_dir / "package.json").write_text('{"name": "{{cookiecutter.project_slug}}"}', encoding="utf-8")
+
+    ctx = ScanContext(tmp_path)
+    py_res = PythonDetector().detect(ctx)
+    node_res = NodeDetector().detect(ctx)
+
+    # Verify no mock fixture or template was registered as a runnable subproject
+    assert len(py_res.subprojects) == 0
+    assert len(node_res.subprojects) == 0
+
+
+def test_regression_check_yarn_berry_npx_fallback():
+    """Ensure check_yarn returns OK with npx -y fallback when installed yarn version does not meet Berry constraint."""
+    from runrepo.environment.checks import check_yarn
+    from runrepo.environment.command import CommandResult, MockCommandRunner
+
+    runner = MockCommandRunner(
+        responses={
+            ("yarn", "--version"): CommandResult(stdout="1.22.22", stderr="", exit_code=0, duration_ms=5.0, executable="C:\\Yarn\\yarn.cmd"),
+            ("npx", "--version"): CommandResult(stdout="10.8.2", stderr="", exit_code=0, duration_ms=5.0, executable="C:\\Node\\npx.cmd"),
+        }
+    )
+
+    check = check_yarn(runner, required=True, required_version="4.12.0")
+    assert check.status == EnvironmentStatus.OK
+    assert "npx -y yarn@4.12.0" in check.installed_version
+
+

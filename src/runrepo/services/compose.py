@@ -20,7 +20,7 @@ class ComposeManager:
     @classmethod
     def find_compose_file(cls, directory: Path) -> Path | None:
         """Find the primary Docker Compose file in a directory or immediate subdirectories."""
-        EXCLUDED_DIRS = {"test", "tests", "integration", "e2e", "fixtures", "benchmark", "benchmarks", "ci", ".github", "scripts"}
+        EXCLUDED_DIRS = {"test", "tests", "integration", "e2e", "fixtures", "benchmark", "benchmarks", "ci", ".github", "scripts", "docker"}
         for name in cls.COMPOSE_FILENAMES:
             candidate = directory / name
             if candidate.exists() and candidate.is_file():

@@ -283,6 +283,12 @@ class PythonDetector(BaseDetector):
             sub_dir = str(Path(manifest).parent.as_posix())
             if sub_dir in processed_dirs or sub_dir == ".":
                 continue
+            # Skip test fixtures, benchmarks, ci directories, and template placeholders
+            if "{{" in sub_dir or "}}" in sub_dir or "{%" in sub_dir or "%}" in sub_dir:
+                continue
+            parts = sub_dir.lower().split("/")
+            if any(p in {"test", "tests", "fixtures", "fixture", "test_fixtures", "spec", "specs", "e2e", "benchmark", "benchmarks", "ci", ".github", "vendor"} for p in parts):
+                continue
             processed_dirs.add(sub_dir)
 
             sub_scripts: list[ProjectScript] = []

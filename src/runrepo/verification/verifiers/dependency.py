@@ -57,9 +57,29 @@ class DependencyVerifier(BaseVerifier):
         # 1. Node.js Dependency Verification
         package_json = working_dir / "package.json"
         if package_json.exists():
+            # Check if package.json defines any dependencies
+            import json
+            has_deps = False
+            try:
+                with open(package_json, "r", encoding="utf-8") as f:
+                    pdata = json.load(f)
+                if isinstance(pdata, dict):
+                    has_deps = bool(pdata.get("dependencies") or pdata.get("devDependencies") or pdata.get("peerDependencies") or pdata.get("optionalDependencies"))
+            except Exception:
+                has_deps = True
+
             node_modules = working_dir / "node_modules"
             if not node_modules.exists() or not node_modules.is_dir():
                 elapsed = (time.perf_counter() - start_time) * 1000.0
+                if not has_deps:
+                    return VerificationResult(
+                        step_id=step.id,
+                        verification_type=VerificationType.DEPENDENCY_CHECK,
+                        status=VerificationStatus.PASSED,
+                        target=str(working_dir),
+                        message="Node package without dependencies verified",
+                        duration_ms=elapsed,
+                    )
                 return VerificationResult(
                     step_id=step.id,
                     verification_type=VerificationType.DEPENDENCY_CHECK,
