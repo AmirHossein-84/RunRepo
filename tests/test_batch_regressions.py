@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import pytest
 from runrepo.environment.models import EnvironmentCheck, EnvironmentState, EnvironmentStatus
+from runrepo.executor.models import ExecutionStatus
 from runrepo.models import (
     Confidence,
     DetectionEvidence,
@@ -15,7 +16,7 @@ from runrepo.models import (
     RuntimeInfo,
     SubprojectInfo,
 )
-from runrepo.planner.models import ActionType, PlanStatus
+from runrepo.planner.models import ActionType, PlanStatus, PlanStep, RiskLevel
 from runrepo.planner.planner import ExecutionPlanner
 from runrepo.services.compose import ComposeManager
 
@@ -343,4 +344,100 @@ services:
     assert "reusing active service" in res.stdout or "already allocated" in res.stdout
 
 
+def test_regression_service_handler_handles_windows_container_daemon_incompatibility(tmp_path: Path):
+    """Ensure ServiceStepHandler gracefully warns and continues when Windows Docker daemon cannot run Linux images."""
+    from runrepo.executor.handlers.service import ServiceStepHandler
+    from runrepo.executor.process import MockProcessExecutor, ProcessExecutionResult
+    from runrepo.executor.process_manager import ProcessManager
 
+    step = PlanStep(
+        id="start-service:postgres",
+        description="Start Postgres database",
+        action_type=ActionType.START_SERVICE,
+        command=["docker", "run", "-d", "--name", "test-postgres", "-p", "5432:5432", "postgres:16-alpine"],
+        risk=RiskLevel.REQUIRES_CONFIRMATION,
+        reason="PostgreSQL database required by application",
+    )
+
+    executor = MockProcessExecutor(
+        custom_responses={
+            ("docker", "run", "-d", "--name", "test-postgres", "-p", "5432:5432", "postgres:16-alpine"): ProcessExecutionResult(
+                exit_code=1,
+                stdout="",
+                stderr="docker: no matching manifest for windows(10.0.26100)/amd64 in the manifest list entries",
+            )
+        }
+    )
+
+    handler = ServiceStepHandler()
+    res = handler.execute(
+        step=step,
+        repo_path=tmp_path,
+        executor=executor,
+        process_manager=ProcessManager(),
+    )
+
+    assert res.status == ExecutionStatus.SUCCESS
+    assert res.exit_code == 0
+    assert "Windows container mode" in res.stdout
+
+
+def test_regression_python_subproject_skips_ci_and_build_tools_dirs(tmp_path: Path):
+    """Ensure Python detector ignores build_tools, .ci, and tools directories without runnable applications."""
+    from runrepo.analyzer.context import ScanContext
+    from runrepo.analyzer.detectors.python import PythonDetector
+
+    ci_dir = tmp_path / ".ci" / "docker" / "ci_commit_pins"
+    ci_dir.mkdir(parents=True)
+    (ci_dir / "requirements.txt").write_text("pytest\n", encoding="utf-8")
+
+    tools_dir = tmp_path / "build_tools" / "github"
+    tools_dir.mkdir(parents=True)
+    (tools_dir / "requirements.txt").write_text("flake8\n", encoding="utf-8")
+
+    # Real subproject
+    app_dir = tmp_path / "apps" / "backend"
+    app_dir.mkdir(parents=True)
+    (app_dir / "pyproject.toml").write_text('[project]\nname = "my-backend"\nversion = "1.0.0"\n', encoding="utf-8")
+
+    ctx = ScanContext(tmp_path)
+    res = PythonDetector().detect(ctx)
+
+    sp_paths = [sp.path for sp in res.subprojects]
+    assert "apps/backend" in sp_paths
+    assert not any("ci_commit_pins" in p or "build_tools" in p for p in sp_paths)
+
+
+def test_regression_conda_planner_falls_back_to_pip(tmp_path: Path):
+    """Ensure planner does not block on missing conda when standard requirements.txt exists."""
+    (tmp_path / "environment.yml").write_text("name: test\n", encoding="utf-8")
+    (tmp_path / "requirements.txt").write_text("flask\n", encoding="utf-8")
+
+    ev = [DetectionEvidence(source="environment.yml", confidence=Confidence.HIGH)]
+    project = ProjectInfo(
+        path=str(tmp_path),
+        name="conda-flask",
+        project_type=ProjectType.WEB_APPLICATION,
+        runtimes=[RuntimeInfo(name="python", version=">=3.11", evidence=ev)],
+        package_managers=[
+            PackageManagerInfo(name="conda", evidence=ev),
+            PackageManagerInfo(name="pip", evidence=[DetectionEvidence(source="requirements.txt", confidence=Confidence.HIGH)]),
+        ],
+    )
+
+    env = _make_env([
+        EnvironmentCheck(name="python", status=EnvironmentStatus.OK, installed_version="3.12.3", required=True),
+        EnvironmentCheck(name="pip", status=EnvironmentStatus.OK, installed_version="24.0.0", required=True),
+        EnvironmentCheck(name="uv", status=EnvironmentStatus.OK, installed_version="0.5.0"),
+        EnvironmentCheck(name="conda", status=EnvironmentStatus.MISSING, required=False),
+    ])
+
+    planner = ExecutionPlanner()
+    plan = planner.plan(project, env)
+
+    assert plan.status != PlanStatus.BLOCKED
+    assert len(plan.blocking_reasons) == 0
+    step_ids = [s.id for s in plan.steps]
+    assert "verify-pm:conda" in step_ids
+    conda_step = next(s for s in plan.steps if s.id == "verify-pm:conda")
+    assert not conda_step.is_blocked

@@ -7,3 +7,7 @@ htmlcov/
 
 # Local AI agent instructions/state
 .agent/
+
+# Benchmark artifacts & zip archives
+benchmark/
+*.zip
