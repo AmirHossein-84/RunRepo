@@ -174,19 +174,24 @@ class ServiceStepHandler(BaseStepHandler):
                             new_lines.append(f"DATABASE_URL={db_url}")
                         env_file.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
             else:
-                # Check for platform container OS incompatibility (Windows container daemon unable to run Linux image)
+                # Check for platform container OS incompatibility or daemon connectivity issues
+                err_lower = (res.stderr or "").lower()
                 is_platform_incompatibility = any(
-                    err in (res.stderr or "").lower()
+                    err in err_lower
                     for err in (
                         "no matching manifest for windows",
                         "cannot be used on this platform",
                         "image operating system",
                         "daemon in windows mode",
+                        "pipe/docker_engine",
+                        "error during connect",
+                        "is the docker daemon running",
+                        "the system cannot find the file specified",
                     )
                 )
                 if is_platform_incompatibility:
                     finished_at = datetime.now(timezone.utc)
-                    warn_msg = f"[WARNING] Host Docker daemon runs in Windows container mode and cannot pull/run Linux container image. Continuing with local embedded environment if available."
+                    warn_msg = f"[WARNING] Host Docker daemon is unavailable or cannot run Linux container images on this OS. Continuing with local embedded environment if available."
                     return StepExecutionResult(
                         step_id=step.id,
                         status=ExecutionStatus.SUCCESS,

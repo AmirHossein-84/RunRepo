@@ -92,6 +92,11 @@ class InstallDepsStepHandler(BaseStepHandler):
             fallback_cmd = list(step.command) + fallback_flags
             res = executor.execute(fallback_cmd, cwd=working_dir)
 
+            # If --legacy-peer-deps still fails on strict peer trees, retry with --force
+            if res.exit_code != 0 and "ERESOLVE" in f"{res.stdout or ''}\n{res.stderr or ''}":
+                force_cmd = list(step.command) + ["--force"]
+                res = executor.execute(force_cmd, cwd=working_dir)
+
         # 3. Fallback for broken postinstall/lifecycle scripts (e.g. opencollective crashing libuv, Turbo recursive stack overflow)
         err_combined = f"{res.stdout or ''}\n{res.stderr or ''}"
         if res.exit_code != 0 and any(err in err_combined for err in ("Assertion failed", "postinstall", "post-install", "3221226505", "UV_HANDLE_CLOSING", "Maximum call stack size exceeded", "command finished with error: command")):

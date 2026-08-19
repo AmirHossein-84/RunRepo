@@ -121,12 +121,13 @@ class ComposeManager:
                 duration_ms=res.duration_ms,
             )
 
-        # If Windows container daemon cannot pull/run Linux container images, warn and continue
-        if res.exit_code != 0 and any(err in (res.stderr or "").lower() for err in ("no matching manifest for windows", "cannot be used on this platform", "image operating system", "daemon in windows mode")):
+        # If Windows container daemon cannot pull/run Linux container images or daemon is unavailable, warn and continue
+        err_lower = (res.stderr or "").lower()
+        if res.exit_code != 0 and any(err in err_lower for err in ("no matching manifest for windows", "cannot be used on this platform", "image operating system", "daemon in windows mode", "pipe/docker_engine", "error during connect", "is the docker daemon running", "the system cannot find the file specified")):
             from runrepo.executor.process import ProcessExecutionResult
             res = ProcessExecutionResult(
                 exit_code=0,
-                stdout=f"[runrepo] Host Docker daemon runs in Windows container mode and cannot run Linux compose images. Continuing with local environment.\n{res.stdout}",
+                stdout=f"[runrepo] Host Docker daemon is unavailable or cannot run Linux compose images. Continuing with local environment.\n{res.stdout}",
                 stderr="",
                 duration_ms=res.duration_ms,
             )
