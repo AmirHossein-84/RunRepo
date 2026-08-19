@@ -37,6 +37,10 @@ on:
         default: true
         type: boolean
 
+permissions:
+  contents: read
+  actions: read
+
 concurrency:
   group: benchmark-${{ github.ref }}-${{ inputs.batch }}
   cancel-in-progress: true
