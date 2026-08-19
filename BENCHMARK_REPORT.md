@@ -3,7 +3,7 @@
 [![Benchmark Status](https://img.shields.io/badge/Benchmark-50%2F50%20Completed-brightgreen.svg)](#batch-progress)
 [![Engine Reliability](https://img.shields.io/badge/Engine%20Reliability-100%25-brightgreen.svg)](#executive-summary)
 [![Zero AI Required](https://img.shields.io/badge/Mode-100%25%20Deterministic%20(No%20AI)-purple.svg)](#test-environment--constraints)
-[![Tests Passing](https://img.shields.io/badge/Tests-323%20passing-success.svg)](#test-suite-health)
+[![Tests Passing](https://img.shields.io/badge/Tests-328%20passing-success.svg)](#test-suite-health)
 
 This report documents the empirical validation of **RunRepo** across a curated corpus of **50 real-world, high-profile open-source repositories**. The goal is objective measurement of RunRepo's deterministic capability to clone, analyze, provision dependencies/services, execute, and verify arbitrary projects with zero human intervention.
 
