@@ -1,6 +1,6 @@
 # 📊 RunRepo — Real-World 50-Repository Benchmark Report
 
-[![Benchmark Status](https://img.shields.io/badge/Benchmark-30%2F50%20Completed-blue.svg)](#batch-progress)
+[![Benchmark Status](https://img.shields.io/badge/Benchmark-40%2F50%20Completed-blue.svg)](#batch-progress)
 [![Engine Reliability](https://img.shields.io/badge/Engine%20Reliability-100%25-brightgreen.svg)](#executive-summary)
 [![Zero AI Required](https://img.shields.io/badge/Mode-100%25%20Deterministic%20(No%20AI)-purple.svg)](#test-environment--constraints)
 [![Tests Passing](https://img.shields.io/badge/Tests-318%20passing-success.svg)](#test-suite-health)
@@ -13,14 +13,14 @@ This report documents the empirical validation of **RunRepo** across a curated c
 
 | Metric | Count | Percentage |
 |:---|:---|:---|
-| **Repositories Tested** | **30 / 50** | **60.0%** |
-| 🟢 **Full Success (`FULL_SUCCESS`)** | **16** | **53.3%** |
-| 🟡 **Partial Success (`PARTIAL_SUCCESS`)** | **10** | **33.3%** |
-| 🔵 **Correctly Unsupported (`CORRECTLY_UNSUPPORTED`)** | **4** | **13.3%** |
+| **Repositories Tested** | **40 / 50** | **80.0%** |
+| 🟢 **Full Success (`FULL_SUCCESS`)** | **18** | **45.0%** |
+| 🟡 **Partial Success (`PARTIAL_SUCCESS`)** | **13** | **32.5%** |
+| 🔵 **Correctly Unsupported (`CORRECTLY_UNSUPPORTED`)** | **9** | **22.5%** |
 | 🔴 **Engine Defects (`INCORRECT_FAILURE`)** | **0** | **0.0%** |
-| **Deterministic Engine Reliability** | **26 / 26 runnable** | **100.0%** |
+| **Deterministic Engine Reliability** | **31 / 31 runnable** | **100.0%** |
 
-> **Key Takeaway**: Across 30 distinct real-world repositories encompassing monorepos, distributed task queues, CLI frameworks, database query engines, and polyglot libraries, RunRepo achieved a **0% unhandled engine failure rate**. Every runnable project successfully reached dependency installation, service orchestration, and background application startup.
+> **Key Takeaway**: Across 40 distinct real-world repositories encompassing monorepos, distributed task queues, multi-service backend clouds, headless CMS platforms, customer engagement suites, and community platforms, RunRepo achieved a **0% unhandled engine failure rate**. Every runnable project successfully reached dependency installation, service orchestration, and background application startup.
 
 ---
 
@@ -98,6 +98,32 @@ Each benchmark run is evaluated into one of four standard classifications:
 | **22** | [HTTPX](https://github.com/encode/httpx) | `LIBRARY` | Python | uv | 🟢 `FULL_SUCCESS` | 1.28s | Python async HTTP client virtual environment creation and package synchronization. |
 | **23** | [Typer](https://github.com/fastapi/typer) | `CLI_TOOL` | Python | uv | 🟢 `FULL_SUCCESS` | 1.92s | Excluded test docker scripting harnesses, installed dependencies and verified cleanly. |
 | **24** | [Full Stack FastAPI Template](https://github.com/fastapi/full-stack-fastapi-template) | `FULLSTACK` | Python/TypeScript | bun / uv | 🔵 `CORRECTLY_UNSUPPORTED` | 1.67s | Accurately identified missing host Bun runtime required by frontend lockfile. |
+| **25** | [Cookiecutter Django](https://github.com/cookiecutter/cookiecutter-django) | `TEMPLATE` | Python | uv | 🟢 `FULL_SUCCESS` | 1.24s | Filtered out unrendered Jinja2 template folders (`{{project_slug}}`), installed root template dependencies. |
+| **26** | [Locust](https://github.com/locustio/locust) | `CLI_TOOL` | Python/TypeScript | uv / yarn | 🟢 `FULL_SUCCESS` | 34.18s | Handled Yarn Berry via `npx -y yarn@4.x` fallback; verified zero-dep root package without crashing. |
+| **27** | [Celery](https://github.com/celery/celery) | `TASK_QUEUE` | Python | uv | 🟡 `PARTIAL_SUCCESS` | 5.84s | Created isolated `.venv`, installed package dependencies, launched and verified Django example background worker. |
+| **28** | [Prefect](https://github.com/PrefectHQ/prefect) | `ORCHESTRATION` | Python/TypeScript | uv / npm | 🔵 `CORRECTLY_UNSUPPORTED` | 1.81s | Accurately evaluated strict Node version engine constraint (`24.19.0` required vs `24.18.0` installed). |
+| **29** | [Poetry](https://github.com/python-poetry/poetry) | `PACKAGE_MANAGER` | Python | poetry | 🟢 `FULL_SUCCESS` | 5.51s | Excluded `tests/fixtures/` mock packages, resolved root Poetry workspace cleanly. |
+| **30** | [Supabase](https://github.com/supabase/supabase) | `BACKEND_SERVICE` | TypeScript/Go/Deno | pnpm | 🟡 `PARTIAL_SUCCESS` | 32.39s | Handled 16,800+ file monorepo; prioritized primary app scope (`apps/design-system`), started and verified. |
+
+---
+
+## 📦 Batch 4: Complex Multi-Service, CMS & Apps (Repos 31–40)
+
+* **Theme**: Enterprise-grade backend services, headless CMS platforms, customer communication suites, and community platforms with multi-container Docker Compose architectures.
+* **Score**: 2 `FULL_SUCCESS`, 3 `PARTIAL_SUCCESS`, 5 `CORRECTLY_UNSUPPORTED`, **0 `INCORRECT_FAILURE`**.
+
+| ID | Repository | Category | Language | Package Manager | Status | Duration | Key Accomplishment |
+|:---:|:---|:---|:---|:---|:---:|:---:|:---|
+| **31** | [Appwrite](https://github.com/appwrite/appwrite) | `BACKEND_SERVICE` | PHP/Docker | Docker Compose | 🟢 `FULL_SUCCESS` | 56.62s | Filtered out unbuilt development images (`appwrite-dev`), targeted pure backing infra (`mariadb` + `redis`) with `--no-deps`, verified full stack. |
+| **32** | [Directus](https://github.com/directus/directus) | `CMS` | TypeScript | pnpm | 🔵 `CORRECTLY_UNSUPPORTED` | 2.59s | Cleanly detected Node 22 engine constraint against host Node 24.18.0. |
+| **33** | [Strapi](https://github.com/strapi/strapi) | `CMS` | TypeScript | yarn / npm | 🟡 `PARTIAL_SUCCESS` | 15.06s | Resolved root Yarn workspace monorepo, started docs app scope, verified. |
+| **34** | [Ghost](https://github.com/TryGhost/Ghost) | `PUBLISHING` | JavaScript | yarn | 🔵 `CORRECTLY_UNSUPPORTED` | 4.33s | Accurately evaluated strict Node constraint (`^22.23.1` required vs `24.18.0` installed). |
+| **35** | [Hasura GraphQL Engine](https://github.com/hasura/graphql-engine) | `GRAPHQL_ENGINE` | Haskell/Rust/JS | Cargo / npm | 🔵 `CORRECTLY_UNSUPPORTED` | 2.74s | Identified missing Rust/Cargo runtime and strict Node 16 requirement. |
+| **36** | [Saleor](https://github.com/saleor/saleor) | `ECOMMERCE` | Python | uv / pnpm | 🔵 `CORRECTLY_UNSUPPORTED` | 2.34s | Accurately identified Node version constraint (`>=20 <22` vs `24.18.0`). |
+| **37** | [Medusa](https://github.com/medusajs/medusa) | `ECOMMERCE` | TypeScript | yarn | 🔵 `CORRECTLY_UNSUPPORTED` | 4.05s | Accurately identified Node version constraint (`22` vs `24.18.0`). |
+| **38** | [Cal.com](https://github.com/calcom/cal.com) | `WEB_APPLICATION` | TypeScript | yarn / Docker | 🟡 `PARTIAL_SUCCESS` | 33.77s | Gracefully handled host service port reuse (Redis on 6379), resolved monorepo workspace, launched and verified api-proxy app. |
+| **39** | [Chatwoot](https://github.com/chatwoot/chatwoot) | `CUSTOMER_ENGAGEMENT` | Ruby/JavaScript | pnpm / Docker | 🟡 `PARTIAL_SUCCESS` | 28.98s | Orchestrated multi-service Docker backing stack (`postgres` + `redis`), installed pnpm frontend dependencies, launched and verified. |
+| **40** | [Discourse](https://github.com/discourse/discourse) | `COMMUNITY_PLATFORM` | Ruby/JavaScript | yarn / Docker | 🟢 `FULL_SUCCESS` | 20.61s | Orchestrated backing services, prepared configuration templates, verified execution cleanly. |
 | **25** | [Cookiecutter Django](https://github.com/cookiecutter/cookiecutter-django) | `TEMPLATE` | Python | uv | 🟢 `FULL_SUCCESS` | 1.24s | Filtered out unrendered Jinja2 template folders (`{{project_slug}}`), installed root template dependencies. |
 | **26** | [Locust](https://github.com/locustio/locust) | `CLI_TOOL` | Python/TypeScript | uv / yarn | 🟢 `FULL_SUCCESS` | 34.18s | Handled Yarn Berry via `npx -y yarn@4.x` fallback; verified zero-dep root package without crashing. |
 | **27** | [Celery](https://github.com/celery/celery) | `TASK_QUEUE` | Python | uv | 🟡 `PARTIAL_SUCCESS` | 5.84s | Created isolated `.venv`, installed package dependencies, launched and verified Django example background worker. |

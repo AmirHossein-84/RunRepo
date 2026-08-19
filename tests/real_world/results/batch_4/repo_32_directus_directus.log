@@ -1,0 +1,20 @@
+=== STDOUT ===
+Using cached repository: 
+C:\Users\Undeadmoon\AppData\Local\runrepo\runrepo\repositories\directus_directu
+s
+{
+  "plan_id": "plan_1787120274",
+  "repository_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\directus_directus",
+  "status": "BLOCKED",
+  "steps": [],
+  "successful_steps": [],
+  "failed_steps": [],
+  "skipped_steps": [],
+  "started_at": "2026-08-19T06:17:54.762818Z",
+  "finished_at": "2026-08-19T06:17:54.762818Z",
+  "summary": "Execution blocked by prerequisites: Node version mismatch: required 22, but found 24.18.0 installed."
+}
+
+
+=== STDERR ===
+

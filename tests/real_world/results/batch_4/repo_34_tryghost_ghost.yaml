@@ -1,0 +1,24 @@
+id: 34
+name: Ghost
+url: https://github.com/TryGhost/Ghost
+batch: 4
+category: PUBLISHING
+language: JavaScript
+expected_runtime: node
+expected_package_manager: yarn
+expected_services:
+- mysql
+difficulty: VERY_HARD
+result: CORRECTLY_UNSUPPORTED
+status: BLOCKED
+failure_stage: PREREQUISITE_CHECK
+failure_category: UNSUPPORTED_RUNTIME
+root_cause: 'Execution blocked by prerequisites: Node version mismatch: required ^22.23.1,
+  but found 24.18.0 installed.'
+manual_intervention: null
+verification: null
+cleanup: SUCCESS
+duration_seconds: 4.33
+executed_steps: []
+notes: ''
+timestamp: '2026-08-19T06:18:11.345706+00:00'

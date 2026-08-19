@@ -1,0 +1,25 @@
+id: 37
+name: Medusa
+url: https://github.com/medusajs/medusa
+batch: 4
+category: ECOMMERCE
+language: TypeScript
+expected_runtime: node
+expected_package_manager: yarn
+expected_services:
+- postgres
+- redis
+difficulty: HARD
+result: CORRECTLY_UNSUPPORTED
+status: BLOCKED
+failure_stage: PREREQUISITE_CHECK
+failure_category: UNSUPPORTED_RUNTIME
+root_cause: 'Execution blocked by prerequisites: Node version mismatch: required 22,
+  but found 24.18.0 installed.'
+manual_intervention: null
+verification: null
+cleanup: SUCCESS
+duration_seconds: 4.05
+executed_steps: []
+notes: ''
+timestamp: '2026-08-19T06:18:22.903646+00:00'

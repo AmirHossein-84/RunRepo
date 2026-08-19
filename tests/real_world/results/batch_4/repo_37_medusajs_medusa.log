@@ -1,0 +1,19 @@
+=== STDOUT ===
+Using cached repository: 
+C:\Users\Undeadmoon\AppData\Local\runrepo\runrepo\repositories\medusajs_medusa
+{
+  "plan_id": "plan_1787120306",
+  "repository_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\medusajs_medusa",
+  "status": "BLOCKED",
+  "steps": [],
+  "successful_steps": [],
+  "failed_steps": [],
+  "skipped_steps": [],
+  "started_at": "2026-08-19T06:18:26.896414Z",
+  "finished_at": "2026-08-19T06:18:26.896414Z",
+  "summary": "Execution blocked by prerequisites: Node version mismatch: required 22, but found 24.18.0 installed."
+}
+
+
+=== STDERR ===
+

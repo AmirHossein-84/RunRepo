@@ -1,0 +1,43 @@
+id: 40
+name: Discourse
+url: https://github.com/discourse/discourse
+batch: 4
+category: COMMUNITY_PLATFORM
+language: Ruby/Ember
+expected_runtime: ruby/node
+expected_package_manager: bundle/yarn
+expected_services:
+- postgres
+- redis
+difficulty: VERY_HARD
+result: FULL_SUCCESS
+status: SUCCESS
+failure_stage: null
+failure_category: null
+root_cause: null
+manual_intervention: null
+verification: PASSED
+cleanup: SUCCESS
+duration_seconds: 20.61
+executed_steps:
+- step_id: verify-runtime:node
+  status: SUCCESS
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-pm:pnpm
+  status: SUCCESS
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: install-deps
+  status: SUCCESS
+  command:
+  - npx
+  - -y
+  - pnpm
+  - install
+  duration_ms: 16432.0238000073
+  error: null
+notes: ''
+timestamp: '2026-08-19T06:19:32.312236+00:00'

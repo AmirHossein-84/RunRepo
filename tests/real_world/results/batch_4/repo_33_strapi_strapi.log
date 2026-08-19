@@ -1,0 +1,216 @@
+=== STDOUT ===
+Using cached repository: 
+C:\Users\Undeadmoon\AppData\Local\runrepo\runrepo\repositories\strapi_strapi
+{
+  "plan_id": "plan_1787120277",
+  "repository_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\strapi_strapi",
+  "status": "FAILED",
+  "steps": [
+    {
+      "step_id": "verify-runtime:node",
+      "status": "SUCCESS",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T06:17:57.776313Z",
+      "finished_at": "2026-08-19T06:17:57.776313Z",
+      "duration_ms": 0.0,
+      "stdout": "Repository requires node (requires >=20.0.0 <=26.x.x); host has 24.18.0 installed",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Command exited cleanly (code 0)",
+      "verification": {
+        "step_id": "verify-runtime:node",
+        "verification_type": "EXIT_CODE_CHECK",
+        "status": "PASSED",
+        "target": "exit_code",
+        "message": "Command exited cleanly (code 0)",
+        "details": {},
+        "duration_ms": 0.000600004568696022,
+        "failure_reason": null,
+        "diagnostic_data": {
+          "exit_code": 0,
+          "stderr": ""
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "verify-pm:yarn",
+      "status": "SUCCESS",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T06:17:57.776416Z",
+      "finished_at": "2026-08-19T06:17:57.776416Z",
+      "duration_ms": 0.0,
+      "stdout": "Project uses yarn; host has npx -y yarn@4.12.0 available",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Command exited cleanly (code 0)",
+      "verification": {
+        "step_id": "verify-pm:yarn",
+        "verification_type": "EXIT_CODE_CHECK",
+        "status": "PASSED",
+        "target": "exit_code",
+        "message": "Command exited cleanly (code 0)",
+        "details": {},
+        "duration_ms": 0.000300002284348011,
+        "failure_reason": null,
+        "diagnostic_data": {
+          "exit_code": 0,
+          "stderr": ""
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "install-deps",
+      "status": "SUCCESS",
+      "command": [
+        "npx",
+        "-y",
+        "yarn",
+        "install"
+      ],
+      "cwd": null,
+      "started_at": "2026-08-19T06:17:57.776446Z",
+      "finished_at": "2026-08-19T06:18:06.126486Z",
+      "duration_ms": 8197.568100003991,
+      "stdout": "➤ YN0000: · Yarn 4.12.0\n➤ YN0000: ┌ Resolution step\n➤ YN0000: └ Completed in 0s 399ms\n➤ YN0000: ┌ Post-resolution validation\n➤ YN0060: │ chokidar is listed by your project with version 3.6.0 (p8b37d4), which doesn't satisfy what @swc/cli requests (^4.0.1).\n➤ YN0002: │ @strapi/strapi@workspace:packages/core/strapi [547c9] doesn't provide esbuild (pce50ee), requested by esbuild-register.\n➤ YN0002: │ @strapi/strapi@workspace:packages/core/strapi [f538c] doesn't provide esbuild (p079791), requested by esbuild-register.\n➤ YN0002: │ @strapi/strapi@workspace:packages/core/strapi doesn't provide esbuild (p530bc4), requested by esbuild-register.\n➤ YN0002: │ @strapi/upgrade@workspace:packages/utils/upgrade doesn't provide esbuild (pf1d953), requested by esbuild-register.\n➤ YN0002: │ @strapi/upgrade@workspace:packages/utils/upgrade doesn't provide tslib (p0f1d61), requested by memfs.\n➤ YN0002: │ strapi@workspace:. doesn't provide jest (p326027), requested by jest-watch-typeahead.\n➤ YN0086: │ Some peer dependencies are incorrectly met by your project; run yarn explain peer-requirements <hash> for details, where <hash> is the six-letter p-prefixed code.\n➤ YN0086: │ Some peer dependencies are incorrectly met by dependencies; run yarn explain peer-requirements for details.\n➤ YN0000: └ Completed\n➤ YN0000: ┌ Fetch step\n➤ YN0000: └ Completed in 1s 882ms\n➤ YN0000: ┌ Link step\n➤ YN0000: └ Completed in 0s 939ms\n➤ YN0000: · Done with warnings in 3s 383ms\n",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Node dependencies verified (node_modules present and populated)",
+      "verification": {
+        "step_id": "install-deps",
+        "verification_type": "DEPENDENCY_CHECK",
+        "status": "PASSED",
+        "target": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\strapi_strapi\\node_modules",
+        "message": "Node dependencies verified (node_modules present and populated)",
+        "details": {
+          "node_modules_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\strapi_strapi\\node_modules",
+          "has_package_json": true
+        },
+        "duration_ms": 2.329799986910075,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "start-app:docs",
+      "status": "FAILED",
+      "command": [
+        "npx",
+        "-y",
+        "yarn",
+        "start"
+      ],
+      "cwd": "docs",
+      "started_at": "2026-08-19T06:18:06.128982Z",
+      "finished_at": "2026-08-19T06:18:06.344898Z",
+      "duration_ms": 10.0,
+      "stdout": "Application started in background (PID: 34468). Output logged to: C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\processes\\logs\\start-app_docs_20260819_061806.log",
+      "stderr": "Verification failed: Application crashed before responding to HTTP requests at http://127.0.0.1:3000",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": "Application crashed before responding to HTTP requests at http://127.0.0.1:3000",
+      "verification": {
+        "step_id": "start-app:docs",
+        "verification_type": "HTTP_CHECK",
+        "status": "FAILED",
+        "target": "http://127.0.0.1:3000",
+        "message": "Application crashed before responding to HTTP requests at http://127.0.0.1:3000",
+        "details": {},
+        "duration_ms": 4130.098800000269,
+        "failure_reason": "Process exited during HTTP readiness check",
+        "diagnostic_data": {
+          "pid": 34468,
+          "recent_logs": ""
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "start-app:complex",
+      "status": "SKIPPED",
+      "command": [
+        "npx",
+        "-y",
+        "yarn",
+        "dev"
+      ],
+      "cwd": "examples/complex",
+      "started_at": "2026-08-19T06:18:10.518830Z",
+      "finished_at": "2026-08-19T06:18:10.518833Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'previous step' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    },
+    {
+      "step_id": "verify-app:docs",
+      "status": "SKIPPED",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T06:18:10.518860Z",
+      "finished_at": "2026-08-19T06:18:10.518861Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'start-app:docs' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    },
+    {
+      "step_id": "verify-app:complex",
+      "status": "SKIPPED",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T06:18:10.518873Z",
+      "finished_at": "2026-08-19T06:18:10.518874Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'start-app:complex' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    }
+  ],
+  "successful_steps": [
+    "install-deps",
+    "verify-pm:yarn",
+    "verify-runtime:node"
+  ],
+  "failed_steps": [
+    "start-app:docs"
+  ],
+  "skipped_steps": [
+    "start-app:complex",
+    "verify-app:docs",
+    "verify-app:complex"
+  ],
+  "started_at": "2026-08-19T06:17:57.776183Z",
+  "finished_at": "2026-08-19T06:18:10.518882Z",
+  "summary": "Execution failed at step(s): start-app:docs"
+}
+
+
+=== STDERR ===
+

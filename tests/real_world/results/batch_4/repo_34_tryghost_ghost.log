@@ -1,0 +1,19 @@
+=== STDOUT ===
+Using cached repository: 
+C:\Users\Undeadmoon\AppData\Local\runrepo\runrepo\repositories\TryGhost_Ghost
+{
+  "plan_id": "plan_1787120295",
+  "repository_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\TryGhost_Ghost",
+  "status": "BLOCKED",
+  "steps": [],
+  "successful_steps": [],
+  "failed_steps": [],
+  "skipped_steps": [],
+  "started_at": "2026-08-19T06:18:15.624716Z",
+  "finished_at": "2026-08-19T06:18:15.624716Z",
+  "summary": "Execution blocked by prerequisites: Node version mismatch: required ^22.23.1, but found 24.18.0 installed."
+}
+
+
+=== STDERR ===
+

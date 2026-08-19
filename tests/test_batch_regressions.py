@@ -279,3 +279,68 @@ def test_regression_check_yarn_berry_npx_fallback():
     assert "npx -y yarn@4.12.0" in check.installed_version
 
 
+def test_regression_compose_manager_filters_unbuilt_dev_services(tmp_path):
+    """Ensure ComposeManager.up filters out unbuilt dev images and targets pure official infra services."""
+    from runrepo.executor.process import MockProcessExecutor
+    from runrepo.services.compose import ComposeManager
+
+    compose_yml = tmp_path / "docker-compose.yml"
+    compose_yml.write_text(
+        """
+services:
+  appwrite:
+    image: appwrite-dev
+  mariadb:
+    image: mariadb:10.11
+  redis:
+    image: redis:7.0-alpine
+  custom-worker:
+    image: appwrite-worker-dev
+""",
+        encoding="utf-8",
+    )
+
+    executor = MockProcessExecutor()
+    res = ComposeManager.up(cwd=tmp_path, executor=executor, project_path=str(tmp_path))
+
+    assert res.exit_code == 0
+    assert len(executor.executed_commands) > 0
+    cmd_str = " ".join(executor.executed_commands[0][0])
+    assert "mariadb" in cmd_str
+    assert "redis" in cmd_str
+    assert "appwrite-dev" not in cmd_str
+
+
+def test_regression_compose_manager_handles_port_already_allocated(tmp_path):
+    """Ensure ComposeManager.up recognizes active services when port is already bound on host."""
+    from runrepo.executor.process import MockProcessExecutor, ProcessExecutionResult
+    from runrepo.services.compose import ComposeManager
+
+    compose_yml = tmp_path / "docker-compose.yml"
+    compose_yml.write_text(
+        """
+services:
+  redis:
+    image: redis:7.0-alpine
+    ports:
+      - "6379:6379"
+""",
+        encoding="utf-8",
+    )
+
+    executor = MockProcessExecutor(
+        custom_responses={
+            ("docker", "compose", "up", "-d"): ProcessExecutionResult(
+                exit_code=1,
+                stdout="",
+                stderr="Error response from daemon: Bind for 0.0.0.0:6379 failed: port is already allocated",
+            )
+        }
+    )
+
+    res = ComposeManager.up(cwd=tmp_path, executor=executor, project_path=str(tmp_path))
+    assert res.exit_code == 0
+    assert "reusing active service" in res.stdout or "already allocated" in res.stdout
+
+
+

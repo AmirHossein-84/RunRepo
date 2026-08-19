@@ -48,7 +48,15 @@ class ComposeManager:
         """Execute `docker compose up -d` targeting backing services, and track created resources."""
         import yaml
 
+        OFFICIAL_INFRA_PREFIXES = (
+            "postgres", "mysql", "mariadb", "redis", "valkey",
+            "mongo", "rabbitmq", "memcached", "mailhog", "maildev",
+            "minio", "localstack", "clickhouse", "elasticsearch",
+            "opensearch", "meilisearch", "traefik", "nginx", "adminer",
+        )
+
         backing_services: list[str] = []
+        all_infra_services: list[str] = []
         compose_file = cls.find_compose_file(cwd)
         actual_cwd = compose_file.parent if compose_file else cwd
 
@@ -58,19 +66,55 @@ class ComposeManager:
                     cdata = yaml.safe_load(f)
                 if isinstance(cdata, dict) and isinstance(cdata.get("services"), dict):
                     all_services = cdata["services"]
+                    for sname, sdef in all_services.items():
+                        if not isinstance(sdef, dict):
+                            continue
+                        img = str(sdef.get("image", "")).lower().strip()
+                        # Extract repo name from image tag (e.g. "library/postgres:14" -> "postgres", "redis:alpine" -> "redis")
+                        raw_img = img.split(":")[0].split("/")[-1]
+                        if any(raw_img == pfx or raw_img.startswith(f"{pfx}-") for pfx in OFFICIAL_INFRA_PREFIXES) and not img.endswith("-dev"):
+                            all_infra_services.append(sname)
+
+                    has_dev_images = any("-dev" in str(sdef.get("image", "")).lower() or not sdef.get("image") for sdef in all_services.values() if isinstance(sdef, dict))
                     has_build = any("build" in sdef for sdef in all_services.values() if isinstance(sdef, dict))
-                    if has_build:
-                        for sname, sdef in all_services.items():
-                            if isinstance(sdef, dict) and "build" not in sdef:
-                                backing_services.append(sname)
+                    if has_dev_images or has_build:
+                        if all_infra_services:
+                            # Prioritize primary DB (mariadb or postgres) + cache (redis)
+                            primary_infra = []
+                            for s in all_infra_services:
+                                s_low = s.lower()
+                                if any(db in s_low for db in ("mariadb", "postgres", "redis")):
+                                    primary_infra.append(s)
+                            backing_services = primary_infra if primary_infra else all_infra_services[:3]
+                        else:
+                            for sname, sdef in all_services.items():
+                                if isinstance(sdef, dict) and "build" not in sdef and not str(sdef.get("image", "")).lower().endswith("-dev"):
+                                    backing_services.append(sname)
             except Exception:
                 pass
 
         up_cmd = ["docker", "compose", "up", "-d"]
         if backing_services:
+            up_cmd.append("--no-deps")
             up_cmd.extend(backing_services)
 
-        res = executor.execute(up_cmd, cwd=actual_cwd, timeout_s=180)
+        res = executor.execute(up_cmd, cwd=actual_cwd, timeout_s=300)
+
+        # If pulling all services failed due to private/custom unbuilt dev images, retry with pure infra services
+        if res.exit_code != 0 and all_infra_services and any(err in (res.stderr or "") for err in ("pull access denied", "does not exist", "manifest unknown", "docker login")):
+            fallback_cmd = ["docker", "compose", "up", "-d", "--no-deps"] + all_infra_services
+            res = executor.execute(fallback_cmd, cwd=actual_cwd, timeout_s=300)
+
+        # If port is already allocated on host, backing service is already active and listening
+        if res.exit_code != 0 and any(err in (res.stderr or "") for err in ("port is already allocated", "already in use")):
+            from runrepo.executor.process import ProcessExecutionResult
+            res = ProcessExecutionResult(
+                exit_code=0,
+                stdout=f"[runrepo] Required port already allocated on host; reusing active service.\n{res.stdout}",
+                stderr="",
+                duration_ms=res.duration_ms,
+            )
+
         if res.exit_code == 0 and registry is not None:
             # Inspect containers created by compose and register them
             ps_res = executor.execute(["docker", "compose", "ps", "--format", "json"], cwd=actual_cwd, timeout_s=5)

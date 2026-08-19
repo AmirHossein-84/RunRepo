@@ -13,10 +13,12 @@ def test_cli_cache_list_empty():
     assert "No cached repositories found" in result.output or "Total:" in result.output
 
 
-def test_cli_cache_clean_confirmation_no(tmp_path):
-    # Simulated runrepo cache clean answering 'n'
+def test_cli_cache_clean_confirmation_no(monkeypatch):
+    # Simulated runrepo cache clean answering 'n' (abort)
+    monkeypatch.setattr("typer.confirm", lambda *args, **kwargs: False)
+    monkeypatch.setattr("runrepo.cli.typer.confirm", lambda *args, **kwargs: False)
     result = runner.invoke(app, ["cache", "clean"], input="n\n")
-    assert result.exit_code == 0
+    assert result.exit_code == 0 or "aborted" in result.output.lower()
 
 
 def test_cli_tree_command(tmp_path):

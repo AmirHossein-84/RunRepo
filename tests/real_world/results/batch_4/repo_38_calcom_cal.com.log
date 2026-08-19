@@ -1,0 +1,313 @@
+=== STDOUT ===
+Using cached repository: 
+C:\Users\Undeadmoon\AppData\Local\runrepo\runrepo\repositories\calcom_cal.com
+{
+  "plan_id": "plan_1787120310",
+  "repository_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\calcom_cal.com",
+  "status": "FAILED",
+  "steps": [
+    {
+      "step_id": "verify-runtime:node",
+      "status": "SUCCESS",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T06:18:30.986350Z",
+      "finished_at": "2026-08-19T06:18:30.986350Z",
+      "duration_ms": 0.0,
+      "stdout": "Repository requires node; host has 24.18.0 installed",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Command exited cleanly (code 0)",
+      "verification": {
+        "step_id": "verify-runtime:node",
+        "verification_type": "EXIT_CODE_CHECK",
+        "status": "PASSED",
+        "target": "exit_code",
+        "message": "Command exited cleanly (code 0)",
+        "details": {},
+        "duration_ms": 0.0005999754648655653,
+        "failure_reason": null,
+        "diagnostic_data": {
+          "exit_code": 0,
+          "stderr": ""
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "configure-env:template",
+      "status": "SUCCESS",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T06:18:30.986449Z",
+      "finished_at": "2026-08-19T06:18:31.006913Z",
+      "duration_ms": 10.0,
+      "stdout": "Successfully prepared .env (Backup created at .env.backup.20260819_061830; configured 1 variable(s): E2E_TEST_CALCOM_QA_PASSWORD; added placeholder stubs for 7 external key(s))",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Target exists: .env",
+      "verification": {
+        "step_id": "configure-env:template",
+        "verification_type": "FILE_CHECK",
+        "status": "PASSED",
+        "target": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\calcom_cal.com\\.env",
+        "message": "Target exists: .env",
+        "details": {
+          "file_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\calcom_cal.com\\.env"
+        },
+        "duration_ms": 0.33680000342428684,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": true
+    },
+    {
+      "step_id": "configure-env:secrets",
+      "status": "SUCCESS",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T06:18:31.007398Z",
+      "finished_at": "2026-08-19T06:18:31.070999Z",
+      "duration_ms": 10.0,
+      "stdout": "Successfully prepared .env (Backup created at .env.backup.20260819_061831; configured 1 variable(s): E2E_TEST_CALCOM_QA_PASSWORD; added placeholder stubs for 7 external key(s))",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Target exists: .env",
+      "verification": {
+        "step_id": "configure-env:secrets",
+        "verification_type": "FILE_CHECK",
+        "status": "PASSED",
+        "target": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\calcom_cal.com\\.env",
+        "message": "Target exists: .env",
+        "details": {
+          "file_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\calcom_cal.com\\.env"
+        },
+        "duration_ms": 0.5366000114008784,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": true
+    },
+    {
+      "step_id": "verify-pm:yarn",
+      "status": "SUCCESS",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T06:18:31.071699Z",
+      "finished_at": "2026-08-19T06:18:31.071699Z",
+      "duration_ms": 0.0,
+      "stdout": "Project uses yarn; host has npx -y yarn@4.12.0 available",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Command exited cleanly (code 0)",
+      "verification": {
+        "step_id": "verify-pm:yarn",
+        "verification_type": "EXIT_CODE_CHECK",
+        "status": "PASSED",
+        "target": "exit_code",
+        "message": "Command exited cleanly (code 0)",
+        "details": {},
+        "duration_ms": 0.000500003807246685,
+        "failure_reason": null,
+        "diagnostic_data": {
+          "exit_code": 0,
+          "stderr": ""
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "start-service:docker-compose",
+      "status": "SUCCESS",
+      "command": [
+        "docker",
+        "compose",
+        "up",
+        "-d"
+      ],
+      "cwd": "apps\\api\\v2",
+      "started_at": "2026-08-19T06:18:31.071743Z",
+      "finished_at": "2026-08-19T06:18:32.464650Z",
+      "duration_ms": 901.1766999901738,
+      "stdout": "[runrepo] Required port already allocated on host; reusing active service.\n",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Services started successfully",
+      "verification": {
+        "step_id": "start-service:docker-compose",
+        "verification_type": "SERVICE_CHECK",
+        "status": "PASSED",
+        "target": "docker-compose",
+        "message": "Services started successfully",
+        "details": {
+          "containers": [],
+          "port_probed": null
+        },
+        "duration_ms": 326.058299979195,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": true
+    },
+    {
+      "step_id": "install-deps",
+      "status": "SUCCESS",
+      "command": [
+        "npx",
+        "-y",
+        "yarn",
+        "install"
+      ],
+      "cwd": null,
+      "started_at": "2026-08-19T06:18:32.790810Z",
+      "finished_at": "2026-08-19T06:18:40.481284Z",
+      "duration_ms": 7510.0253999989945,
+      "stdout": "➤ YN0000: · Yarn 4.12.0\n➤ YN0000: ┌ Resolution step\n➤ YN0000: └ Completed in 0s 428ms\n➤ YN0000: ┌ Post-resolution validation\n➤ YN0060: │ @types/react is listed by your project with version 18.0.26 (p2ea0e7), which doesn't satisfy what @testing-library/react-hooks (via @calcom/features) and other dependencies request (but they have non-overlapping ranges!).\n➤ YN0060: │ @urql/core is listed by your project with version 5.1.1 (pec12f0), which doesn't satisfy what @urql/exchange-retry requests (^6.0.0).\n➤ YN0060: │ i18next is listed by your project with version 23.2.3 (p46596c), which doesn't satisfy what next-i18next and other dependencies request (>=23.7.13).\n➤ YN0060: │ next is listed by your project with version 16.2.3 (p9f7abf), which doesn't satisfy what @next/third-parties and other dependencies request (but they have non-overlapping ranges!).\n➤ YN0060: │ prisma is listed by your project with version 6.16.1 (pc18db8), which doesn't satisfy what prisma-kysely and other dependencies request (~6.15.0).\n➤ YN0060: │ react is listed by your project with version 18.2.0 (p732e66), which doesn't satisfy what ink-select-input and other dependencies request (^17.0.2).\n➤ YN0060: │ react is listed by your project with version 18.2.0 (pbc00bd), which doesn't satisfy what @dub/embed-react and other dependencies request (but they have non-overlapping ranges!).\n➤ YN0060: │ react-dom is listed by your project with version 18.2.0 (p4d7554), which doesn't satisfy what @dub/embed-react and other dependencies request (but they have non-overlapping ranges!).\n➤ YN0060: │ react-i18next is listed by your project with version 12.3.1 (pb47931), which doesn't satisfy what next-i18next requests (>=13.5.0).\n➤ YN0060: │ reflect-metadata is listed by your project with version 0.1.14 (p762248), which doesn't satisfy what @nest-lab/throttler-storage-redis and other dependencies request (~0.2.1).\n➤ YN0060: │ stripe is listed by your project with version 9.16.0 (p2f8c95), which doesn't satisfy what stripe-event-types requests (>=10.0.0).\n➤ YN0060: │ stripe is listed by your project with version 9.16.0 (p8d4837), which doesn't satisfy what stripe-event-types requests (>=10.0.0).\n➤ YN0060: │ stripe is listed by your project with version 9.16.0 (p9c6b52), which doesn't satisfy what stripe-event-types requests (>=10.0.0).\n➤ YN0060: │ stripe is listed by your project with version 9.16.0 (pd5ed0d), which doesn't satisfy what stripe-event-types requests (>=10.0.0).\n➤ YN0060: │ stripe is listed by your project with version 9.16.0 (pe5e734), which doesn't satisfy what stripe-event-types requests (>=10.0.0).\n➤ YN0060: │ typescript is listed by your project with version 5.9.3 (p318a27), which doesn't satisfy what class-variance-authority requests (^4.5.5).\n➤ YN0060: │ typescript is listed by your project with version 5.9.3 (p464494), which doesn't satisfy what class-variance-authority requests (^4.5.5).\n➤ YN0060: │ typescript is listed by your project with version 5.9.3 (p6d0328), which doesn't satisfy what class-variance-authority and other dependencies request (^4.5.5).\n➤ YN0060: │ typescript is listed by your project with version 5.9.3 (p8710a5), which doesn't satisfy what class-variance-authority requests (^4.5.5).\n➤ YN0060: │ typescript is listed by your project with version 5.9.3 (pdd7a59), which doesn't satisfy what class-variance-authority requests (^4.5.5).\n➤ YN0060: │ typescript is listed by your project with version 5.9.3 (pe82e67), which doesn't satisfy what class-variance-authority and other dependencies request (^4.5.5).\n➤ YN0060: │ typescript is listed by your project with version 5.9.3 (pf2c3c4), which doesn't satisfy what class-variance-authority and other dependencies request (^4.5.5).\n➤ YN0060: │ vite is listed by your project with version 6.4.2 (p17772e), which doesn't satisfy what vite-plugin-inspect and other dependencies request (^4.2.0 || ^5.0.0).\n➤ YN0060: │ vite is listed by your project with version 6.4.2 (p23a10e), which doesn't satisfy what vite-plugin-inspect and other dependencies request (^4.2.0 || ^5.0.0).\n➤ YN0060: │ vite is listed by your project with version 6.4.2 (pcc4d15), which doesn't satisfy what vite-plugin-inspect and other dependencies request (^4.2.0 || ^5.0.0).\n➤ YN0002: │ @calcom/alby@workspace:packages/app-store/alby doesn't provide react (p804b61), requested by react-qr-code.\n➤ YN0002: │ @calcom/api-v2@workspace:apps/api/v2 doesn't provide @types/node (p832e48), requested by node-mocks-http and other dependencies.\n➤ YN0002: │ @calcom/api-v2@workspace:apps/api/v2 doesn't provide react (p442ee8), requested by @calcom/platform-libraries.\n➤ YN0002: │ @calcom/api-v2@workspace:apps/api/v2 doesn't provide react-dom (p4d5b3a), requested by @calcom/platform-libraries.\n➤ YN0002: │ @calcom/api-v2@workspace:apps/api/v2 doesn't provide webpack (pdc351c), requested by ts-loader.\n➤ YN0002: │ @calcom/app-store-cli@workspace:packages/app-store-cli doesn't provide @types/node (p924244), requested by ts-node.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store [6d903] doesn't provide @tanstack/react-query (p15688c), requested by @calcom/ui.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store [6d903] doesn't provide i18next (pfd3da2), requested by react-i18next.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store [6d903] doesn't provide next (pb4d60a), requested by @calcom/features.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store [6d903] doesn't provide react-is (p8a923f), requested by @calcom/features.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store [ef4ec] doesn't provide @tanstack/react-query (pdd5b0e), requested by @calcom/ui.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store [ef4ec] doesn't provide i18next (pacc0d0), requested by react-i18next.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store [ef4ec] doesn't provide next (p83cb9c), requested by @calcom/features.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store [ef4ec] doesn't provide react-is (p8751ad), requested by @calcom/features.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store doesn't provide @tanstack/react-query (pa17241), requested by @calcom/ui.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store doesn't provide i18next (pef15bb), requested by react-i18next.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store doesn't provide next (pe8f6c8), requested by @calcom/features.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store doesn't provide react (pddaf0b), requested by @calcom/features and other dependencies.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store doesn't provide react-dom (pff8bc5), requested by @calcom/features and other dependencies.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store doesn't provide react-is (p8e3294), requested by @calcom/features.\n➤ YN0002: │ @calcom/app-store@workspace:packages/app-store doesn't provide zod (p43b4ec), requested by @calcom/features.\n➤ YN0002: │ @calcom/applecalendar@workspace:packages/app-store/applecalendar doesn't provide react (pa774a8), requested by react-hook-form.\n➤ YN0002: │ @calcom/atoms@workspace:packages/platform/atoms doesn't provide react (p2187f6), requested by @radix-ui/react-dialog and other dependencies.\n➤ YN0002: │ @calcom/atoms@workspace:packages/platform/atoms doesn't provide react-dom (p7adb16), requested by @radix-ui/react-dialog and other dependencies.\n➤ YN0002: │ @calcom/caldavcalendar@workspace:packages/app-store/caldavcalendar doesn't provide @tanstack/react-query (p3da7df), requested by @calcom/ui.\n➤ YN0002: │ @calcom/caldavcalendar@workspace:packages/app-store/caldavcalendar doesn't provide react (p6c4883), requested by @calcom/ui.\n➤ YN0002: │ @calcom/caldavcalendar@workspace:packages/app-store/caldavcalendar doesn't provide react-dom (p30c42c), requested by @calcom/ui.\n➤ YN0002: │ @calcom/config@workspace:packages/config doesn't provide tailwindcss (pdaf96e), requested by @tailwindcss/typography and other dependencies.\n➤ YN0002: │ @calcom/dub@workspace:packages/app-store/dub doesn't provide zod (p8a0f98), requested by dub.\n➤ YN0002: │ @calcom/exchange2013calendar@workspace:packages/app-store/exchange2013calendar doesn't provide @tanstack/react-query (pbec951), requested by @calcom/ui.\n➤ YN0002: │ @calcom/exchange2013calendar@workspace:packages/app-store/exchange2013calendar doesn't provide react (pdb6b52), requested by @calcom/ui.\n➤ YN0002: │ @calcom/exchange2013calendar@workspace:packages/app-store/exchange2013calendar doesn't provide react-dom (p3bdc31), requested by @calcom/ui.\n➤ YN0002: │ @calcom/exchange2016calendar@workspace:packages/app-store/exchange2016calendar doesn't provide @tanstack/react-query (pb5fdf6), requested by @calcom/ui.\n➤ YN0002: │ @calcom/exchange2016calendar@workspace:packages/app-store/exchange2016calendar doesn't provide react (pe5fd42), requested by @calcom/ui.\n➤ YN0002: │ @calcom/exchange2016calendar@workspace:packages/app-store/exchange2016calendar doesn't provide react-dom (p5e2baf), requested by @calcom/ui.\n➤ YN0002: │ @calcom/feature-auth@workspace:packages/features/auth doesn't provide @tanstack/react-query (pd7cc71), requested by @calcom/ui.\n➤ YN0002: │ @calcom/feature-auth@workspace:packages/features/auth doesn't provide next (pfe8544), requested by @calcom/trpc and other dependencies.\n➤ YN0002: │ @calcom/feature-auth@workspace:packages/features/auth doesn't provide react (p631333), requested by @calcom/trpc and other dependencies.\n➤ YN0002: │ @calcom/feature-auth@workspace:packages/features/auth doesn't provide react-dom (p59a257), requested by @calcom/trpc and other dependencies.\n➤ YN0002: │ @calcom/feature-auth@workspace:packages/features/auth doesn't provide zod (pa55aca), requested by dub.\n➤ YN0002: │ @calcom/features@workspace:packages/features [6d903] doesn't provide @tanstack/react-query (p9f8824), requested by @calcom/ui.\n➤ YN0002: │ @calcom/features@workspace:packages/features [6d903] doesn't provide date-fns (p6eb442), requested by date-fns-tz.\n➤ YN0002: │ @calcom/features@workspace:packages/features [7bb91] doesn't provide @tanstack/react-query (pcb9765), requested by @calcom/ui.\n➤ YN0002: │ @calcom/features@workspace:packages/features [7bb91] doesn't provide date-fns (p9792be), requested by date-fns-tz.\n➤ YN0002: │ @calcom/features@workspace:packages/features [d41b9] doesn't provide @tanstack/react-query (pdfc45d), requested by @calcom/ui.\n➤ YN0002: │ @calcom/features@workspace:packages/features [d41b9] doesn't provide date-fns (pf8d5fc), requested by date-fns-tz.\n➤ YN0002: │ @calcom/features@workspace:packages/features [f69c1] doesn't provide @tanstack/react-query (p3ed838), requested by @calcom/ui.\n➤ YN0002: │ @calcom/features@workspace:packages/features [f69c1] doesn't provide date-fns (pf324f3), requested by date-fns-tz.\n➤ YN0002: │ @calcom/features@workspace:packages/features doesn't provide @tanstack/react-query (p6b00d2), requested by @calcom/ui.\n➤ YN0002: │ @calcom/features@workspace:packages/features doesn't provide date-fns (p911e27), requested by date-fns-tz.\n➤ YN0002: │ @calcom/features@workspace:packages/features doesn't provide next (p5d633a), requested by @calcom/trpc.\n➤ YN0002: │ @calcom/features@workspace:packages/features doesn't provide react (peb01fe), requested by @calcom/atoms and other dependencies.\n➤ YN0002: │ @calcom/features@workspace:packages/features doesn't provide react-dom (pce1a28), requested by @calcom/atoms and other dependencies.\n➤ YN0002: │ @calcom/features@workspace:packages/features doesn't provide react-is (p0de657), requested by recharts.\n➤ YN0002: │ @calcom/features@workspace:packages/features doesn't provide zod (p6ed8a0), requested by @trigger.dev/sdk.\n➤ YN0002: │ @calcom/ics-feed@workspace:packages/app-store/ics-feedcalendar doesn't provide @tanstack/react-query (pf6a237), requested by @calcom/ui.\n➤ YN0002: │ @calcom/ics-feed@workspace:packages/app-store/ics-feedcalendar doesn't provide react (p8665f7), requested by @calcom/ui.\n➤ YN0002: │ @calcom/ics-feed@workspace:packages/app-store/ics-feedcalendar doesn't provide react-dom (p4245ae), requested by @calcom/ui.\n➤ YN0002: │ @calcom/platform-libraries@workspace:packages/platform/libraries [11945] doesn't provide next (p249c16), requested by @calcom/features.\n➤ YN0002: │ @calcom/platform-libraries@workspace:packages/platform/libraries [11945] doesn't provide react-is (pd96218), requested by @calcom/features.\n➤ YN0002: │ @calcom/platform-libraries@workspace:packages/platform/libraries doesn't provide next (pf9a80b), requested by @calcom/features.\n➤ YN0002: │ @calcom/platform-libraries@workspace:packages/platform/libraries doesn't provide react (p8ffd0b), requested by @calcom/features.\n➤ YN0002: │ @calcom/platform-libraries@workspace:packages/platform/libraries doesn't provide react-dom (p529ae9), requested by @calcom/features.\n➤ YN0002: │ @calcom/platform-libraries@workspace:packages/platform/libraries doesn't provide react-is (p9b679f), requested by @calcom/features.\n➤ YN0002: │ @calcom/platform-libraries@workspace:packages/platform/libraries doesn't provide zod (pc26ba8), requested by @calcom/features.\n➤ YN0002: │ @calcom/platform-types@workspace:packages/platform/types doesn't provide @nestjs/core (p335de5), requested by @nestjs/swagger.\n➤ YN0002: │ @calcom/platform-types@workspace:packages/platform/types doesn't provide reflect-metadata (p0d1687), requested by @nestjs/common and other dependencies.\n➤ YN0002: │ @calcom/platform-types@workspace:packages/platform/types doesn't provide rxjs (pc84203), requested by @nestjs/common.\n➤ YN0002: │ @calcom/platform-utils@workspace:packages/platform/utils doesn't provide typescript (p51c50d), requested by ts-jest.\n➤ YN0002: │ @calcom/prisma@workspace:packages/prisma doesn't provide @types/node (p5cd041), requested by ts-node.\n➤ YN0002: │ @calcom/prisma@workspace:packages/prisma doesn't provide typescript (p26b5bb), requested by @prisma/client and other dependencies.\n➤ YN0002: │ @calcom/salesforce@workspace:packages/app-store/salesforce doesn't provide graphql (p03dc67), requested by @graphql-codegen/cli and other dependencies.\n➤ YN0002: │ @calcom/stripepayment@workspace:packages/app-store/stripepayment doesn't provide @types/node (p094c17), requested by ts-node.\n➤ YN0002: │ @calcom/stripepayment@workspace:packages/app-store/stripepayment doesn't provide next (p8f63ce), requested by @calcom/features.\n➤ YN0002: │ @calcom/stripepayment@workspace:packages/app-store/stripepayment doesn't provide react (pf63884), requested by @calcom/app-store and other dependencies.\n➤ YN0002: │ @calcom/stripepayment@workspace:packages/app-store/stripepayment doesn't provide react-dom (p752041), requested by @calcom/app-store and other dependencies.\n➤ YN0002: │ @calcom/stripepayment@workspace:packages/app-store/stripepayment doesn't provide react-is (p6ce5fc), requested by @calcom/features.\n➤ YN0002: │ @calcom/stripepayment@workspace:packages/app-store/stripepayment doesn't provide typescript (p26868b), requested by ts-node.\n➤ YN0002: │ @calcom/testing@workspace:packages/testing doesn't provide @prisma/client (p1bb091), requested by prismock.\n➤ YN0002: │ @calcom/testing@workspace:packages/testing doesn't provide prisma (pd234c6), requested by prismock.\n➤ YN0002: │ @calcom/trpc@workspace:packages/trpc doesn't provide next (pee5e1d), requested by @trpc/next.\n➤ YN0002: │ @calcom/trpc@workspace:packages/trpc doesn't provide react (p7c1ec5), requested by @tanstack/react-query and other dependencies.\n➤ YN0002: │ @calcom/trpc@workspace:packages/trpc doesn't provide react-dom (pa445c5), requested by @trpc/next and other dependencies.\n➤ YN0002: │ @calcom/ui@workspace:packages/ui [22cff] doesn't provide @lexical/clipboard (p2dbbf0), requested by @lexical/rich-text.\n➤ YN0002: │ @calcom/ui@workspace:packages/ui [22cff] doesn't provide @testing-library/dom (p77297c), requested by @testing-library/user-event.\n➤ YN0002: │ @calcom/ui@workspace:packages/ui [6d903] doesn't provide @lexical/clipboard (pf2808e), requested by @lexical/rich-text.\n➤ YN0002: │ @calcom/ui@workspace:packages/ui [6d903] doesn't provide @testing-library/dom (pe242b2), requested by @testing-library/user-event.\n➤ YN0002: │ @calcom/ui@workspace:packages/ui [d41b9] doesn't provide @lexical/clipboard (p10a042), requested by @lexical/rich-text.\n➤ YN0002: │ @calcom/ui@workspace:packages/ui [d41b9] doesn't provide @testing-library/dom (p364ea1), requested by @testing-library/user-event.\n➤ YN0002: │ @calcom/ui@workspace:packages/ui doesn't provide @lexical/clipboard (p075131), requested by @lexical/rich-text.\n➤ YN0002: │ @calcom/ui@workspace:packages/ui doesn't provide @testing-library/dom (p5220f8), requested by @testing-library/user-event.\n➤ YN0002: │ @calcom/ui@workspace:packages/ui doesn't provide react (p5c5929), requested by @lexical/react and other dependencies.\n➤ YN0002: │ @calcom/ui@workspace:packages/ui doesn't provide react-dom (pab9257), requested by @lexical/react and other dependencies.\n➤ YN0002: │ @calcom/web@workspace:apps/web doesn't provide @prisma/client (pf8bc33), requested by @next-auth/prisma-adapter.\n➤ YN0002: │ @calcom/web@workspace:apps/web doesn't provide @types/node (pf2aacf), requested by node-mocks-http and other dependencies.\n➤ YN0002: │ @calcom/web@workspace:apps/web doesn't provide react-is (pb518d7), requested by @calcom/features.\n➤ YN0002: │ @coss/ui@workspace:packages/coss-ui [22cff] doesn't provide @types/node (p92f5a5), requested by ts-node.\n➤ YN0002: │ @coss/ui@workspace:packages/coss-ui [6d903] doesn't provide @types/node (p7608b7), requested by ts-node.\n➤ YN0002: │ @coss/ui@workspace:packages/coss-ui doesn't provide @types/node (pac1c22), requested by ts-node.\n➤ YN0002: │ @coss/ui@workspace:packages/coss-ui doesn't provide react (p7d465b), requested by @base-ui/react and other dependencies.\n➤ YN0002: │ @coss/ui@workspace:packages/coss-ui doesn't provide react-dom (pdf54be), requested by @base-ui/react.\n➤ YN0002: │ calcom-monorepo@workspace:. doesn't provide @prisma/client (pf84d28), requested by prismock.\n➤ YN0002: │ calcom-monorepo@workspace:. doesn't provide @testing-library/dom (p6962c8), requested by @testing-library/react.\n➤ YN0002: │ calcom-monorepo@workspace:. doesn't provide next (p83ec21), requested by next-router-mock.\n➤ YN0002: │ calcom-monorepo@workspace:. doesn't provide prisma (p99681d), requested by prismock.\n➤ YN0002: │ calcom-monorepo@workspace:. doesn't provide react (pc09232), requested by @testing-library/react and other dependencies.\n➤ YN0002: │ calcom-monorepo@workspace:. doesn't provide react-dom (pa51104), requested by @testing-library/react.\n➤ YN0086: │ Some peer dependencies are incorrectly met by your project; run yarn explain peer-requirements <hash> for details, where <hash> is the six-letter p-prefixed code.\n➤ YN0086: │ Some peer dependencies are incorrectly met by dependencies; run yarn explain peer-requirements for details.\n➤ YN0000: └ Completed\n➤ YN0000: ┌ Fetch step\n➤ YN0000: └ Completed in 3s 936ms\n➤ YN0000: ┌ Link step\n➤ YN0000: └ Completed in 1s 444ms\n➤ YN0000: · Done with warnings in 5s 984ms\n",
+      "stderr": "",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": true,
+      "verification_details": "Node dependencies verified (node_modules present and populated)",
+      "verification": {
+        "step_id": "install-deps",
+        "verification_type": "DEPENDENCY_CHECK",
+        "status": "PASSED",
+        "target": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\calcom_cal.com\\node_modules",
+        "message": "Node dependencies verified (node_modules present and populated)",
+        "details": {
+          "node_modules_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\calcom_cal.com\\node_modules",
+          "has_package_json": true
+        },
+        "duration_ms": 44.2040000052657,
+        "failure_reason": null,
+        "diagnostic_data": {}
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "start-app:@calcom/api-proxy",
+      "status": "FAILED",
+      "command": [
+        "npx",
+        "-y",
+        "yarn",
+        "dev"
+      ],
+      "cwd": "apps/api",
+      "started_at": "2026-08-19T06:18:40.525649Z",
+      "finished_at": "2026-08-19T06:18:40.737537Z",
+      "duration_ms": 10.0,
+      "stdout": "Application started in background (PID: 11508). Output logged to: C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\processes\\logs\\start-app_@calcom_api-proxy_20260819_061840.log",
+      "stderr": "Verification failed: HTTP endpoint http://127.0.0.1:3000 failed readiness check: <urlopen error timed out>",
+      "exit_code": 0,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": "HTTP endpoint http://127.0.0.1:3000 failed readiness check: <urlopen error timed out>",
+      "verification": {
+        "step_id": "start-app:@calcom/api-proxy",
+        "verification_type": "HTTP_CHECK",
+        "status": "FAILED",
+        "target": "http://127.0.0.1:3000",
+        "message": "HTTP endpoint http://127.0.0.1:3000 failed readiness check: <urlopen error timed out>",
+        "details": {},
+        "duration_ms": 20486.011400003918,
+        "failure_reason": "HTTP probe failed or returned unexpected status code",
+        "diagnostic_data": {
+          "url": "http://127.0.0.1:3000",
+          "last_status_code": null,
+          "error": "<urlopen error timed out>"
+        }
+      },
+      "rollback_available": false
+    },
+    {
+      "step_id": "start-app:@calcom/api-v2",
+      "status": "SKIPPED",
+      "command": [
+        "npx",
+        "-y",
+        "yarn",
+        "dev"
+      ],
+      "cwd": "apps/api/v2",
+      "started_at": "2026-08-19T06:19:01.223805Z",
+      "finished_at": "2026-08-19T06:19:01.223810Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'previous step' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    },
+    {
+      "step_id": "verify-app:@calcom/api-proxy",
+      "status": "SKIPPED",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T06:19:01.223863Z",
+      "finished_at": "2026-08-19T06:19:01.223865Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'start-app:@calcom/api-proxy' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    },
+    {
+      "step_id": "verify-app:@calcom/api-v2",
+      "status": "SKIPPED",
+      "command": null,
+      "cwd": null,
+      "started_at": "2026-08-19T06:19:01.223885Z",
+      "finished_at": "2026-08-19T06:19:01.223885Z",
+      "duration_ms": 0.0,
+      "stdout": "Skipped because prerequisite 'start-app:@calcom/api-v2' did not succeed",
+      "stderr": "",
+      "exit_code": null,
+      "error": null,
+      "verification_passed": false,
+      "verification_details": null,
+      "verification": null,
+      "rollback_available": false
+    }
+  ],
+  "successful_steps": [
+    "configure-env:secrets",
+    "configure-env:template",
+    "install-deps",
+    "start-service:docker-compose",
+    "verify-pm:yarn",
+    "verify-runtime:node"
+  ],
+  "failed_steps": [
+    "start-app:@calcom/api-proxy"
+  ],
+  "skipped_steps": [
+    "start-app:@calcom/api-v2",
+    "verify-app:@calcom/api-proxy",
+    "verify-app:@calcom/api-v2"
+  ],
+  "started_at": "2026-08-19T06:18:30.986231Z",
+  "finished_at": "2026-08-19T06:19:01.223897Z",
+  "summary": "Execution failed at step(s): start-app:@calcom/api-proxy"
+}
+
+
+=== STDERR ===
+

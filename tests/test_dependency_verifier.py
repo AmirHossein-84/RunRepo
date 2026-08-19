@@ -33,7 +33,7 @@ def test_dependency_verifier_node_success(tmp_path):
 
 
 def test_dependency_verifier_node_missing_node_modules(tmp_path):
-    (tmp_path / "package.json").write_text('{"name": "test"}', encoding="utf-8")
+    (tmp_path / "package.json").write_text('{"name": "test", "dependencies": {"express": "1.0.0"}}', encoding="utf-8")
 
     verifier = DependencyVerifier()
     step = _make_install_step()
@@ -45,7 +45,7 @@ def test_dependency_verifier_node_missing_node_modules(tmp_path):
 
 
 def test_dependency_verifier_node_empty_node_modules(tmp_path):
-    (tmp_path / "package.json").write_text('{"name": "test"}', encoding="utf-8")
+    (tmp_path / "package.json").write_text('{"name": "test", "dependencies": {"express": "1.0.0"}}', encoding="utf-8")
     nm = tmp_path / "node_modules"
     nm.mkdir()
 
