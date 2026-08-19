@@ -444,14 +444,14 @@ def test_regression_conda_planner_falls_back_to_pip(tmp_path: Path):
 
 
 def test_regression_install_handler_retries_with_ignore_engines_on_ebaddevengines(tmp_path: Path):
-    """Ensure InstallDepsStepHandler adds --ignore-engines when npm/yarn encounters EBADDEVENGINES."""
+    """Ensure InstallDepsStepHandler adds --ignore-engines when yarn encounters EBADDEVENGINES."""
     from runrepo.executor.handlers.install import InstallDepsStepHandler
     from runrepo.executor.process import ProcessExecutor, ProcessExecutionResult
 
     step = PlanStep(
         id="install-deps",
         action_type=ActionType.INSTALL_DEPENDENCIES,
-        command=["npm", "install"],
+        command=["yarn", "install"],
         description="Install dependencies",
         reason="Project dependencies",
     )
@@ -483,6 +483,52 @@ def test_regression_install_handler_retries_with_ignore_engines_on_ebaddevengine
     assert res.status == ExecutionStatus.SUCCESS
     assert len(calls) == 2
     assert "--ignore-engines" in calls[1]
+
+
+def test_regression_install_handler_yarn_berry_mode_skip_build_fallback(tmp_path: Path):
+    """Ensure InstallDepsStepHandler uses --mode=skip-build and YARN_ENABLE_SCRIPTS=0 for Yarn Berry."""
+    from runrepo.executor.handlers.install import InstallDepsStepHandler
+    from runrepo.executor.process import ProcessExecutor, ProcessExecutionResult
+    from runrepo.executor.process_manager import ProcessManager
+
+    step = PlanStep(
+        id="install-deps",
+        action_type=ActionType.INSTALL_DEPENDENCIES,
+        command=["npx", "-y", "yarn", "install"],
+        description="Install dependencies",
+        reason="Project dependencies",
+    )
+
+    calls = []
+    envs = []
+
+    class MockExecutor(ProcessExecutor):
+        def execute(self, cmd, cwd=None, env=None, timeout_s=None):
+            calls.append(list(cmd))
+            envs.append(env)
+            if len(calls) == 1:
+                return ProcessExecutionResult(
+                    exit_code=1,
+                    stdout="Error: Maximum call stack size exceeded\ncommand finished with error: command",
+                    stderr="",
+                    duration_ms=10.0,
+                )
+            return ProcessExecutionResult(exit_code=0, stdout="installed packages", stderr="", duration_ms=10.0)
+
+        def start_background(self, cmd, cwd=None, env=None):
+            raise NotImplementedError()
+
+    mock_exec = MockExecutor()
+    pm = ProcessManager(state_dir=tmp_path)
+
+    handler = InstallDepsStepHandler()
+    res = handler.execute(step, tmp_path, mock_exec, pm)
+
+    assert res.status == ExecutionStatus.SUCCESS
+    assert len(calls) == 2
+    assert "--mode=skip-build" in calls[1]
+    assert envs[1].get("YARN_ENABLE_SCRIPTS") == "0"
+
 
 
 def test_regression_docker_detector_excludes_examples_and_samples_compose(tmp_path: Path):

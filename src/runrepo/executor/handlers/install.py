@@ -84,29 +84,30 @@ class InstallDepsStepHandler(BaseStepHandler):
         # 2. Fallback for npm peer dependency resolution conflicts (ERESOLVE) & devEngines mismatch (EBADDEVENGINES)
         err_combined = f"{res.stdout or ''}\n{res.stderr or ''}"
         if res.exit_code != 0 and any(err in err_combined for err in ("ERESOLVE", "EBADDEVENGINES", "EBADENGINE", "Unsupported engine")):
-            fallback_flags = []
-            if "ERESOLVE" in err_combined:
-                fallback_flags.append("--legacy-peer-deps")
-            if any(err in err_combined for err in ("EBADDEVENGINES", "EBADENGINE", "Unsupported engine")):
-                fallback_flags.append("--ignore-engines")
-            fallback_cmd = list(step.command) + fallback_flags
-            res = executor.execute(fallback_cmd, cwd=working_dir)
-
-            # If --legacy-peer-deps still fails on strict peer trees, retry with --force
-            if res.exit_code != 0 and "ERESOLVE" in f"{res.stdout or ''}\n{res.stderr or ''}":
-                force_cmd = list(step.command) + ["--force"]
-                res = executor.execute(force_cmd, cwd=working_dir)
+            if "npm" in step.command:
+                res = executor.execute(list(step.command) + ["--legacy-peer-deps"], cwd=working_dir)
+                if res.exit_code != 0:
+                    res = executor.execute(list(step.command) + ["--force"], cwd=working_dir)
+            else:
+                res = executor.execute(list(step.command) + ["--ignore-engines"], cwd=working_dir)
 
         # 3. Fallback for broken postinstall/lifecycle scripts (e.g. opencollective crashing libuv, Turbo recursive stack overflow)
         err_combined = f"{res.stdout or ''}\n{res.stderr or ''}"
         if res.exit_code != 0 and any(err in err_combined for err in ("Assertion failed", "postinstall", "post-install", "3221226505", "UV_HANDLE_CLOSING", "Maximum call stack size exceeded", "command finished with error: command")):
-            fallback_flags = ["--ignore-scripts"]
-            if "ERESOLVE" in err_combined:
-                fallback_flags.append("--legacy-peer-deps")
-            if any(err in err_combined for err in ("EBADDEVENGINES", "EBADENGINE", "Unsupported engine")):
-                fallback_flags.append("--ignore-engines")
-            fallback_cmd = list(step.command) + fallback_flags
-            res = executor.execute(fallback_cmd, cwd=working_dir)
+            if "yarn" in step.command:
+                yarn_env = dict(custom_env) if custom_env else {}
+                yarn_env["YARN_ENABLE_SCRIPTS"] = "0"
+                # Yarn Berry uses --mode=skip-build, Yarn Classic uses --ignore-scripts
+                res = executor.execute(list(step.command) + ["--mode=skip-build"], cwd=working_dir, env=yarn_env)
+                if res.exit_code != 0:
+                    res = executor.execute(list(step.command) + ["--ignore-scripts"], cwd=working_dir, env=yarn_env)
+            else:
+                fallback_flags = ["--ignore-scripts"]
+                if "ERESOLVE" in err_combined:
+                    fallback_flags.append("--legacy-peer-deps")
+                if any(err in err_combined for err in ("EBADDEVENGINES", "EBADENGINE", "Unsupported engine")):
+                    fallback_flags.append("--force")
+                res = executor.execute(list(step.command) + fallback_flags, cwd=working_dir)
 
         # 4. Retry on transient network resets/timeouts
         if res.exit_code != 0:
