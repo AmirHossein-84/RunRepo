@@ -1,13 +1,13 @@
-id: 1
-name: Express
-url: https://github.com/expressjs/express
-batch: 1
-category: WEB_BACKEND
+id: 45
+name: Babel
+url: https://github.com/babel/babel
+batch: 5
+category: COMPILER
 language: JavaScript
 expected_runtime: node
-expected_package_manager: npm
+expected_package_manager: yarn
 expected_services: []
-difficulty: MEDIUM
+difficulty: HARD
 result: FULL_SUCCESS
 status: SUCCESS
 failure_stage: null
@@ -16,14 +16,14 @@ root_cause: null
 manual_intervention: null
 verification: PASSED
 cleanup: SUCCESS
-duration_seconds: 51.43
+duration_seconds: 429.33
 executed_steps:
 - step_id: verify-runtime:node
   status: SUCCESS
   command: null
   duration_ms: 0.0
   error: null
-- step_id: verify-pm:npm
+- step_id: verify-pm:yarn
   status: SUCCESS
   command: null
   duration_ms: 0.0
@@ -31,9 +31,11 @@ executed_steps:
 - step_id: install-deps
   status: SUCCESS
   command:
-  - npm
+  - npx
+  - -y
+  - yarn
   - install
-  duration_ms: 47383.968500013
+  duration_ms: 398474.2021999846
   error: null
 notes: ''
-timestamp: '2026-08-19T10:06:29.438501+00:00'
+timestamp: '2026-08-19T06:37:26.707806+00:00'

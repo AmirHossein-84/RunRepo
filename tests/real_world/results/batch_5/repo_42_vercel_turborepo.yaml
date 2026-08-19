@@ -1,0 +1,26 @@
+id: 42
+name: Turborepo
+url: https://github.com/vercel/turborepo
+batch: 5
+category: BUILD_SYSTEM
+language: Rust/TypeScript
+expected_runtime: rust/node
+expected_package_manager: pnpm
+expected_services: []
+difficulty: VERY_HARD
+result: CORRECTLY_UNSUPPORTED
+status: BLOCKED
+failure_stage: PREREQUISITE_CHECK
+failure_category: UNSUPPORTED_RUNTIME
+root_cause: 'Execution blocked by prerequisites: Rust runtime is required but not
+  installed on host machine.; Package manager ''cargo'' is required by lockfile/manifest
+  but missing on host.; Package manager ''bun'' is required by lockfile/manifest but
+  missing on host.; Package manager ''npm'' is required by lockfile/manifest but missing
+  on host.'
+manual_intervention: null
+verification: null
+cleanup: SUCCESS
+duration_seconds: 50.52
+executed_steps: []
+notes: ''
+timestamp: '2026-08-19T06:35:21.824455+00:00'

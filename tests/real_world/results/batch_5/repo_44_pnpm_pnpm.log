@@ -1,0 +1,19 @@
+=== STDOUT ===
+Cloned repository to: 
+C:\Users\Undeadmoon\AppData\Local\runrepo\runrepo\repositories\pnpm_pnpm
+{
+  "plan_id": "plan_1787121446",
+  "repository_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\pnpm_pnpm",
+  "status": "BLOCKED",
+  "steps": [],
+  "successful_steps": [],
+  "failed_steps": [],
+  "skipped_steps": [],
+  "started_at": "2026-08-19T06:37:26.012145Z",
+  "finished_at": "2026-08-19T06:37:26.012145Z",
+  "summary": "Execution blocked by prerequisites: Rust runtime is required but not installed on host machine.; Package manager 'cargo' is required by lockfile/manifest but missing on host."
+}
+
+
+=== STDERR ===
+

@@ -1,0 +1,23 @@
+id: 48
+name: pandas
+url: https://github.com/pandas-dev/pandas
+batch: 5
+category: DATA_ANALYSIS
+language: Python/Cython
+expected_runtime: python
+expected_package_manager: pip/meson
+expected_services: []
+difficulty: HARD
+result: INCORRECT_FAILURE
+status: BLOCKED
+failure_stage: PREREQUISITE_CHECK
+failure_category: BLOCKED_PREREQUISITE
+root_cause: 'Execution blocked by prerequisites: Package manager ''conda'' is required
+  by lockfile/manifest but missing on host.'
+manual_intervention: null
+verification: null
+cleanup: SUCCESS
+duration_seconds: 14.56
+executed_steps: []
+notes: ''
+timestamp: '2026-08-19T06:49:30.161590+00:00'

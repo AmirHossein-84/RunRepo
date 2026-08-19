@@ -1,0 +1,19 @@
+=== STDOUT ===
+Cloned repository to: 
+C:\Users\Undeadmoon\AppData\Local\runrepo\runrepo\repositories\nrwl_nx
+{
+  "plan_id": "plan_1787121419",
+  "repository_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\nrwl_nx",
+  "status": "BLOCKED",
+  "steps": [],
+  "successful_steps": [],
+  "failed_steps": [],
+  "skipped_steps": [],
+  "started_at": "2026-08-19T06:36:59.496222Z",
+  "finished_at": "2026-08-19T06:36:59.496222Z",
+  "summary": "Execution blocked by prerequisites: Rust runtime is required but not installed on host machine.; Package manager 'cargo' is required by lockfile/manifest but missing on host."
+}
+
+
+=== STDERR ===
+

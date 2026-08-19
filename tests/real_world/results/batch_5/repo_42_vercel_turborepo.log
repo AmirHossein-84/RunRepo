@@ -1,0 +1,19 @@
+=== STDOUT ===
+Cloned repository to: 
+C:\Users\Undeadmoon\AppData\Local\runrepo\runrepo\repositories\vercel_turborepo
+{
+  "plan_id": "plan_1787121372",
+  "repository_path": "C:\\Users\\Undeadmoon\\AppData\\Local\\runrepo\\runrepo\\repositories\\vercel_turborepo",
+  "status": "BLOCKED",
+  "steps": [],
+  "successful_steps": [],
+  "failed_steps": [],
+  "skipped_steps": [],
+  "started_at": "2026-08-19T06:36:12.280652Z",
+  "finished_at": "2026-08-19T06:36:12.280652Z",
+  "summary": "Execution blocked by prerequisites: Rust runtime is required but not installed on host machine.; Package manager 'cargo' is required by lockfile/manifest but missing on host.; Package manager 'bun' is required by lockfile/manifest but missing on host.; Package manager 'npm' is required by lockfile/manifest but missing on host."
+}
+
+
+=== STDERR ===
+

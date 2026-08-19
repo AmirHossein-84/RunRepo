@@ -1,0 +1,670 @@
+[
+  {
+    "id": 41,
+    "name": "Focalboard",
+    "url": "https://github.com/mattermost-community/focalboard",
+    "batch": 5,
+    "category": "COLLABORATION",
+    "language": "Go/TypeScript",
+    "expected_runtime": "go/node",
+    "expected_package_manager": "npm",
+    "expected_services": [
+      "postgres"
+    ],
+    "difficulty": "HARD",
+    "result": "FULL_SUCCESS",
+    "status": "SUCCESS",
+    "failure_stage": null,
+    "failure_category": null,
+    "root_cause": null,
+    "manual_intervention": null,
+    "verification": "PASSED",
+    "cleanup": "SUCCESS",
+    "duration_seconds": 108.97,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:npm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:focalboard-web-clipper",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 73179.03719999595,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:focalboard-asana-importer",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 14867.045099992538,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T06:33:32.284733+00:00"
+  },
+  {
+    "id": 42,
+    "name": "Turborepo",
+    "url": "https://github.com/vercel/turborepo",
+    "batch": 5,
+    "category": "BUILD_SYSTEM",
+    "language": "Rust/TypeScript",
+    "expected_runtime": "rust/node",
+    "expected_package_manager": "pnpm",
+    "expected_services": [],
+    "difficulty": "VERY_HARD",
+    "result": "CORRECTLY_UNSUPPORTED",
+    "status": "BLOCKED",
+    "failure_stage": "PREREQUISITE_CHECK",
+    "failure_category": "UNSUPPORTED_RUNTIME",
+    "root_cause": "Execution blocked by prerequisites: Rust runtime is required but not installed on host machine.; Package manager 'cargo' is required by lockfile/manifest but missing on host.; Package manager 'bun' is required by lockfile/manifest but missing on host.; Package manager 'npm' is required by lockfile/manifest but missing on host.",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 50.52,
+    "executed_steps": [],
+    "notes": "",
+    "timestamp": "2026-08-19T06:35:21.824455+00:00"
+  },
+  {
+    "id": 43,
+    "name": "Nx",
+    "url": "https://github.com/nrwl/nx",
+    "batch": 5,
+    "category": "BUILD_SYSTEM",
+    "language": "TypeScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "yarn/pnpm",
+    "expected_services": [],
+    "difficulty": "HARD",
+    "result": "CORRECTLY_UNSUPPORTED",
+    "status": "BLOCKED",
+    "failure_stage": "PREREQUISITE_CHECK",
+    "failure_category": "UNSUPPORTED_RUNTIME",
+    "root_cause": "Execution blocked by prerequisites: Rust runtime is required but not installed on host machine.; Package manager 'cargo' is required by lockfile/manifest but missing on host.",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 46.5,
+    "executed_steps": [],
+    "notes": "",
+    "timestamp": "2026-08-19T06:36:13.047754+00:00"
+  },
+  {
+    "id": 44,
+    "name": "pnpm",
+    "url": "https://github.com/pnpm/pnpm",
+    "batch": 5,
+    "category": "PACKAGE_MANAGER",
+    "language": "TypeScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "pnpm",
+    "expected_services": [],
+    "difficulty": "HARD",
+    "result": "CORRECTLY_UNSUPPORTED",
+    "status": "BLOCKED",
+    "failure_stage": "PREREQUISITE_CHECK",
+    "failure_category": "UNSUPPORTED_RUNTIME",
+    "root_cause": "Execution blocked by prerequisites: Rust runtime is required but not installed on host machine.; Package manager 'cargo' is required by lockfile/manifest but missing on host.",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 25.87,
+    "executed_steps": [],
+    "notes": "",
+    "timestamp": "2026-08-19T06:37:00.206160+00:00"
+  },
+  {
+    "id": 45,
+    "name": "Babel",
+    "url": "https://github.com/babel/babel",
+    "batch": 5,
+    "category": "COMPILER",
+    "language": "JavaScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "yarn",
+    "expected_services": [],
+    "difficulty": "HARD",
+    "result": "FULL_SUCCESS",
+    "status": "SUCCESS",
+    "failure_stage": null,
+    "failure_category": null,
+    "root_cause": null,
+    "manual_intervention": null,
+    "verification": "PASSED",
+    "cleanup": "SUCCESS",
+    "duration_seconds": 429.33,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:yarn",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "yarn",
+          "install"
+        ],
+        "duration_ms": 398474.2021999846,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T06:37:26.707806+00:00"
+  },
+  {
+    "id": 46,
+    "name": "Transformers",
+    "url": "https://github.com/huggingface/transformers",
+    "batch": 5,
+    "category": "MACHINE_LEARNING",
+    "language": "Python",
+    "expected_runtime": "python",
+    "expected_package_manager": "pip",
+    "expected_services": [],
+    "difficulty": "HARD",
+    "result": "FULL_SUCCESS",
+    "status": "SUCCESS",
+    "failure_stage": null,
+    "failure_category": null,
+    "root_cause": null,
+    "manual_intervention": null,
+    "verification": "PASSED",
+    "cleanup": "SUCCESS",
+    "duration_seconds": 195.45,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:python",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "create-venv:benchmark_v2",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "venv"
+        ],
+        "duration_ms": 339.51750001870096,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:pip",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "create-venv",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "venv"
+        ],
+        "duration_ms": 265.764699986903,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:benchmark_v2",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "pip",
+          "install",
+          "-r",
+          "requirements.txt"
+        ],
+        "duration_ms": 151927.74980000104,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "pip",
+          "install",
+          "-e",
+          "."
+        ],
+        "duration_ms": 17578.19540001219,
+        "error": null
+      },
+      {
+        "step_id": "start-app:benchmark_v2",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "run",
+          "python",
+          "conftest.py"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:pytorch",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "run",
+          "python",
+          "conftest.py"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:benchmark_v2",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:pytorch",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 10.0,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T06:44:36.774132+00:00"
+  },
+  {
+    "id": 47,
+    "name": "scikit-learn",
+    "url": "https://github.com/scikit-learn/scikit-learn",
+    "batch": 5,
+    "category": "MACHINE_LEARNING",
+    "language": "Python/C",
+    "expected_runtime": "python",
+    "expected_package_manager": "pip",
+    "expected_services": [],
+    "difficulty": "HARD",
+    "result": "INCORRECT_FAILURE",
+    "status": "FAILED",
+    "failure_stage": "install-deps:github",
+    "failure_category": "PACKAGE_MANAGER",
+    "root_cause": "error: File not found: `requirements.txt`\n",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 96.73,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:python",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "create-venv:.binder",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "venv"
+        ],
+        "duration_ms": 280.2115000085905,
+        "error": null
+      },
+      {
+        "step_id": "create-venv:github",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "venv"
+        ],
+        "duration_ms": 270.1588000054471,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:pip",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "create-venv",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "venv"
+        ],
+        "duration_ms": 284.53460001037456,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:.binder",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "pip",
+          "install",
+          "-r",
+          "requirements.txt"
+        ],
+        "duration_ms": 83350.32430000138,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:github",
+        "status": "FAILED",
+        "command": [
+          "uv",
+          "pip",
+          "install",
+          "-r",
+          "requirements.txt"
+        ],
+        "duration_ms": 43.438199994852766,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SKIPPED",
+        "command": [
+          "uv",
+          "pip",
+          "install",
+          "-e",
+          "."
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T06:47:52.838278+00:00"
+  },
+  {
+    "id": 48,
+    "name": "pandas",
+    "url": "https://github.com/pandas-dev/pandas",
+    "batch": 5,
+    "category": "DATA_ANALYSIS",
+    "language": "Python/Cython",
+    "expected_runtime": "python",
+    "expected_package_manager": "pip/meson",
+    "expected_services": [],
+    "difficulty": "HARD",
+    "result": "INCORRECT_FAILURE",
+    "status": "BLOCKED",
+    "failure_stage": "PREREQUISITE_CHECK",
+    "failure_category": "BLOCKED_PREREQUISITE",
+    "root_cause": "Execution blocked by prerequisites: Package manager 'conda' is required by lockfile/manifest but missing on host.",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 14.56,
+    "executed_steps": [],
+    "notes": "",
+    "timestamp": "2026-08-19T06:49:30.161590+00:00"
+  },
+  {
+    "id": 49,
+    "name": "PyTorch",
+    "url": "https://github.com/pytorch/pytorch",
+    "batch": 5,
+    "category": "MACHINE_LEARNING",
+    "language": "C++/Python",
+    "expected_runtime": "python",
+    "expected_package_manager": "pip/cmake",
+    "expected_services": [],
+    "difficulty": "VERY_HARD",
+    "result": "INCORRECT_FAILURE",
+    "status": "FAILED",
+    "failure_stage": "install-deps:ci_commit_pins",
+    "failure_category": "PACKAGE_MANAGER",
+    "root_cause": "error: File not found: `requirements.txt`\n",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 67.43,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:python",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "create-venv:ci_commit_pins",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "venv"
+        ],
+        "duration_ms": 278.0946999846492,
+        "error": null
+      },
+      {
+        "step_id": "create-venv:lumen_cli",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "venv"
+        ],
+        "duration_ms": 288.3215000038035,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:pip",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "create-venv",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "venv"
+        ],
+        "duration_ms": 265.00060001853853,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:ci_commit_pins",
+        "status": "FAILED",
+        "command": [
+          "uv",
+          "pip",
+          "install",
+          "-r",
+          "requirements.txt"
+        ],
+        "duration_ms": 58.445800008485094,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:lumen_cli",
+        "status": "SKIPPED",
+        "command": [
+          "uv",
+          "pip",
+          "install",
+          "-e",
+          "."
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SKIPPED",
+        "command": [
+          "uv",
+          "pip",
+          "install",
+          "-r",
+          "requirements.txt"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T06:49:45.322848+00:00"
+  },
+  {
+    "id": 50,
+    "name": "Flask Mega-Tutorial",
+    "url": "https://github.com/miguelgrinberg/microblog",
+    "batch": 5,
+    "category": "WEB_APPLICATION",
+    "language": "Python",
+    "expected_runtime": "python",
+    "expected_package_manager": "pip",
+    "expected_services": [],
+    "difficulty": "MEDIUM",
+    "result": "INCORRECT_FAILURE",
+    "status": "FAILED",
+    "failure_stage": "install-deps",
+    "failure_category": "PACKAGE_MANAGER",
+    "root_cause": "Resolved 56 packages in 4.97s\n   Building flask-mail==0.9.1\n      Built flask-mail==0.9.1\n   Building markupsafe==2.1.3\nDownloading sqlalchemy (1.8MiB)\nDownloading babel (9.6MiB)\nDownloading pygments (1.1MiB)\n   Building multidict==6.0.4\n   Building langdetect==1.0.9\n   Building greenlet==3.0.1\n Downloaded pygments\n   Building psycopg2-binary==2.9.9\n Downloaded sqlalchemy\n Downloaded babel\n  \u00d7 Failed to build `multidict==6.0.4`\n  \u251c\u2500\u25b6 The build backend returned an error\n  \u2570\u2500\u25b6 Call to `setuptools.build_meta:__legacy__.build_wheel` failed (exit\n      code: 1)\n\n      [stdout]\n      *********************\n      * Accelerated build *\n      *********************\n      running bdist_wheel\n      running build\n      running build_py\n      creating build\\lib.win-amd64-cpython-314\\multidict\n      copying multidict\\_abc.py -> build\\lib.win-amd64-cpython-314\\multidict\n      copying multidict\\_compat.py -> build\\lib.win-amd64-cpython-314\\multidict\n      copying multidict\\_multidict_base.py ->\n      build\\lib.win-amd64-cpython-314\\multidict\n      copying multidict\\_multidict_py.py ->\n      build\\lib.win-amd64-cpython-314\\multidict\n      copying multidict\\__init__.py ->\n      build\\lib.win-amd64-cpython-314\\multidict\n      running egg_info\n      writing multidict.egg-info\\PKG-INFO\n      writing dependency_links to multidict.egg-info\\dependency_links.txt\n      writing top-level names to multidict.egg-info\\top_level.txt\n      reading manifest file 'multidict.egg-info\\SOURCES.txt'\n      reading manifest template 'MANIFEST.in'\n      adding license file 'LICENSE'\n      writing manifest file 'multidict.egg-info\\SOURCES.txt'\n      copying multidict\\__init__.pyi ->\n      build\\lib.win-amd64-cpython-314\\multidict\n      copying multidict\\py.typed -> build\\lib.win-amd64-cpython-314\\multidict\n      running build_ext\n      building 'multidict._multidict' extension\n\n      [stderr]\n      <string>:37: DeprecationWarning: codecs.open() is deprecated. Use open()\n      instead.\n      C:\\Users\\Undeadmoon\\AppData\\Local\\uv\\cache\\builds-v0\\.tmplTUNEr\\Lib\\site-packages\\setuptools\\dist.py:765:\n      SetuptoolsDeprecationWarning: License classifiers are deprecated.\n      !!\n\n      \n      ********************************************************************************\n              Please consider removing the following classifiers in favor of a\n      SPDX license expression:\n\n              License :: OSI Approved :: Apache Software License\n\n              See\n      https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license\n      for details.\n      \n      ********************************************************************************\n\n      !!\n        self._finalize_license_expression()\n      warning: no previously-included files matching '*.pyc' found anywhere\n      in distribution\n      warning: no previously-included files found matching\n      'multidict\\_multidict.html'\n      warning: no previously-included files found matching 'multidict\\*.so'\n      warning: no previously-included files found matching 'multidict\\*.pyd'\n      warning: no previously-included files found matching 'multidict\\*.pyd'\n      no previously-included directories found matching 'docs\\_build'\n      C:\\Users\\Undeadmoon\\AppData\\Local\\uv\\cache\\builds-v0\\.tmplTUNEr\\Lib\\site-packages\\setuptools\\command\\build_py.py:215:\n      _Warning: Package 'multidict._multilib' is absent from the `packages`\n      configuration.\n      !!\n\n      \n      ********************************************************************************\n              ############################\n              # Package would be ignored #\n              ############################\n              Python recognizes 'multidict._multilib' as an importable\n      package[^1],\n              but it is absent from setuptools' `packages` configuration.\n\n              This leads to an ambiguous overall configuration. If you want to\n      distribute this\n              package, please make sure that 'multidict._multilib' is\n      explicitly added\n              to the `packages` configuration field.\n\n              Alternatively, you can also rely on setuptools' discovery\n      methods\n              (for example by using\n      `find_namespace_packages(...)`/`find_namespace:`\n              instead of `find_packages(...)`/`find:`).\n\n              You can read more about \"package discovery\" on setuptools\n      documentation page:\n\n              -\n      https://setuptools.pypa.io/en/latest/userguide/package_discovery.html\n\n              If you don't want 'multidict._multilib' to be distributed and\n      are\n              already explicitly excluding 'multidict._multilib' via\n              `find_namespace_packages(...)/find_namespace` or\n      `find_packages(...)/find`,\n              you can try to use `exclude_package_data`, or\n      `include-package-data=False` in\n              combination with a more fine grained `package-data`\n      configuration.\n\n              You can read more about \"package data files\" on setuptools\n      documentation page:\n\n              - https://setuptools.pypa.io/en/latest/userguide/datafiles.html\n\n\n              [^1]: For Python, any directory (with suitable naming) can be\n      imported,\n                    even if it does not contain any `.py` files.\n                    On the other hand, currently there is no concept of\n      package data\n                    directory, all directories are treated like packages.\n      \n      ********************************************************************************\n\n      !!\n        check.warn(importable)\n      error: Microsoft Visual C++ 14.0 or greater is\n      required. Get it with \"Microsoft C++ Build Tools\":\n      https://visualstudio.microsoft.com/visual-cpp-build-tools/\n\n\nhint: Build failures usually indicate a problem with the package or the build environment",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 48.37,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:python",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "configure-env:template",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "create-venv",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "venv"
+        ],
+        "duration_ms": 296.09859999618493,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:pip",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-docker-daemon",
+        "status": "SUCCESS",
+        "command": [
+          "runrepo",
+          "service",
+          "start-docker"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "FAILED",
+        "command": [
+          "uv",
+          "pip",
+          "install",
+          "-r",
+          "requirements.txt"
+        ],
+        "duration_ms": 30313.08480000007,
+        "error": null
+      },
+      {
+        "step_id": "start-service:postgres",
+        "status": "SKIPPED",
+        "command": [
+          "docker",
+          "run",
+          "-d",
+          "--name",
+          "runrepo-miguelgrinberg_microblog-postgres",
+          "-p",
+          "5433:5432",
+          "-e",
+          "POSTGRES_DB=miguelgrinberg_microblog_dev",
+          "-e",
+          "POSTGRES_USER=postgres",
+          "-e",
+          "POSTGRES_PASSWORD=postgres",
+          "postgres:16-alpine"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app",
+        "status": "SKIPPED",
+        "command": [
+          "uv",
+          "run",
+          "flask",
+          "run"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T06:50:53.478347+00:00"
+  }
+]

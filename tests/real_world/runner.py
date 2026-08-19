@@ -51,7 +51,7 @@ def run_command(cmd: List[str], cwd: Optional[Path] = None, timeout: float = 600
     )
 
 
-def test_repository(repo: Dict[str, Any], batch_num: int) -> Dict[str, Any]:
+def test_repository(repo: Dict[str, Any], batch_num: int, ephemeral: bool = False) -> Dict[str, Any]:
     repo_id = repo["id"]
     repo_name = repo["name"]
     repo_url = repo["url"]
@@ -228,6 +228,15 @@ def test_repository(repo: Dict[str, Any], batch_num: int) -> Dict[str, Any]:
     except Exception:
         result_data["cleanup"] = "FAILED"
 
+    # Ephemeral cleanup if requested
+    if ephemeral:
+        try:
+            from runrepo.repository.manager import RepositoryManager
+            mgr = RepositoryManager()
+            mgr.clean_cache(target=slug)
+        except Exception:
+            pass
+
     # Save structured YAML result
     res_yaml_file = batch_dir / f"repo_{repo_id:02d}_{slug}.yaml"
     with open(res_yaml_file, "w", encoding="utf-8") as f:
@@ -236,7 +245,60 @@ def test_repository(repo: Dict[str, Any], batch_num: int) -> Dict[str, Any]:
     return result_data
 
 
-def run_batch(batch_num: int) -> List[Dict[str, Any]]:
+def generate_github_step_summary(batch_num: int, batch_name: str, results: List[Dict[str, Any]]) -> None:
+    summary_env = os.environ.get("GITHUB_STEP_SUMMARY")
+    if not summary_env:
+        return
+
+    md_lines = [
+        f"### 📊 Batch {batch_num} Benchmark Results: {batch_name}",
+        "",
+        "| ID | Repository | Category | Status | Stage / Root Cause | Duration |",
+        "|:---:|:---|:---|:---:|:---|:---:|",
+    ]
+
+    for r in results:
+        res = r.get("result", "UNKNOWN")
+        if res == "FULL_SUCCESS":
+            status_badge = "🟢 **FULL_SUCCESS**"
+        elif res == "PARTIAL_SUCCESS":
+            status_badge = "🟡 **PARTIAL_SUCCESS**"
+        elif res == "CORRECTLY_UNSUPPORTED":
+            status_badge = "🔵 **CORRECTLY_UNSUPPORTED**"
+        else:
+            status_badge = "🔴 **INCORRECT_FAILURE**"
+
+        stage = r.get("failure_stage") or "-"
+        cause = (r.get("root_cause") or "").replace("\n", " ")[:80]
+        details = f"`{stage}`: {cause}" if stage != "-" else "-"
+
+        md_lines.append(
+            f"| **{r['id']:02d}** | [{r['name']}]({r['url']}) | `{r.get('category', '-')}` | {status_badge} | {details} | {r.get('duration_seconds', 0)}s |"
+        )
+
+    md_lines.append("")
+    try:
+        with open(summary_env, "a", encoding="utf-8") as f:
+            f.write("\n".join(md_lines) + "\n")
+    except Exception as exc:
+        console.print(f"[dim]Failed to write to $GITHUB_STEP_SUMMARY: {exc}[/dim]")
+
+
+def generate_failures_summary(batch_num: int, results: List[Dict[str, Any]]) -> None:
+    failures = [r for r in results if r.get("result") in ("INCORRECT_FAILURE", "UNKNOWN")]
+    failures_file = RESULTS_ROOT / f"batch_{batch_num}" / "failures_summary.json"
+    
+    data = {
+        "batch": batch_num,
+        "total_repositories": len(results),
+        "failures_count": len(failures),
+        "failures": failures,
+    }
+    with open(failures_file, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+
+def run_batch(batch_num: int, ephemeral: bool = False) -> List[Dict[str, Any]]:
     corpus = load_corpus()
     batches = corpus.get("batches", [])
     batch_data = next((b for b in batches if b["batch"] == batch_num), None)
@@ -250,7 +312,7 @@ def run_batch(batch_num: int) -> List[Dict[str, Any]]:
 
     results: List[Dict[str, Any]] = []
     for repo in batch_data["repositories"]:
-        res = test_repository(repo, batch_num)
+        res = test_repository(repo, batch_num, ephemeral=ephemeral)
         results.append(res)
 
     # Output Batch Summary Table
@@ -277,9 +339,15 @@ def run_batch(batch_num: int) -> List[Dict[str, Any]]:
     console.print(table)
 
     # Save Batch summary JSON
-    summary_file = RESULTS_ROOT / f"batch_{batch_num}" / "summary.json"
+    batch_dir = RESULTS_ROOT / f"batch_{batch_num}"
+    batch_dir.mkdir(parents=True, exist_ok=True)
+    summary_file = batch_dir / "summary.json"
     with open(summary_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
+
+    # Generate failures summary and GitHub step summary
+    generate_failures_summary(batch_num, results)
+    generate_github_step_summary(batch_num, batch_data["name"], results)
 
     return results
 
@@ -288,6 +356,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="RunRepo 50-Repository Real-World Benchmark Runner")
     parser.add_argument("--batch", type=int, choices=[1, 2, 3, 4, 5], help="Run a specific batch (1-5)")
     parser.add_argument("--id", type=int, help="Run a specific repository ID (1-50)")
+    parser.add_argument("--ephemeral", action="store_true", help="Delete cloned repository immediately after test to save disk space")
     args = parser.parse_args()
 
     if args.id:
@@ -295,16 +364,16 @@ def main() -> None:
         for b in corpus["batches"]:
             for r in b["repositories"]:
                 if r["id"] == args.id:
-                    test_repository(r, b["batch"])
+                    test_repository(r, b["batch"], ephemeral=args.ephemeral)
                     return
         console.print(f"[bold red]Repository ID {args.id} not found[/bold red]")
         sys.exit(1)
 
     if args.batch:
-        run_batch(args.batch)
+        run_batch(args.batch, ephemeral=args.ephemeral)
     else:
         # Default to Batch 1
-        run_batch(1)
+        run_batch(1, ephemeral=args.ephemeral)
 
 
 if __name__ == "__main__":

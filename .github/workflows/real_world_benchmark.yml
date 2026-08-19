@@ -1,0 +1,126 @@
+name: Real-World 50-Repository Benchmark
+run-name: 50-Repo Benchmark (${{ inputs.batch || 'Manual' }} on ${{ inputs.runner_os || 'windows-latest' }})
+
+on:
+  workflow_dispatch:
+    inputs:
+      batch:
+        description: "Benchmark Batch to Run"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - "all"
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+          - "custom_id"
+      custom_id:
+        description: "Specific Repository ID (if batch is custom_id, 1-50)"
+        required: false
+        default: ""
+        type: string
+      runner_os:
+        description: "Operating System Runner"
+        required: true
+        default: "windows-latest"
+        type: choice
+        options:
+          - "windows-latest"
+          - "ubuntu-latest"
+          - "both"
+      ephemeral:
+        description: "Clean up cloned repositories immediately after test to save runner disk"
+        required: true
+        default: true
+        type: boolean
+
+concurrency:
+  group: benchmark-${{ github.ref }}-${{ inputs.batch }}
+  cancel-in-progress: true
+
+jobs:
+  setup-matrix:
+    name: 🎯 Plan Benchmark Execution Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      batches: ${{ steps.set-matrix.outputs.batches }}
+      os_matrix: ${{ steps.set-matrix.outputs.os_matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          # 1. Determine Batches
+          if [ "${{ inputs.batch }}" == "all" ]; then
+            echo 'batches=[1, 2, 3, 4, 5]' >> $GITHUB_OUTPUT
+          elif [ "${{ inputs.batch }}" == "custom_id" ]; then
+            echo 'batches=[0]' >> $GITHUB_OUTPUT
+          else
+            echo "batches=[${{ inputs.batch }}]" >> $GITHUB_OUTPUT
+          fi
+
+          # 2. Determine OS Matrix
+          if [ "${{ inputs.runner_os }}" == "both" ]; then
+            echo 'os_matrix=["windows-latest", "ubuntu-latest"]' >> $GITHUB_OUTPUT
+          else
+            echo 'os_matrix=["${{ inputs.runner_os }}"]' >> $GITHUB_OUTPUT
+          fi
+
+  run-benchmark:
+    name: 🚀 Batch ${{ matrix.batch }} on ${{ matrix.os }}
+    needs: setup-matrix
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: ${{ fromJson(needs.setup-matrix.outputs.batches) }}
+        os: ${{ fromJson(needs.setup-matrix.outputs.os_matrix) }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+
+    steps:
+      - name: 📥 Check out repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Install uv and Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: 🟢 Install Node.js & Package Managers
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 📦 Install RunRepo dependencies
+        run: uv sync
+
+      - name: 🧪 Run Benchmark Execution
+        shell: bash
+        env:
+          RUNREPO_NO_AI: "1"
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+        run: |
+          EPHEMERAL_FLAG=""
+          if [ "${{ inputs.ephemeral }}" = "true" ]; then
+            EPHEMERAL_FLAG="--ephemeral"
+          fi
+
+          if [ "${{ matrix.batch }}" = "0" ]; then
+            echo "Running specific repository ID ${{ inputs.custom_id }}"
+            uv run python tests/real_world/runner.py --id ${{ inputs.custom_id }} $EPHEMERAL_FLAG
+          else
+            echo "Running Batch ${{ matrix.batch }}"
+            uv run python tests/real_world/runner.py --batch ${{ matrix.batch }} $EPHEMERAL_FLAG
+          fi
+
+      - name: 📤 Upload Batch Results & Execution Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-batch-${{ matrix.batch }}-${{ matrix.os }}
+          path: |
+            tests/real_world/results/
+          retention-days: 30
+          if-no-files-found: warn

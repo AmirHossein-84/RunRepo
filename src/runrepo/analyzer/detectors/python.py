@@ -287,8 +287,23 @@ class PythonDetector(BaseDetector):
             if "{{" in sub_dir or "}}" in sub_dir or "{%" in sub_dir or "%}" in sub_dir:
                 continue
             parts = sub_dir.lower().split("/")
-            if any(p in {"test", "tests", "fixtures", "fixture", "test_fixtures", "spec", "specs", "e2e", "benchmark", "benchmarks", "ci", ".github", "vendor"} for p in parts):
+            if any(p in {"test", "tests", "fixtures", "fixture", "test_fixtures", "spec", "specs", "e2e", "benchmark", "benchmarks", "ci", ".ci", "build_tools", "tools", "scripts", ".github", "vendor", ".binder", "docker", ".docker", "docs", "documentation", ".devcontainer"} for p in parts):
                 continue
+
+            sub_pyproject_path = f"{sub_dir}/pyproject.toml"
+            sub_req_path = f"{sub_dir}/requirements.txt"
+            sub_setup_path = f"{sub_dir}/setup.py"
+            sub_cfg_path = f"{sub_dir}/setup.cfg"
+
+            has_manifest = (
+                context.has_file(sub_pyproject_path)
+                or context.has_file(sub_req_path)
+                or context.has_file(sub_setup_path)
+                or context.has_file(sub_cfg_path)
+            )
+            if not has_manifest:
+                continue
+
             processed_dirs.add(sub_dir)
 
             sub_scripts: list[ProjectScript] = []
@@ -296,7 +311,6 @@ class PythonDetector(BaseDetector):
             sub_fws: list[FrameworkInfo] = []
             sub_pms: list[PackageManagerInfo] = []
 
-            sub_pyproject_path = f"{sub_dir}/pyproject.toml"
             if context.has_file(sub_pyproject_path):
                 sub_toml = context.read_toml(sub_pyproject_path)
                 if sub_toml:
@@ -306,8 +320,20 @@ class PythonDetector(BaseDetector):
                     sub_scripts.extend(s_scripts)
                     sub_deps.extend(s_deps)
                     sub_fws.extend(s_fws)
+                sub_pms.append(
+                    PackageManagerInfo(
+                        name="pip",
+                        evidence=[
+                            DetectionEvidence(
+                                source="pyproject.toml",
+                                detail="Python subproject configuration found",
+                                confidence=Confidence.HIGH,
+                                path=sub_pyproject_path,
+                            )
+                        ],
+                    )
+                )
 
-            sub_req_path = f"{sub_dir}/requirements.txt"
             if context.has_file(sub_req_path):
                 s_deps2, s_fws2 = self._parse_requirements_file(context, sub_req_path)
                 existing_d = {d.name.lower() for d in sub_deps}
@@ -318,6 +344,20 @@ class PythonDetector(BaseDetector):
                 for f in s_fws2:
                     if f.name not in existing_f:
                         sub_fws.append(f)
+                if not sub_pms:
+                    sub_pms.append(
+                        PackageManagerInfo(
+                            name="pip",
+                            evidence=[
+                                DetectionEvidence(
+                                    source="requirements.txt",
+                                    detail="Python subproject requirements found",
+                                    confidence=Confidence.HIGH,
+                                    path=sub_req_path,
+                                )
+                            ],
+                        )
+                    )
 
             subproject = SubprojectInfo(
                 name=sub_dir.split("/")[-1],

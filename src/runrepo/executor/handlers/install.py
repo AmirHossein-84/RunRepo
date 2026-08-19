@@ -99,6 +99,13 @@ class InstallDepsStepHandler(BaseStepHandler):
             if any(net_err in err_combined for net_err in ("econnreset", "etimedout", "socket hang up", "fetch failed", "connection reset", "network error")):
                 res = executor.execute(step.command, cwd=working_dir)
 
+        # 5. Fallback for C-extension build failures on Windows without MSVC (recreate venv with Python 3.12 where pre-built binary wheels exist)
+        if res.exit_code != 0 and "uv" in step.command and any(err in (res.stderr or "") for err in ("Microsoft Visual C++", "Failed to build", "error: command 'cl.exe' failed", "Building wheel for")):
+            if venv_path.exists():
+                recreate_res = executor.execute(["uv", "venv", "--python", "3.12", "--clear", str(venv_path)], cwd=working_dir)
+                if recreate_res.exit_code == 0:
+                    res = executor.execute(step.command, cwd=working_dir, env=custom_env if custom_env else None, timeout_s=600.0)
+
         finished_at = datetime.now(timezone.utc)
         status = ExecutionStatus.SUCCESS if res.exit_code == 0 else ExecutionStatus.FAILED
 

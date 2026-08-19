@@ -1,0 +1,85 @@
+id: 47
+name: scikit-learn
+url: https://github.com/scikit-learn/scikit-learn
+batch: 5
+category: MACHINE_LEARNING
+language: Python/C
+expected_runtime: python
+expected_package_manager: pip
+expected_services: []
+difficulty: HARD
+result: INCORRECT_FAILURE
+status: FAILED
+failure_stage: install-deps:github
+failure_category: PACKAGE_MANAGER
+root_cause: 'error: File not found: `requirements.txt`
+
+  '
+manual_intervention: null
+verification: null
+cleanup: SUCCESS
+duration_seconds: 96.73
+executed_steps:
+- step_id: verify-runtime:python
+  status: SUCCESS
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: create-venv:.binder
+  status: SUCCESS
+  command:
+  - uv
+  - venv
+  duration_ms: 280.2115000085905
+  error: null
+- step_id: create-venv:github
+  status: SUCCESS
+  command:
+  - uv
+  - venv
+  duration_ms: 270.1588000054471
+  error: null
+- step_id: verify-pm:pip
+  status: SUCCESS
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: create-venv
+  status: SUCCESS
+  command:
+  - uv
+  - venv
+  duration_ms: 284.53460001037456
+  error: null
+- step_id: install-deps:.binder
+  status: SUCCESS
+  command:
+  - uv
+  - pip
+  - install
+  - -r
+  - requirements.txt
+  duration_ms: 83350.32430000138
+  error: null
+- step_id: install-deps:github
+  status: FAILED
+  command:
+  - uv
+  - pip
+  - install
+  - -r
+  - requirements.txt
+  duration_ms: 43.438199994852766
+  error: null
+- step_id: install-deps
+  status: SKIPPED
+  command:
+  - uv
+  - pip
+  - install
+  - -e
+  - .
+  duration_ms: 0.0
+  error: null
+notes: ''
+timestamp: '2026-08-19T06:47:52.838278+00:00'

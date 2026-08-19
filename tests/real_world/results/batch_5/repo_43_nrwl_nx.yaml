@@ -1,0 +1,24 @@
+id: 43
+name: Nx
+url: https://github.com/nrwl/nx
+batch: 5
+category: BUILD_SYSTEM
+language: TypeScript
+expected_runtime: node
+expected_package_manager: yarn/pnpm
+expected_services: []
+difficulty: HARD
+result: CORRECTLY_UNSUPPORTED
+status: BLOCKED
+failure_stage: PREREQUISITE_CHECK
+failure_category: UNSUPPORTED_RUNTIME
+root_cause: 'Execution blocked by prerequisites: Rust runtime is required but not
+  installed on host machine.; Package manager ''cargo'' is required by lockfile/manifest
+  but missing on host.'
+manual_intervention: null
+verification: null
+cleanup: SUCCESS
+duration_seconds: 46.5
+executed_steps: []
+notes: ''
+timestamp: '2026-08-19T06:36:13.047754+00:00'

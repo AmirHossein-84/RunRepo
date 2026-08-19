@@ -109,10 +109,25 @@ class ExecutionPlanner:
             if is_satisfied:
                 reason = f"Project uses {pm_name}; host has {check.installed_version} available"
             else:
-                reason = f"Required package manager '{pm_name}' is not installed or available on PATH"
-                blocking_reasons.append(
-                    f"Package manager '{pm_name}' is required by lockfile/manifest but missing on host."
-                )
+                if pm_name == "conda":
+                    base_dir = Path(project_info.path)
+                    has_std_py = (
+                        (base_dir / "pyproject.toml").exists()
+                        or (base_dir / "requirements.txt").exists()
+                        or (base_dir / "setup.py").exists()
+                        or any(p.name.lower() in ("pip", "uv", "poetry") for p in all_pms)
+                    )
+                    if has_std_py and any(p in env_checks_map and env_checks_map[p].status == EnvironmentStatus.OK for p in ("pip", "uv", "python")):
+                        is_satisfied = True
+                        is_blocked = False
+                        risk = RiskLevel.SAFE
+                        reason = "Conda not found on host; falling back to standard Python environment (uv/pip)"
+
+                if not is_satisfied:
+                    reason = f"Required package manager '{pm_name}' is not installed or available on PATH"
+                    blocking_reasons.append(
+                        f"Package manager '{pm_name}' is required by lockfile/manifest but missing on host."
+                    )
 
             steps.append(
                 PlanStep(
@@ -374,6 +389,8 @@ class ExecutionPlanner:
         root_deps_step_id: str | None = None
         if project_info.subprojects and project_info.package_managers:
             root_pm = project_info.package_managers[0].name.lower()
+            if root_pm == "conda":
+                root_pm = "pip"
             root_install_cmd: list[str] | None = None
             root_install_pm_name = root_pm
             use_uv_pip = False
@@ -656,7 +673,7 @@ class ExecutionPlanner:
                             elif (target_dir / "pyproject.toml").exists() or (target_dir / "setup.py").exists() or (target_dir / "setup.cfg").exists():
                                 install_cmd = ["uv", "pip", "install", "-e", "."]
                             else:
-                                install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"]
+                                install_cmd = ["uv", "pip", "install", "-r", "requirements.txt"] if scope_name == "root" else None
                             install_pm_name = "uv pip"
                         else:
                             if (target_dir / "requirements.txt").exists():
