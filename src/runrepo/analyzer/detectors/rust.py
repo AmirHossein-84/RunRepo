@@ -15,7 +15,9 @@ class RustDetector(BaseDetector):
     def detect(self, context: ScanContext) -> DetectorResult:
         result = DetectorResult()
 
-        if context.has_file("Cargo.toml"):
+        cargo_files = context.find_files_by_name("Cargo.toml")
+        if cargo_files:
+            rel_file = cargo_files[0]
             result.languages.append("rust")
             result.runtimes.append(
                 RuntimeInfo(
@@ -24,7 +26,8 @@ class RustDetector(BaseDetector):
                         DetectionEvidence(
                             source="Cargo.toml",
                             confidence=Confidence.HIGH,
-                            details="Discovered Cargo.toml manifest",
+                            details=f"Discovered Cargo.toml manifest at {rel_file}",
+                            path=rel_file,
                         )
                     ],
                 )
@@ -36,7 +39,8 @@ class RustDetector(BaseDetector):
                         DetectionEvidence(
                             source="Cargo.toml",
                             confidence=Confidence.HIGH,
-                            details="Discovered Cargo package manager",
+                            details=f"Discovered Cargo package manager at {rel_file}",
+                            path=rel_file,
                         )
                     ],
                 )
@@ -50,6 +54,7 @@ class RustDetector(BaseDetector):
                             source="Cargo.toml",
                             confidence=Confidence.HIGH,
                             details="Default cargo run development command",
+                            path=rel_file,
                         )
                     ],
                 )

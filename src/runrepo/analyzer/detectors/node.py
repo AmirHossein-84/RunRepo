@@ -145,13 +145,12 @@ class NodeDetector(BaseDetector):
                     )
                 )
 
-            # Node engine in root package.json
+            # Node engine in root package.json (definitive package constraint)
             engines = root_pkg_json.get("engines")
             if isinstance(engines, dict) and "node" in engines:
                 engine_val = str(engines["node"])
-                if not node_version:
-                    node_version = engine_val
-                    node_raw_version = engine_val
+                node_version = engine_val
+                node_raw_version = engine_val
                 node_evidence.append(
                     DetectionEvidence(
                         source="package.json",

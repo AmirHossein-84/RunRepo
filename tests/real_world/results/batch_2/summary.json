@@ -1,0 +1,3584 @@
+[
+  {
+    "id": 11,
+    "name": "Svelte",
+    "url": "https://github.com/sveltejs/svelte",
+    "batch": 2,
+    "category": "FRONTEND",
+    "language": "TypeScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "pnpm",
+    "expected_services": [],
+    "difficulty": "HARD",
+    "result": "PARTIAL_SUCCESS",
+    "status": "FAILED",
+    "failure_stage": "start-app:svelte-playgrounds-demo",
+    "failure_category": "VERIFICATION",
+    "root_cause": "Verification failed: Application crashed before responding to HTTP requests at http://127.0.0.1:5173",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 36.89,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:pnpm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 18557.578400010243,
+        "error": null
+      },
+      {
+        "step_id": "start-app:svelte",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:svelte-playgrounds-demo",
+        "status": "FAILED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:svelte",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:svelte-playgrounds-demo",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T02:27:46.586504+00:00"
+  },
+  {
+    "id": 12,
+    "name": "Vue",
+    "url": "https://github.com/vuejs/core",
+    "batch": 2,
+    "category": "FRONTEND",
+    "language": "TypeScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "pnpm",
+    "expected_services": [],
+    "difficulty": "HARD",
+    "result": "PARTIAL_SUCCESS",
+    "status": "FAILED",
+    "failure_stage": "start-app:@vue/sfc-playground",
+    "failure_category": "VERIFICATION",
+    "root_cause": "Verification failed: Application crashed before responding to HTTP requests at http://127.0.0.1:5173",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 36.88,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:pnpm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 18150.81009999267,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vue/sfc-playground",
+        "status": "FAILED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-debug",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vue/sfc-playground",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-debug",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T02:28:24.639614+00:00"
+  },
+  {
+    "id": 13,
+    "name": "Vite",
+    "url": "https://github.com/vitejs/vite",
+    "batch": 2,
+    "category": "TOOLING",
+    "language": "TypeScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "pnpm",
+    "expected_services": [],
+    "difficulty": "HARD",
+    "result": "PARTIAL_SUCCESS",
+    "status": "FAILED",
+    "failure_stage": "start-app:@vitejs/test-alias:playground-alias",
+    "failure_category": "VERIFICATION",
+    "root_cause": "Verification failed: Application crashed before responding to HTTP requests at http://127.0.0.1:3000",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 27.94,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:pnpm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 10419.911200006027,
+        "error": null
+      },
+      {
+        "step_id": "start-app:create-vite:packages-create-vite",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-lit-starter:packages-create-vite-template-lit",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-lit-ts-starter:packages-create-vite-template-lit-ts",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-preact-starter:packages-create-vite-template-preact",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-preact-ts-starter:packages-create-vite-template-preact-ts",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-qwik:packages-create-vite-template-qwik",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-qwik:packages-create-vite-template-qwik-ts",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-react-starter:packages-create-vite-template-react",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-react-typescript-starter:packages-create-vite-template-react-ts",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-solid-starter:packages-create-vite-template-solid",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-solid-typescript-starter:packages-create-vite-template-solid-ts",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-svelte-starter:packages-create-vite-template-svelte",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-svelte-ts-starter:packages-create-vite-template-svelte-ts",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-starter:packages-create-vite-template-vanilla",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-typescript-starter:packages-create-vite-template-vanilla-ts",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-vue-starter:packages-create-vite-template-vue",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite-vue-typescript-starter:packages-create-vite-template-vue-ts",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/plugin-legacy:packages-plugin-legacy",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:vite:packages-vite",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-alias:playground-alias",
+        "status": "FAILED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-assets:playground-assets",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-assets-sanitize:playground-assets-sanitize",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-backend-integration:playground-backend-integration",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-base-conflict:playground-base-conflict",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-build-old:playground-build-old",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-chunk-importmap:playground-chunk-importmap",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-cli:playground-cli",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-cli-module:playground-cli-module",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-client-reload:playground-client-reload",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-csp:playground-csp",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-css:playground-css",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-css-codesplit:playground-css-codesplit",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-css-codesplit-cjs:playground-css-codesplit-cjs",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-css-lightningcss:playground-css-lightningcss",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-css-lightningcss-proxy:playground-css-lightningcss-proxy",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-css-lightningcss-root:playground-css-lightningcss-root",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-css-no-codesplit:playground-css-no-codesplit",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-css-sourcemap:playground-css-sourcemap",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-data-uri:playground-data-uri",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-define:playground-define",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-devtools:playground-devtools",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-dynamic-import:playground-dynamic-import",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-dynamic-import-inline:playground-dynamic-import-inline",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-env-nested:playground-env-nested",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-environment-react-ssr:playground-environment-react-ssr",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-extensions:playground-extensions",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-external:playground-external",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-forward-console:playground-forward-console",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-fs-serve:playground-fs-serve",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-import-context:playground-glob-import",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-hmr:playground-hmr",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-hmr-full-bundle-mode:playground-hmr-full-bundle-mode",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-hmr-ssr:playground-hmr-ssr",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-html:playground-html",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-import-attribute:playground-import-attribute",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-js-sourcemap:playground-js-sourcemap",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-json:playground-json",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-legacy:playground-legacy",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-my-lib:playground-lib",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-minify:playground-minify",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-hmr:playground-module-graph",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-multiple-entrypoints:playground-multiple-entrypoints",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-nested-deps:playground-nested-deps",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-object-hooks:playground-object-hooks",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-optimize-deps:playground-optimize-deps",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-optimize-deps-no-discovery:playground-optimize-deps-no-discovery",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-optimize-missing-deps:playground-optimize-missing-deps",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-preload:playground-preload",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-preserve-symlinks:playground-preserve-symlinks",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-proxy-bypass:playground-proxy-bypass",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-proxy-hmr:playground-proxy-hmr",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-other-app:playground-proxy-hmr-other-app",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-resolve:playground-resolve",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-resolve-tsconfig-paths:playground-resolve-tsconfig-paths",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-ssr:playground-ssr",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-ssr-conditions:playground-ssr-conditions",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-ssr-deps:playground-ssr-deps",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-ssr-html:playground-ssr-html",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-ssr-noexternal:playground-ssr-noexternal",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-ssr-pug:playground-ssr-pug",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-ssr-wasm:playground-ssr-wasm",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-ssr-webworker:playground-ssr-webworker",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-tailwind:playground-tailwind",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-tailwind-sourcemap:playground-tailwind-sourcemap",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-tailwind-v3:playground-tailwind-v3",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-transform-plugin:playground-transform-plugin",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-tsconfig-json:playground-tsconfig-json",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-tsconfig-json-load-error:playground-tsconfig-json-load-error",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-wasm:playground-wasm",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@vitejs/test-worker:playground-worker",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:create-vite:packages-create-vite",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-lit-starter:packages-create-vite-template-lit",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-lit-ts-starter:packages-create-vite-template-lit-ts",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-preact-starter:packages-create-vite-template-preact",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-preact-ts-starter:packages-create-vite-template-preact-ts",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-qwik:packages-create-vite-template-qwik",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-qwik:packages-create-vite-template-qwik-ts",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-react-starter:packages-create-vite-template-react",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-react-typescript-starter:packages-create-vite-template-react-ts",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-solid-starter:packages-create-vite-template-solid",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-solid-typescript-starter:packages-create-vite-template-solid-ts",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-svelte-starter:packages-create-vite-template-svelte",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-svelte-ts-starter:packages-create-vite-template-svelte-ts",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-starter:packages-create-vite-template-vanilla",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-typescript-starter:packages-create-vite-template-vanilla-ts",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-vue-starter:packages-create-vite-template-vue",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite-vue-typescript-starter:packages-create-vite-template-vue-ts",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/plugin-legacy:packages-plugin-legacy",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:vite:packages-vite",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-alias:playground-alias",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-assets:playground-assets",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-assets-sanitize:playground-assets-sanitize",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-backend-integration:playground-backend-integration",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-base-conflict:playground-base-conflict",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-build-old:playground-build-old",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-chunk-importmap:playground-chunk-importmap",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-cli:playground-cli",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-cli-module:playground-cli-module",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-client-reload:playground-client-reload",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-csp:playground-csp",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-css:playground-css",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-css-codesplit:playground-css-codesplit",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-css-codesplit-cjs:playground-css-codesplit-cjs",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-css-lightningcss:playground-css-lightningcss",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-css-lightningcss-proxy:playground-css-lightningcss-proxy",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-css-lightningcss-root:playground-css-lightningcss-root",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-css-no-codesplit:playground-css-no-codesplit",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-css-sourcemap:playground-css-sourcemap",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-data-uri:playground-data-uri",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-define:playground-define",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-devtools:playground-devtools",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-dynamic-import:playground-dynamic-import",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-dynamic-import-inline:playground-dynamic-import-inline",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-env-nested:playground-env-nested",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-environment-react-ssr:playground-environment-react-ssr",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-extensions:playground-extensions",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-external:playground-external",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-forward-console:playground-forward-console",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-fs-serve:playground-fs-serve",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-import-context:playground-glob-import",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-hmr:playground-hmr",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-hmr-full-bundle-mode:playground-hmr-full-bundle-mode",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-hmr-ssr:playground-hmr-ssr",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-html:playground-html",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-import-attribute:playground-import-attribute",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-js-sourcemap:playground-js-sourcemap",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-json:playground-json",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-legacy:playground-legacy",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-my-lib:playground-lib",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-minify:playground-minify",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-hmr:playground-module-graph",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-multiple-entrypoints:playground-multiple-entrypoints",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-nested-deps:playground-nested-deps",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-object-hooks:playground-object-hooks",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-optimize-deps:playground-optimize-deps",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-optimize-deps-no-discovery:playground-optimize-deps-no-discovery",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-optimize-missing-deps:playground-optimize-missing-deps",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-preload:playground-preload",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-preserve-symlinks:playground-preserve-symlinks",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-proxy-bypass:playground-proxy-bypass",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-proxy-hmr:playground-proxy-hmr",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-other-app:playground-proxy-hmr-other-app",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-resolve:playground-resolve",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-resolve-tsconfig-paths:playground-resolve-tsconfig-paths",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-ssr:playground-ssr",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-ssr-conditions:playground-ssr-conditions",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-ssr-deps:playground-ssr-deps",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-ssr-html:playground-ssr-html",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-ssr-noexternal:playground-ssr-noexternal",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-ssr-pug:playground-ssr-pug",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-ssr-wasm:playground-ssr-wasm",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-ssr-webworker:playground-ssr-webworker",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-tailwind:playground-tailwind",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-tailwind-sourcemap:playground-tailwind-sourcemap",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-tailwind-v3:playground-tailwind-v3",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-transform-plugin:playground-transform-plugin",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-tsconfig-json:playground-tsconfig-json",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-tsconfig-json-load-error:playground-tsconfig-json-load-error",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-wasm:playground-wasm",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@vitejs/test-worker:playground-worker",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T02:29:02.103341+00:00"
+  },
+  {
+    "id": 14,
+    "name": "Astro",
+    "url": "https://github.com/withastro/astro",
+    "batch": 2,
+    "category": "FULLSTACK",
+    "language": "TypeScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "pnpm",
+    "expected_services": [],
+    "difficulty": "HARD",
+    "result": "PARTIAL_SUCCESS",
+    "status": "FAILED",
+    "failure_stage": "start-app:@example/advanced-routing",
+    "failure_category": "VERIFICATION",
+    "root_cause": "Verification failed: Application crashed before responding to HTTP requests at http://127.0.0.1:3000",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 44.51,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:pnpm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 33418.0398999888,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@benchmark/adapter",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@benchmark/timer",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/advanced-routing",
+        "status": "FAILED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/basics",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/blog",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/container-with-vitest",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/framework-alpine",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/framework-multiple",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/framework-preact",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/framework-react",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/framework-solid",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/framework-svelte",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/framework-vue",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/hackernews",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/minimal",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/portfolio",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/ssr",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/starlog",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/toolbar-app",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/with-markdoc",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/with-mdx",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/with-nanostores",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/with-tailwindcss",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@example/with-vitest",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:astro",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/prism",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/rss",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:create-astro",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/alpinejs",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/cloudflare",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/markdoc",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/mdx",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/netlify",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/node",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/partytown",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/preact",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/react",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/sitemap",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/solid-js",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/svelte",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/vercel",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/vue",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/internal-helpers",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/check",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/language-server",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/ts-plugin",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:astro-vscode",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/yaml2ts",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/markdown-remark",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/markdown-satteri",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/telemetry",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/underscore-redirects",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@astrojs/upgrade",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@benchmark/adapter",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@benchmark/timer",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/advanced-routing",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/basics",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/blog",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/container-with-vitest",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/framework-alpine",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/framework-multiple",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/framework-preact",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/framework-react",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/framework-solid",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/framework-svelte",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/framework-vue",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/hackernews",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/minimal",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/portfolio",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/ssr",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/starlog",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/toolbar-app",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/with-markdoc",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/with-mdx",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/with-nanostores",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/with-tailwindcss",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@example/with-vitest",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:astro",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/prism",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/rss",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:create-astro",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/alpinejs",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/cloudflare",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/markdoc",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/mdx",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/netlify",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/node",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/partytown",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/preact",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/react",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/sitemap",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/solid-js",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/svelte",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/vercel",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/vue",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/internal-helpers",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/check",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/language-server",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/ts-plugin",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:astro-vscode",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/yaml2ts",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/markdown-remark",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/markdown-satteri",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/telemetry",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/underscore-redirects",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@astrojs/upgrade",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T02:29:31.628289+00:00"
+  },
+  {
+    "id": 15,
+    "name": "Nuxt",
+    "url": "https://github.com/nuxt/nuxt",
+    "batch": 2,
+    "category": "FULLSTACK",
+    "language": "TypeScript",
+    "expected_runtime": "node",
+    "expected_package_manager": "pnpm",
+    "expected_services": [],
+    "difficulty": "HARD",
+    "result": "PARTIAL_SUCCESS",
+    "status": "FAILED",
+    "failure_stage": "start-app:nuxt-playground",
+    "failure_category": "VERIFICATION",
+    "root_cause": "Verification failed: HTTP endpoint http://127.0.0.1:3000 failed readiness check: <urlopen error timed out>",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 39.68,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:pnpm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "install"
+        ],
+        "duration_ms": 16777.327799994964,
+        "error": null
+      },
+      {
+        "step_id": "start-app:@nuxt/ui-templates",
+        "status": "SUCCESS",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:nuxt-playground",
+        "status": "FAILED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:fixture-spa-loader",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:fixture-ui-templates",
+        "status": "SKIPPED",
+        "command": [
+          "npx",
+          "-y",
+          "pnpm",
+          "run",
+          "dev"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:@nuxt/ui-templates",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:nuxt-playground",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:fixture-spa-loader",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:fixture-ui-templates",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T02:30:17.387644+00:00"
+  },
+  {
+    "id": 16,
+    "name": "FastAPI",
+    "url": "https://github.com/fastapi/fastapi",
+    "batch": 2,
+    "category": "WEB_BACKEND",
+    "language": "Python",
+    "expected_runtime": "python",
+    "expected_package_manager": "pdm/uv",
+    "expected_services": [],
+    "difficulty": "MEDIUM",
+    "result": "FULL_SUCCESS",
+    "status": "SUCCESS",
+    "failure_stage": null,
+    "failure_category": null,
+    "root_cause": null,
+    "manual_intervention": null,
+    "verification": "PASSED",
+    "cleanup": "SUCCESS",
+    "duration_seconds": 1.28,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:python",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:uv",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "sync"
+        ],
+        "duration_ms": 73.08420000481419,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T02:30:58.197849+00:00"
+  },
+  {
+    "id": 17,
+    "name": "Flask",
+    "url": "https://github.com/pallets/flask",
+    "batch": 2,
+    "category": "WEB_BACKEND",
+    "language": "Python",
+    "expected_runtime": "python",
+    "expected_package_manager": "pip/flit",
+    "expected_services": [],
+    "difficulty": "EASY",
+    "result": "PARTIAL_SUCCESS",
+    "status": "FAILED",
+    "failure_stage": "start-app:celery",
+    "failure_category": "VERIFICATION",
+    "root_cause": "Verification failed: Application crashed before responding to HTTP requests at http://127.0.0.1:5000",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 3.5,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:python",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:uv",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "sync"
+        ],
+        "duration_ms": 59.60380000760779,
+        "error": null
+      },
+      {
+        "step_id": "start-app:celery",
+        "status": "FAILED",
+        "command": [
+          "uv",
+          "run",
+          "flask",
+          "run"
+        ],
+        "duration_ms": 10.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:javascript",
+        "status": "SKIPPED",
+        "command": [
+          "uv",
+          "run",
+          "flask",
+          "run"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "start-app:tutorial",
+        "status": "SKIPPED",
+        "command": [
+          "uv",
+          "run",
+          "flask",
+          "run"
+        ],
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:celery",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:javascript",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-app:tutorial",
+        "status": "SKIPPED",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T02:31:00.008772+00:00"
+  },
+  {
+    "id": 18,
+    "name": "Django",
+    "url": "https://github.com/django/django",
+    "batch": 2,
+    "category": "WEB_BACKEND",
+    "language": "Python",
+    "expected_runtime": "python",
+    "expected_package_manager": "pip",
+    "expected_services": [],
+    "difficulty": "HARD",
+    "result": "FULL_SUCCESS",
+    "status": "SUCCESS",
+    "failure_stage": null,
+    "failure_category": null,
+    "root_cause": null,
+    "manual_intervention": null,
+    "verification": "PASSED",
+    "cleanup": "SUCCESS",
+    "duration_seconds": 4.4,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:node",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-runtime:python",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:npm",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:pip",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "npm",
+          "install"
+        ],
+        "duration_ms": 2696.6823000111617,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T02:31:04.111429+00:00"
+  },
+  {
+    "id": 19,
+    "name": "Requests",
+    "url": "https://github.com/psf/requests",
+    "batch": 2,
+    "category": "LIBRARY",
+    "language": "Python",
+    "expected_runtime": "python",
+    "expected_package_manager": "pip",
+    "expected_services": [],
+    "difficulty": "EASY",
+    "result": "FULL_SUCCESS",
+    "status": "SUCCESS",
+    "failure_stage": null,
+    "failure_category": null,
+    "root_cause": null,
+    "manual_intervention": null,
+    "verification": "PASSED",
+    "cleanup": "SUCCESS",
+    "duration_seconds": 3.65,
+    "executed_steps": [
+      {
+        "step_id": "verify-runtime:python",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "verify-pm:pip",
+        "status": "SUCCESS",
+        "command": null,
+        "duration_ms": 0.0,
+        "error": null
+      },
+      {
+        "step_id": "install-deps",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "pip",
+          "install",
+          "-e",
+          "."
+        ],
+        "duration_ms": 2237.873200007016,
+        "error": null
+      },
+      {
+        "step_id": "install-deps:docs",
+        "status": "SUCCESS",
+        "command": [
+          "uv",
+          "pip",
+          "install",
+          "-r",
+          "requirements.txt"
+        ],
+        "duration_ms": 37.66430000541732,
+        "error": null
+      }
+    ],
+    "notes": "",
+    "timestamp": "2026-08-19T02:31:09.081445+00:00"
+  },
+  {
+    "id": 20,
+    "name": "Pydantic",
+    "url": "https://github.com/pydantic/pydantic",
+    "batch": 2,
+    "category": "LIBRARY",
+    "language": "Python",
+    "expected_runtime": "python",
+    "expected_package_manager": "hatch/uv",
+    "expected_services": [],
+    "difficulty": "MEDIUM",
+    "result": "CORRECTLY_UNSUPPORTED",
+    "status": "BLOCKED",
+    "failure_stage": "PREREQUISITE_CHECK",
+    "failure_category": "UNSUPPORTED_RUNTIME",
+    "root_cause": "Execution blocked by prerequisites: Rust runtime is required but not installed on host machine.; Package manager 'cargo' is required by lockfile/manifest but missing on host.",
+    "manual_intervention": null,
+    "verification": null,
+    "cleanup": "SUCCESS",
+    "duration_seconds": 0.98,
+    "executed_steps": [],
+    "notes": "",
+    "timestamp": "2026-08-19T02:31:13.337024+00:00"
+  }
+]

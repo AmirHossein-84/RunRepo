@@ -150,11 +150,15 @@ def evaluate_version_requirement(
         False: Requirement is violated.
         None: Requirement or installed version could not be reliably parsed (UNKNOWN).
     """
-    if not required_version or required_version.strip() in ("", "*", "any", "latest"):
+    if not required_version or required_version.strip() in ("", "*"):
         return True
 
     if not installed_version:
         return False
+
+    raw_req_lower = required_version.strip().lower()
+    if raw_req_lower in ("any", "latest", "lts", "lts/*", "stable", "node", "current", "system") or raw_req_lower.startswith("lts/"):
+        return True
 
     installed_tuple = parse_version_tuple(installed_version)
     if installed_tuple is None:

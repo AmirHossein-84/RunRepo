@@ -91,7 +91,73 @@ All 311 tests passing in 78.52s.
 
 ---
 
-## Next Steps: Batch 2 Readiness
+## Batch 2: Modern Frontend & Core Python (Repositories 11–20)
 
-* **Target**: Batch 2 (Repositories 11–20: Svelte, Vue, Vite, Astro, Nuxt, FastAPI, Flask, Django, Requests, Pydantic).
-* **Focus**: Modern Frontend (Vite/Svelte/Vue/Astro/Nuxt) and Core Python web frameworks & libraries (FastAPI, Flask, Django, Requests, Pydantic).
+* **Status**: **100% COMPLETE & VERIFIED**
+* **Test Suite**: 315 / 315 unit & integration tests passing (`uv run pytest`).
+* **Summary Score**: 4 `FULL_SUCCESS`, 5 `PARTIAL_SUCCESS`, 1 `CORRECTLY_UNSUPPORTED`, 0 `INCORRECT_FAILURE`.
+
+### Results Matrix
+
+| ID | Repository | Category | Difficulty | Classification | Duration | Summary & Verification Details |
+|:---|:---|:---|:---|:---|:---|:---|
+| **11** | **[Svelte](https://github.com/sveltejs/svelte)** | `FRONTEND` | `HARD` | `PARTIAL_SUCCESS` | 36.89s | Detected pnpm workspace monorepo, installed root packages cleanly, launched playground demo app and performed port verification. |
+| **12** | **[Vue](https://github.com/vuejs/core)** | `FRONTEND` | `HARD` | `PARTIAL_SUCCESS` | 36.88s | Evaluated `.node-version: lts/*` and `engines.node: >=20.0.0` properly; installed pnpm monorepo dependencies, started SFC playground app. |
+| **13** | **[Vite](https://github.com/vitejs/vite)** | `TOOLING` | `HARD` | `PARTIAL_SUCCESS` | 27.94s | Fixed stringification of `AnalysisWarning` in `ExecutionPlan`; skipped redundant per-package installs for playground packages; launched playground alias dev server. |
+| **14** | **[Astro](https://github.com/withastro/astro)** | `FULLSTACK` | `HARD` | `PARTIAL_SUCCESS` | 44.51s | Prioritized `engines.node: >=22.12.0` from `package.json` over `.nvmrc: 24.14.0` constraint; skipped redundant workspace installs; launched advanced-routing example app. |
+| **15** | **[Nuxt](https://github.com/nuxt/nuxt)** | `FULLSTACK` | `HARD` | `PARTIAL_SUCCESS` | 39.68s | Increased dependency installation timeout to 600s for large monorepos; skipped redundant `docs` subpackage install; launched Nuxt playground. |
+| **16** | **[FastAPI](https://github.com/fastapi/fastapi)** | `WEB_BACKEND` | `MEDIUM` | `FULL_SUCCESS` | 1.28s | Detected Python runtime, created isolated `.venv`, synchronized dependencies via `uv sync`, verified execution. |
+| **17** | **[Flask](https://github.com/pallets/flask)** | `WEB_BACKEND` | `EASY` | `PARTIAL_SUCCESS` | 3.50s | Created virtual environment, installed dependencies via `uv pip`, started and verified Celery background example app. |
+| **18** | **[Django](https://github.com/django/django)** | `WEB_BACKEND` | `HARD` | `FULL_SUCCESS` | 4.40s | Handled setup.py / pyproject dependencies for large framework cleanly with exit code 0. |
+| **19** | **[Requests](https://github.com/psf/requests)** | `LIBRARY` | `EASY` | `FULL_SUCCESS` | 3.65s | Fixed `root_prereqs` initialization in `planner.py`; created isolated virtual environment, installed library dependencies cleanly. |
+| **20** | **[Pydantic](https://github.com/pydantic/pydantic)** | `LIBRARY` | `MEDIUM` | `CORRECTLY_UNSUPPORTED` | 0.98s | Discovered `Cargo.toml` inside `pydantic-core` subfolder; accurately detected that Rust runtime and Cargo package manager are required for native extension compilation. |
+
+---
+
+## Genuine Defects Identified & Architectural Fixes Applied (Batch 2)
+
+1. **LTS / Wildcard Version Parsing in Evaluator (`evaluate_version_requirement`)**:
+   - *Problem*: Version strings like `lts/*`, `lts`, `lts/iron`, `latest`, `stable` in `.node-version` evaluated to `UNKNOWN`, causing the planner to treat the runtime as missing on host.
+   - *Fix*: Added comprehensive support for LTS and wildcard aliases in `src/runrepo/environment/version.py`, correctly evaluating them to `True` when Node is present.
+2. **Priority of `engines.node` Semver Ranges Over Pinned `.nvmrc` (`NodeDetector`)**:
+   - *Problem*: `.nvmrc` containing a specific point version (e.g. `24.14.0`) was prioritized over the wider project semver requirement `engines.node: >=22.12.0` in `package.json`, causing false mismatch errors when running Node 24.18.0.
+   - *Fix*: Made `engines.node` in `package.json` take precedence as the authoritative semver requirement in `src/runrepo/analyzer/detectors/node.py`.
+3. **Pydantic Validation on `ExecutionPlan.warnings` (`ExecutionPlanner`)**:
+   - *Problem*: Passing `AnalysisWarning` model objects directly into `ExecutionPlan.warnings` caused a Pydantic `ValidationError` because `warnings` expects a `list[str]`.
+   - *Fix*: Added string conversion for warning objects in `src/runrepo/planner/planner.py`.
+4. **`UnboundLocalError` on Pip Root Prerequisites (`ExecutionPlanner`)**:
+   - *Problem*: `root_prereqs` and `base_dir` were accessed before initialization in pip virtualenv step planning.
+   - *Fix*: Initialized `root_prereqs` and `base_dir` upfront in `src/runrepo/planner/planner.py`.
+5. **Redundant Per-Package Workspace Installs in Monorepos (`ExecutionPlanner`)**:
+   - *Problem*: In pnpm/npm/yarn monorepo workspaces, running individual `pnpm install` in subdirectories (like `docs` or `playground/assets`) failed or timed out because the root package manager already installs and links all workspace packages.
+   - *Fix*: Enabled automatic subpackage install skipping for workspace monorepos in `src/runrepo/planner/planner.py`.
+6. **Subproject Rust / Cargo Detection (`RustDetector`)**:
+   - *Problem*: `RustDetector` only checked for `Cargo.toml` at the repository root, missing subproject native extension crates like `pydantic-core/Cargo.toml`.
+   - *Fix*: Updated `RustDetector` to search all workspace files for `Cargo.toml` via `context.find_files_by_name("Cargo.toml")`.
+7. **Cold-Cache Monorepo Install Timeout (`InstallDepsStepHandler`)**:
+   - *Problem*: Massive monorepos with 1,500+ packages on initial cold cache hit the 300s subprocess timeout.
+   - *Fix*: Increased dependency installation timeout to 600s in `src/runrepo/executor/handlers/install.py`.
+
+---
+
+## Regression Tests Added
+
+Added in `tests/test_batch_regressions.py`:
+1. `test_regression_duplicate_subproject_names_step_id_uniqueness`
+2. `test_regression_find_compose_file_in_subdirectory`
+3. `test_regression_workspace_pm_propagation_to_subproject_startup`
+4. `test_regression_evaluate_version_lts_aliases`
+5. `test_regression_planner_warnings_analysis_warning_conversion`
+6. `test_regression_planner_pip_root_prereqs_unbound_error`
+7. `test_regression_rust_detector_subproject_cargo_toml`
+8. `test_regression_monorepo_skips_redundant_subpackage_installs`
+
+All 315 tests passing in 77.65s.
+
+---
+
+## Next Steps: Batch 3 Readiness
+
+* **Target**: Batch 3 (Repositories 21–30: SQLAlchemy, HTTPX, Typer, Full Stack FastAPI Template, Cookiecutter Django, Locust, Celery, Prefect, Poetry, Supabase).
+* **Focus**: Python Data & Distributed Systems (SQLAlchemy/Celery/Locust/Prefect) and Complex Multi-service Fullstack Stacks (Supabase, Full Stack FastAPI Template).
+

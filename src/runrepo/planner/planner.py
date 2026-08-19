@@ -24,7 +24,7 @@ class ExecutionPlanner:
     def plan(self, project_info: ProjectInfo, env_state: EnvironmentState, config: Any | None = None) -> ExecutionPlan:
         """Construct an ordered ExecutionPlan from repository and environment facts."""
         steps: list[PlanStep] = []
-        warnings: list[str] = list(project_info.warnings) if hasattr(project_info, "warnings") and isinstance(project_info.warnings, list) else []
+        warnings: list[str] = [str(w.message) if hasattr(w, "message") else str(w) for w in project_info.warnings] if hasattr(project_info, "warnings") and isinstance(project_info.warnings, list) else []
         blocking_reasons: list[str] = []
         input_reasons: list[str] = []
 
@@ -45,7 +45,8 @@ class ExecutionPlanner:
             step_id = f"verify-runtime:{rt_name}"
 
             check = env_checks_map.get(rt_name)
-            is_satisfied = check is not None and check.status == EnvironmentStatus.OK
+            is_installed = check is not None and check.installed_version is not None
+            is_satisfied = check is not None and (check.status == EnvironmentStatus.OK or (check.status == EnvironmentStatus.UNKNOWN and is_installed))
             is_blocked = not is_satisfied
 
             risk = RiskLevel.SAFE if is_satisfied else RiskLevel.BLOCKED
@@ -380,6 +381,13 @@ class ExecutionPlanner:
             is_pm_ok = pm_check and pm_check.status.value == "OK"
             installed_v = pm_check.installed_version if pm_check else ""
 
+            root_prereqs: list[str] = []
+            if root_pm in pm_step_ids:
+                root_prereqs.append(pm_step_ids[root_pm])
+            for rt in project_info.runtimes:
+                if rt.name.lower() in runtime_step_ids and runtime_step_ids[rt.name.lower()] not in root_prereqs:
+                    root_prereqs.append(runtime_step_ids[rt.name.lower()])
+
             if root_pm == "pnpm":
                 if "npx" in (installed_v or "") or not is_pm_ok:
                     root_install_cmd = ["npx", "-y", "pnpm", "install"]
@@ -399,10 +407,10 @@ class ExecutionPlanner:
             elif root_pm == "poetry":
                 root_install_cmd = ["poetry", "install", "--no-root"]
             elif root_pm == "pip":
+                base_dir = Path(project_info.path)
                 pip_check = env_checks_map.get("pip")
                 use_uv_pip = (pip_check and "uv" in (pip_check.installed_version or "").lower()) or ("uv" in env_checks_map and env_checks_map["uv"].status.value == "OK")
                 if use_uv_pip:
-                    base_dir = Path(project_info.path)
                     py_req = next((rt.version for rt in project_info.runtimes if rt.name.lower() == "python"), None)
                     root_venv_info = inspect_virtual_env(base_dir, required_version=py_req)
                     if root_venv_info.status == VirtualEnvStatus.NOT_FOUND:
@@ -464,13 +472,6 @@ class ExecutionPlanner:
 
             if root_install_cmd:
                 root_deps_step_id = "install-deps"
-                root_prereqs = []
-                if root_pm in pm_step_ids:
-                    root_prereqs.append(pm_step_ids[root_pm])
-                for rt in project_info.runtimes:
-                    if rt.name.lower() in runtime_step_ids and runtime_step_ids[rt.name.lower()] not in root_prereqs:
-                        root_prereqs.append(runtime_step_ids[rt.name.lower()])
-
                 steps.append(
                     PlanStep(
                         id=root_deps_step_id,
@@ -513,12 +514,16 @@ class ExecutionPlanner:
             install_pm_name: str | None = None
             deps_prereqs: list[str] = []
 
-            # If root workspace already installed all packages in a monorepo, skip internal packages and samples
+            # If root workspace already installed all packages in a monorepo, skip internal workspace subpackage installs
             skip_sub_install = False
             if project_info.is_monorepo and root_deps_step_id and scope_name != "root":
-                if scope_path and any(scope_path.startswith(p) for p in (
+                root_pm_name = project_info.package_managers[0].name.lower() if project_info.package_managers else None
+                if root_pm_name in ("pnpm", "yarn", "npm", "bun"):
+                    skip_sub_install = True
+                elif scope_path and any(scope_path.startswith(p) for p in (
                     "packages/", "packages\\", "libs/", "libs\\", "packages", "libs",
-                    "sample/", "sample\\", "samples/", "samples\\", "example/", "example\\", "examples/", "examples\\"
+                    "sample/", "sample\\", "samples/", "samples\\", "example/", "example\\", "examples/", "examples\\",
+                    "docs/", "docs\\", "docs", "playground/", "playground\\", "playground", "apps/", "apps\\", "apps"
                 )):
                     skip_sub_install = True
 

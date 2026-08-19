@@ -1,0 +1,24 @@
+id: 20
+name: Pydantic
+url: https://github.com/pydantic/pydantic
+batch: 2
+category: LIBRARY
+language: Python
+expected_runtime: python
+expected_package_manager: hatch/uv
+expected_services: []
+difficulty: MEDIUM
+result: CORRECTLY_UNSUPPORTED
+status: BLOCKED
+failure_stage: PREREQUISITE_CHECK
+failure_category: UNSUPPORTED_RUNTIME
+root_cause: 'Execution blocked by prerequisites: Rust runtime is required but not
+  installed on host machine.; Package manager ''cargo'' is required by lockfile/manifest
+  but missing on host.'
+manual_intervention: null
+verification: null
+cleanup: SUCCESS
+duration_seconds: 0.98
+executed_steps: []
+notes: ''
+timestamp: '2026-08-19T02:31:13.337024+00:00'

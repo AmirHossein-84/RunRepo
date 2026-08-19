@@ -55,7 +55,7 @@ class InstallDepsStepHandler(BaseStepHandler):
                 verification_passed=False,
             )
 
-        res = executor.execute(step.command, cwd=working_dir)
+        res = executor.execute(step.command, cwd=working_dir, timeout_s=600.0)
         # 1. Fallback for npm peer dependency resolution conflicts (ERESOLVE)
         if res.exit_code != 0 and "ERESOLVE" in (res.stderr or ""):
             fallback_cmd = list(step.command) + ["--legacy-peer-deps"]

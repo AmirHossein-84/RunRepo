@@ -1,0 +1,72 @@
+id: 12
+name: Vue
+url: https://github.com/vuejs/core
+batch: 2
+category: FRONTEND
+language: TypeScript
+expected_runtime: node
+expected_package_manager: pnpm
+expected_services: []
+difficulty: HARD
+result: PARTIAL_SUCCESS
+status: FAILED
+failure_stage: start-app:@vue/sfc-playground
+failure_category: VERIFICATION
+root_cause: 'Verification failed: Application crashed before responding to HTTP requests
+  at http://127.0.0.1:5173'
+manual_intervention: null
+verification: null
+cleanup: SUCCESS
+duration_seconds: 36.88
+executed_steps:
+- step_id: verify-runtime:node
+  status: SUCCESS
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-pm:pnpm
+  status: SUCCESS
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: install-deps
+  status: SUCCESS
+  command:
+  - npx
+  - -y
+  - pnpm
+  - install
+  duration_ms: 18150.81009999267
+  error: null
+- step_id: start-app:@vue/sfc-playground
+  status: FAILED
+  command:
+  - npx
+  - -y
+  - pnpm
+  - run
+  - dev
+  duration_ms: 10.0
+  error: null
+- step_id: start-app:vite-debug
+  status: SKIPPED
+  command:
+  - npx
+  - -y
+  - pnpm
+  - run
+  - dev
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:@vue/sfc-playground
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+- step_id: verify-app:vite-debug
+  status: SKIPPED
+  command: null
+  duration_ms: 0.0
+  error: null
+notes: ''
+timestamp: '2026-08-19T02:28:24.639614+00:00'
